@@ -1,10 +1,11 @@
-# Project Specification: Canine Tension (MVP)
+# Project Specification: Barking Mad (MVP)
 
 ---
 
 ## 1. Project Vision
 
-**Canine Tension** is a first-person simulation focusing on the mechanical relationship between a human walker and a reactive Dachshund. The game challenges the player to manage a variable physical constraint (the leash) while the dog autonomously seeks out distractions.
+**Barking Mad** is a first-person simulation focusing on the mechanical relationship between a human walker and a reactive Dachshund.
+ The game challenges the player to manage a variable physical constraint (the leash) while the dog autonomously seeks out distractions.
 
 ---
 
