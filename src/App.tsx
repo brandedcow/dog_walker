@@ -4,9 +4,9 @@ import { Vector3, CatmullRomCurve3 } from 'three';
 import { Line, Sky, Plane, Sphere, Box, Text } from '@react-three/drei';
 
 const MAX_LEASH_LENGTH = 5;
-const PLAYER_BASE_SPEED = 0.08;
-const DOG_BASE_SPEED = 0.1;
-const SNIFF_RADIUS = 2.0;
+const PLAYER_BASE_SPEED = 0.12;
+const DOG_BASE_SPEED = 0.15;
+const SNIFF_RADIUS = 2.5;
 
 const Tree = ({ position }: { position: [number, number, number] }) => (
   <group position={position}>
@@ -21,40 +21,47 @@ const Tree = ({ position }: { position: [number, number, number] }) => (
 
 const DogModel = ({ dogPos, state }: { dogPos: Vector3, state: string }) => {
   const groupRef = useRef<any>(null);
+  const lastPos = useRef(new Vector3().copy(dogPos));
+  const currentRotation = useRef(0);
   
   useFrame(({ clock }) => {
     if (groupRef.current) {
       const time = clock.getElapsedTime();
-      const bob = state === 'WALKING' ? Math.abs(Math.sin(time * 15)) * 0.03 : 0;
+      const bob = state === 'WALKING' ? Math.abs(Math.sin(time * 15)) * 0.02 : 0;
+      const movement = new Vector3().subVectors(dogPos, lastPos.current);
+      if (movement.length() > 0.001) {
+        const targetRot = Math.atan2(movement.x, movement.z);
+        currentRotation.current += (targetRot - currentRotation.current) * 0.1;
+      }
       groupRef.current.position.set(dogPos.x, dogPos.y + bob, dogPos.z);
+      groupRef.current.rotation.y = currentRotation.current + Math.PI;
       groupRef.current.rotation.z = state === 'WALKING' ? Math.sin(time * 15) * 0.02 : 0;
+      lastPos.current.copy(dogPos);
     }
   });
 
   return (
     <group ref={groupRef}>
-      <Box args={[0.5, 0.6, 1.1]} castShadow position={[0, 0.5, 0]}>
+      <Box args={[0.45, 0.4, 1.6]} castShadow position={[0, 0.3, 0]}>
         <meshStandardMaterial color="#8b4513" />
       </Box>
-      <Box args={[0.4, 0.4, 0.4]} position={[0, 0.8, -0.7]}>
+      <Box args={[0.35, 0.35, 0.4]} position={[0, 0.5, -0.9]}>
         <meshStandardMaterial color="#8b4513" />
       </Box>
-      <Box args={[0.1, 0.1, 0.4]} position={[0, 0.7, 0.6]} rotation={[0.5, 0, 0]}>
+      <Box args={[0.1, 0.3, 0.2]} position={[0.2, 0.4, -0.9]} rotation={[0, 0, -0.2]}>
+        <meshStandardMaterial color="#5d4037" />
+      </Box>
+      <Box args={[0.1, 0.3, 0.2]} position={[-0.2, 0.4, -0.9]} rotation={[0, 0, 0.2]}>
+        <meshStandardMaterial color="#5d4037" />
+      </Box>
+      <Box args={[0.08, 0.08, 0.5]} position={[0, 0.4, 0.8]} rotation={[0.6, 0, 0]}>
         <meshStandardMaterial color="#8b4513" />
       </Box>
-      <Text
-        position={[0, 0.5, 0.56]}
-        fontSize={0.15}
-        color="#5d4037"
-        anchorX="center"
-        anchorY="middle"
-      >
-        X
-      </Text>
-      <Box args={[0.12, 0.5, 0.12]} position={[0.18, 0.2, 0.35]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
-      <Box args={[0.12, 0.5, 0.12]} position={[-0.18, 0.2, 0.35]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
-      <Box args={[0.12, 0.5, 0.12]} position={[0.18, 0.2, -0.35]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
-      <Box args={[0.12, 0.5, 0.12]} position={[-0.18, 0.2, -0.35]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
+      <Text position={[0, 0.3, 0.81]} fontSize={0.12} color="#5d4037" anchorX="center" anchorY="middle">X</Text>
+      <Box args={[0.1, 0.2, 0.1]} position={[0.15, 0.1, 0.6]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
+      <Box args={[0.1, 0.2, 0.1]} position={[-0.15, 0.1, 0.6]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
+      <Box args={[0.1, 0.2, 0.1]} position={[0.15, 0.1, -0.6]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
+      <Box args={[0.1, 0.2, 0.1]} position={[-0.15, 0.1, -0.6]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
     </group>
   );
 };
@@ -69,25 +76,25 @@ const LeashModel = ({ start, end, tension }: { start: Vector3, end: Vector3, ten
   return <Line points={curve.getPoints(20)} color="#111" lineWidth={5} />;
 };
 
-const GameManager = ({ 
-  gameState, 
-  setGameState, 
-  onTensionUpdate, 
-  onProgressUpdate,
-  dogState, 
-  setDogState 
+const SceneContent = ({ 
+  gameState, setGameState, onTensionUpdate, onProgressUpdate, dogState, setDogState 
 }: any) => {
   const dogPos = useRef(new Vector3(0, 0, -3));
   const playerPos = useRef(new Vector3(0, 2.2, 0));
   const { camera } = useThree();
+  const sniffingScentId = useRef<number | null>(null);
 
-  const [scents, setScents] = useState(() => 
+  // We use a REF for scents to avoid stale closures in input handlers, 
+  // but keep a STATE version for rendering.
+  const [scentsState, setScentsState] = useState(() => 
     Array.from({ length: 15 }, (_, i) => ({
       id: i, 
-      position: [(Math.random() - 0.5) * 4, 0.05, -20 - i * 12] as [number, number, number],
+      position: [(i % 2 === 0 ? -3.5 : 3.5), 0.05, -20 - i * 12] as [number, number, number],
       tugsRequired: 2
     }))
   );
+  const scentsRef = useRef(scentsState);
+  useEffect(() => { scentsRef.current = scentsState; }, [scentsState]);
 
   const trees = useMemo(() => Array.from({ length: 40 }, (_, i) => ({
     id: i, position: [(i % 2 === 0 ? 6 : -6), 0, -i * 8] as [number, number, number]
@@ -98,28 +105,45 @@ const GameManager = ({
 
   useEffect(() => {
     const processTug = () => {
-      const activeScent = scents.find(s => 
-        dogPos.current.distanceTo(new Vector3(...s.position)) < SNIFF_RADIUS
-      );
-      if (activeScent) {
-        setScents(prev => prev.map(s => {
-          if (s.id === activeScent.id) {
-            const newTugs = s.tugsRequired - 1;
-            if (newTugs <= 0) {
-              setDogState('WALKING');
-              return null;
-            }
-            return { ...s, tugsRequired: newTugs };
-          }
-          return s;
-        }).filter(Boolean) as any);
+      const scentId = sniffingScentId.current;
+      if (scentId === null) return;
+
+      const currentScents = scentsRef.current;
+      const activeScent = currentScents.find(s => s.id === scentId);
+      if (!activeScent) return;
+
+      const newTugs = activeScent.tugsRequired - 1;
+      
+      if (newTugs <= 0) {
+        setDogState('WALKING');
+        sniffingScentId.current = null;
+        setScentsState(prev => prev.filter(s => s.id !== scentId));
+      } else {
+        setScentsState(prev => prev.map(s => s.id === scentId ? { ...s, tugsRequired: newTugs } : s));
       }
     };
 
+    const handleInput = (e: any) => {
+      if (gameState !== 'PLAYING') return;
+      
+      const isTap = e.type === 'mousedown' || e.type === 'touchstart';
+      const isSpace = e.code === 'Space';
+
+      if (isTap) {
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const isRightSide = clientX > window.innerWidth / 2;
+        setKeys({ left: !isRightSide, right: isRightSide });
+        if (dogState === 'SNIFFING') processTug();
+      }
+
+      if (isSpace && dogState === 'SNIFFING') processTug();
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState !== 'PLAYING') return;
       if (e.code === 'KeyA' || e.code === 'ArrowLeft') setKeys(prev => ({ ...prev, left: true }));
       if (e.code === 'KeyD' || e.code === 'ArrowRight') setKeys(prev => ({ ...prev, right: true }));
-      if (e.code === 'Space' && gameState === 'PLAYING' && dogState === 'SNIFFING') processTug();
+      if (e.code === 'Space' && dogState === 'SNIFFING') processTug();
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -127,38 +151,28 @@ const GameManager = ({
       if (e.code === 'KeyD' || e.code === 'ArrowRight') setKeys(prev => ({ ...prev, right: false }));
     };
 
-    const handlePointerDown = (e: any) => {
-      if (gameState !== 'PLAYING') return;
-      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-      if (clientX === undefined) return;
-      const isRightSide = clientX > window.innerWidth / 2;
-      if (isRightSide) setKeys(prev => ({ ...prev, right: true, left: false }));
-      else setKeys(prev => ({ ...prev, left: true, right: false }));
-      if (dogState === 'SNIFFING') processTug();
-    };
-
-    const handlePointerUp = () => setKeys({ left: false, right: false });
+    const handleGlobalPointerUp = () => setKeys({ left: false, right: false });
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('mousedown', handlePointerDown);
-    window.addEventListener('mouseup', handlePointerUp);
-    window.addEventListener('touchstart', handlePointerDown);
-    window.addEventListener('touchend', handlePointerUp);
+    window.addEventListener('mousedown', handleInput);
+    window.addEventListener('touchstart', handleInput);
+    window.addEventListener('mouseup', handleGlobalPointerUp);
+    window.addEventListener('touchend', handleGlobalPointerUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('mousedown', handlePointerDown);
-      window.removeEventListener('mouseup', handlePointerUp);
-      window.removeEventListener('touchstart', handlePointerDown);
-      window.removeEventListener('touchend', handlePointerUp);
+      window.removeEventListener('mousedown', handleInput);
+      window.removeEventListener('touchstart', handleInput);
+      window.removeEventListener('mouseup', handleGlobalPointerUp);
+      window.removeEventListener('touchend', handleGlobalPointerUp);
     };
-  }, [dogState, gameState, scents, setDogState]);
+  }, [dogState, gameState, setDogState]);
 
   useFrame(() => {
     camera.position.set(playerPos.current.x, playerPos.current.y, playerPos.current.z);
-    camera.lookAt(new Vector3(dogPos.current.x, 0.5, dogPos.current.z - 5));
+    camera.lookAt(dogPos.current.x * 0.5, 0.5, playerPos.current.z - 10);
 
     if (gameState !== 'PLAYING') return;
 
@@ -174,11 +188,27 @@ const GameManager = ({
     playerPos.current.x = Math.max(-3.5, Math.min(3.5, playerPos.current.x));
     dogPos.current.x = Math.max(-3.5, Math.min(3.5, dogPos.current.x));
 
-    if (dogState === 'WALKING') dogPos.current.z -= DOG_BASE_SPEED;
+    if (dogState === 'WALKING') {
+      const DETECTION_RADIUS = 25.0;
+      const scentsAhead = scentsState.filter(s => s.position[2] < dogPos.current.z);
+      if (scentsAhead.length > 0) {
+        const closestScent = scentsAhead.reduce((prev, curr) => {
+          const distPrev = dogPos.current.distanceTo(new Vector3(...prev.position));
+          const distCurr = dogPos.current.distanceTo(new Vector3(...curr.position));
+          return distCurr < distPrev ? curr : prev;
+        });
+        if (dogPos.current.distanceTo(new Vector3(...closestScent.position)) < DETECTION_RADIUS) {
+          const distToScent = dogPos.current.distanceTo(new Vector3(...closestScent.position));
+          const pullStrength = Math.max(0.02, 0.08 * (1 - distToScent / DETECTION_RADIUS));
+          if (dogPos.current.x < closestScent.position[0]) dogPos.current.x += pullStrength;
+          else if (dogPos.current.x > closestScent.position[0]) dogPos.current.x -= pullStrength;
+        }
+      }
+      dogPos.current.z -= DOG_BASE_SPEED;
+    }
 
     const dist = new Vector3(playerPos.current.x, 0, playerPos.current.z).distanceTo(new Vector3(dogPos.current.x, 0, dogPos.current.z));
     const t = Math.max(0, Math.min((dist - 1.5) / (MAX_LEASH_LENGTH - 1.5), 1.0));
-    
     if (Math.abs(t - localUiTension) > 0.01) {
       setLocalUiTension(t);
       onTensionUpdate(t);
@@ -197,8 +227,11 @@ const GameManager = ({
     dogPos.current.y = 0;
 
     if (dogState === 'WALKING') {
-      scents.forEach(s => {
-        if (dogPos.current.distanceTo(new Vector3(...s.position)) < SNIFF_RADIUS) setDogState('SNIFFING');
+      scentsState.forEach(s => {
+        if (dogPos.current.distanceTo(new Vector3(...s.position)) < SNIFF_RADIUS) {
+          setDogState('SNIFFING');
+          sniffingScentId.current = s.id;
+        }
       });
     }
 
@@ -211,7 +244,7 @@ const GameManager = ({
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
       <DogModel dogPos={dogPos.current} state={dogState} />
-      {scents.map(s => (
+      {scentsState.map(s => (
         <group key={s.id} position={s.position}>
           <Sphere args={[0.3, 16, 16]}>
             <meshStandardMaterial color={dogState === 'SNIFFING' ? "#ffff00" : "#ff4444"} transparent opacity={0.6} emissive={dogState === 'SNIFFING' ? "#ffff00" : "#ff4444"} emissiveIntensity={0.2} />
@@ -236,7 +269,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden' }}>
       <Canvas shadows camera={{ fov: 60 }}>
-        <GameManager 
+        <SceneContent 
           gameState={gameState} setGameState={setGameState} 
           onTensionUpdate={setTension} onProgressUpdate={setProgress}
           dogState={dogState} setDogState={setDogState} 
