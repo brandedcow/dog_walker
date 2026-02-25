@@ -4,7 +4,7 @@
 
 ## 1. Project Vision
 
-**Barking Mad** is a first-person dog walking simulation focusing on the mechanical and physical relationship between a human walker and a Dachshund. The game features manual movement, physics-based leash constraints, and a command-driven AI.
+**Barking Mad** is a third-person dog walking simulation focusing on the mechanical and physical relationship between a human walker and a Dachshund. The game features manual movement, physics-based leash constraints, and a command-driven AI.
 
 ---
 
@@ -14,10 +14,10 @@
 
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
-| **Locomotion Engine** | Manages player/dog velocity and camera positioning.                | `PLAYER_BASE_SPEED` (7.0), `DOG_MOVE_SPEED` (9.0)      |
+| **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED` (7.0), `panSlowdown`, `uiScale`    |
 | **Physics Engine**    | Verlet Integration + Position-Based Dynamics (PBD) for leash.      | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
 | **Canine Logic (AI)** | State machine managing dog behavior and autonomous pathing.        | `dogFacingYaw`, `dogDistance`, `COMING`, `IDLING`      |
-| **Responsive UI**     | HUD with dynamic scaling and integrated tension feedback.          | `uiScale`, `edgeOffset`, `tensionMeter` (GO background)|
+| **Responsive UI**     | HUD with dynamic scaling and integrated tension feedback.          | `edgeOffset`, `tensionMeter` (GO background)           |
 
 ---
 
@@ -25,7 +25,7 @@
 
 ### 3.1 Leash Physics (Verlet Integration)
 The leash is simulated as a chain of 60 nodes using Verlet Integration and PBD distance constraints.
-- **Tension Visuals:** The leash transitions from Dark Gray to Yellow (75%) to Bright Red (100%) as it stretches.
+- **Tension Visuals:** The leash transitions from Dark Gray to Yellow (75%) to Bright Red (90%) as it stretches.
 - **Player Impact:** Non-linear slowdown occurs as tension increases. Full speed up to 75% tension, ramping down to 10% speed at 100% tension.
 - **Physical Limits:** The dog is physically constrained to a 15m radius. If the player exceeds this, they are pulled back; if the dog exceeds it while walking, its position is clamped.
 
@@ -49,11 +49,14 @@ The player interacts with the dog through a cluster of 3 main command buttons:
 
 ### 4.1 Movement
 - **Walk Toggle:** A single tap on the large central button toggles the player's walking state.
-- **POV Panning:** Swipe anywhere on the screen to look around. Eye level is set to `1.7m` with an `80°` downward tilt to see feet level.
+- **3rd Person POV:** Camera is positioned `6m` behind and `2.5m` above the player.
+- **POV Panning:** Swipe anywhere on the screen to look around. 
+- **Pan Slowdown:** Player's move speed is reduced by up to `70%` during rapid camera panning to simulate loss of forward momentum.
 
 ### 4.2 HUD (Profile Card)
-- **Walk Meter:** Driven by the actual physical distance the dog travels while in the `WALKING` state.
+- **Walk Meter:** A single-line horizontal header showing progress. Driven by the actual physical distance the dog travels while in the `WALKING` state, using a `0.25m` update threshold to filter jitter.
 - **Status Emojis:** Visual feedback for dog states (🐾 WALKING, 🐕 COMING, 🪑 SITTING, 💤 IDLING, 🧍 STANDING).
+- **Layout:** Compact card (`115px`) with vertically stacked dog head and name.
 - **Integrated Tension:** The GO/TUG button's background acts as a vertical progress meter for leash tension.
 
 ---
