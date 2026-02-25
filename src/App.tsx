@@ -374,7 +374,7 @@ export default function App() {
   const handleTug = () => { if (tugHandler.current) tugHandler.current(); };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
         <SceneContent gameState={gameState} setGameState={setGameState} onTensionUpdate={setTension} onProgressUpdate={setDistance} onPositionsUpdate={setPositions} dogState={dogState} setDogState={setDogState} scentsState={scents} setScentsState={setScentsState} isMovingForward={isMovingForward} onTug={(fn) => { tugHandler.current = fn; }} />
       </Canvas>
