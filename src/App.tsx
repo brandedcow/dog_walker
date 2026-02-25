@@ -4,7 +4,6 @@ import { Vector3, CatmullRomCurve3, Color } from 'three';
 import { Line, Sky, Plane, Sphere, Box, Text } from '@react-three/drei';
 
 const MAX_LEASH_LENGTH = 10;
-const SNIFF_RADIUS = 2.5;
 const LEASH_NODES = 40;
 const SEGMENT_LENGTH = MAX_LEASH_LENGTH / (LEASH_NODES - 1);
 const LEASH_STIFFNESS = 15;
@@ -95,7 +94,7 @@ const LeashModel = ({ nodes, tension }: { nodes: Vector3[], tension: number }) =
 };
 
 const SceneContent = ({ 
-  gameState, setGameState, onTensionUpdate, onProgressUpdate, onPositionsUpdate, dogState, setDogState, scentsState, setScentsState, isMovingForward, onTug, onGo
+  gameState, setGameState, onTensionUpdate, onProgressUpdate, onPositionsUpdate, dogState, setDogState, isMovingForward, onTug, onGo
 }: {
   gameState: string,
   setGameState: (s: any) => void,
@@ -104,18 +103,14 @@ const SceneContent = ({
   onPositionsUpdate: (pos: any) => void,
   dogState: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING',
   setDogState: (s: any) => void,
-  scentsState: Scent[],
-  setScentsState: React.Dispatch<React.SetStateAction<Scent[]>>,
   isMovingForward: boolean,
   onTug: (fn: () => void) => void,
   onGo: (fn: () => void) => void
 }) => {
   const dogPos = useRef(new Vector3(0, 0, -1));
   const playerPos = useRef(new Vector3(0, 1.7, 0));
+  const dogDistance = useRef(0);
   const { camera } = useThree();
-  const sniffingScentId = useRef<number | null>(null);
-  const scentsRef = useRef(scentsState);
-  useEffect(() => { scentsRef.current = scentsState; }, [scentsState]);
 
   const trees = useMemo(() => Array.from({ length: 40 }, (_, i) => ({
     id: i, position: [(i % 2 === 0 ? 6 : -6), 0, -i * 8] as [number, number, number]
@@ -140,42 +135,22 @@ const SceneContent = ({
     const doGo = () => {
       // If dog is already walking or sniffing, any press of this button acts as a TUG
       if (dogState === 'WALKING' || dogState === 'SNIFFING') {
-        // Release tension by moving dog towards player
         const dirToPlayer = new Vector3(playerPos.current.x - dogPos.current.x, 0, playerPos.current.z - dogPos.current.z).normalize();
         dogPos.current.add(dirToPlayer.multiplyScalar(0.35)); 
         tugRecoil.current = 1.0; 
         
-        // If it was walking, it stops to stand. If sniffing, it might clear the scent (handled in onTug)
         if (dogState === 'WALKING') {
           setDogState('STANDING');
           stationaryTime.current = 0;
         }
       } else {
-        // If dog is sitting, standing, or idling, start walking
         setDogState('WALKING');
         dogFacingYaw.current = povRotation.current.yaw;
         stationaryTime.current = 0;
       }
     };
     onGo(doGo);
-
-    const processTug = () => {
-      const scentId = sniffingScentId.current;
-      if (scentId === null) return;
-      const activeScent = scentsRef.current.find((s: Scent) => s.id === scentId);
-      if (!activeScent) return;
-      tugRecoil.current = 1.0;
-      const newTugs = activeScent.tugsRequired - 1;
-      if (newTugs <= 0) {
-        setDogState('WALKING');
-        dogFacingYaw.current = povRotation.current.yaw; 
-        sniffingScentId.current = null;
-        setScentsState((prev: Scent[]) => prev.filter((s: Scent) => s.id !== scentId));
-      } else {
-        setScentsState((prev: Scent[]) => prev.map((s: Scent) => s.id === scentId ? { ...s, tugsRequired: newTugs } : s));
-      }
-    };
-    onTug(processTug);
+    onTug(doGo);
 
     const handleDown = (e: any) => {
       isDragging.current = true;
@@ -200,7 +175,7 @@ const SceneContent = ({
       if (swipeStartPos.current) {
         const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
         const deltaY = clientY - swipeStartPos.current.y;
-        if (dogState === 'SNIFFING' && deltaY > 30) processTug();
+        if (dogState === 'SNIFFING' && deltaY > 30) doGo();
       }
       swipeStartPos.current = null;
     };
@@ -218,7 +193,7 @@ const SceneContent = ({
       window.removeEventListener('mouseup', handleUp);
       window.removeEventListener('touchend', handleUp);
     };
-  }, [dogState, setDogState, setScentsState, onTug, onGo]);
+  }, [dogState, setDogState, onTug, onGo]);
 
   useFrame((_, delta) => {
     if (tugRecoil.current > 0) {
@@ -233,6 +208,9 @@ const SceneContent = ({
     camera.lookAt(targetX, targetY, targetZ);
 
     if (gameState !== 'PLAYING') return;
+
+    // Capture position before all movement and constraints
+    const prevDogPos = dogPos.current.clone();
 
     // Verlet Leash Update
     const nodes = leashNodes.current;
@@ -273,10 +251,17 @@ const SceneContent = ({
       onTensionUpdate(t);
     }
 
+    // Player Movement with Non-Linear Slowdown
     const PLAYER_BASE_SPEED = 7.0;
     if (isMovingForwardRef.current) {
-      // Slow down as tension increases, but keep a minimum speed (20% of base)
-      const tensionSlowdown = 1 - (rawTension * 0.8);
+      let tensionSlowdown = 1.0;
+      if (rawTension > 0.9) {
+        const normalized = (rawTension - 0.9) / 0.1; 
+        tensionSlowdown = 0.4 - (normalized * 0.3); // 0.4 down to 0.1
+      } else if (rawTension > 0.75) {
+        const normalized = (rawTension - 0.75) / 0.15;
+        tensionSlowdown = 1.0 - (normalized * 0.6); // 1.0 down to 0.4
+      }
       const speed = PLAYER_BASE_SPEED * tensionSlowdown;
       const moveX = Math.sin(povRotation.current.yaw) * speed * delta;
       const moveZ = -Math.cos(povRotation.current.yaw) * speed * delta;
@@ -309,12 +294,10 @@ const SceneContent = ({
       }
     }
 
-    onProgressUpdate(Math.abs(playerPos.current.z));
-    onPositionsUpdate({ px: playerPos.current.x, pz: playerPos.current.z, dx: dogPos.current.x, dz: dogPos.current.z });
-
-    const currentDist = new Vector3(playerPos.current.x, 0, playerPos.current.z).distanceTo(new Vector3(dogPos.current.x, 0, dogPos.current.z));
-    if (currentDist > MAX_LEASH_LENGTH) {
-      const overshot = currentDist - MAX_LEASH_LENGTH;
+    // Leash constraint: pull player back or pull dog forward
+    const preConstraintDist = new Vector3(playerPos.current.x, 0, playerPos.current.z).distanceTo(new Vector3(dogPos.current.x, 0, dogPos.current.z));
+    if (preConstraintDist > MAX_LEASH_LENGTH) {
+      const overshot = preConstraintDist - MAX_LEASH_LENGTH;
       const dirToDog = new Vector3(dogPos.current.x - playerPos.current.x, 0, dogPos.current.z - playerPos.current.z).normalize();
       if (dogState !== 'WALKING') {
         playerPos.current.x += dirToDog.x * overshot;
@@ -329,36 +312,22 @@ const SceneContent = ({
 
     if (dogState === 'WALKING') {
       const DOG_MOVE_SPEED = 9.0;
-      const DETECTION_RADIUS = 25.0;
-      const scentsAhead = scentsState.filter((s: Scent) => s.position[2] < dogPos.current.z);
       const moveX = Math.sin(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
       const moveZ = -Math.cos(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
       dogPos.current.x += moveX;
       dogPos.current.z += moveZ;
-      if (scentsAhead.length > 0) {
-        const closestScent = scentsAhead.reduce((prev: Scent, curr: Scent) => {
-          const distPrev = dogPos.current.distanceTo(new Vector3(...prev.position));
-          const distCurr = dogPos.current.distanceTo(new Vector3(...curr.position));
-          return distCurr < distPrev ? curr : prev;
-        });
-        if (dogPos.current.distanceTo(new Vector3(...closestScent.position)) < DETECTION_RADIUS) {
-          const distToScent = dogPos.current.distanceTo(new Vector3(...closestScent.position));
-          const pullStrength = Math.max(1.2, 4.8 * (1 - distToScent / DETECTION_RADIUS));
-          if (dogPos.current.x < closestScent.position[0]) dogPos.current.x += pullStrength * delta;
-          else if (dogPos.current.x > closestScent.position[0]) dogPos.current.x -= pullStrength * delta;
-        }
-      }
     }
 
+    // Final distance calculation after all movement and constraints applied
     if (dogState === 'WALKING') {
-      scentsState.forEach((s: Scent) => {
-        if (dogPos.current.distanceTo(new Vector3(...s.position)) < SNIFF_RADIUS) {
-          setDogState('SNIFFING');
-          sniffingScentId.current = s.id;
-        }
-      });
+      const actualMoveDist = new Vector3(dogPos.current.x, 0, dogPos.current.z).distanceTo(new Vector3(prevDogPos.x, 0, prevDogPos.z));
+      dogDistance.current += actualMoveDist;
     }
-    if (playerPos.current.z < -150) setGameState('FINISHED');
+
+    onProgressUpdate(dogDistance.current);
+    onPositionsUpdate({ px: playerPos.current.x, pz: playerPos.current.z, dx: dogPos.current.x, dz: dogPos.current.z });
+
+    if (dogDistance.current > 150) setGameState('FINISHED');
   });
 
   return (
@@ -367,13 +336,6 @@ const SceneContent = ({
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
       <DogModel dogPos={dogPos.current} state={dogState} visualOffset={tugRecoil.current * 0.8} gameState={gameState} />
-      {scentsState.map((s: Scent) => (
-        <group key={s.id} position={s.position}>
-          <Sphere args={[0.3, 16, 16]}>
-            <meshStandardMaterial color={dogState === 'SNIFFING' ? "#ffff00" : "#ff4444"} transparent opacity={0.6} emissive={dogState === 'SNIFFING' ? "#ffff00" : "#ff4444"} emissiveIntensity={0.2} />
-          </Sphere>
-        </group>
-      ))}
       {trees.map(t => <Tree key={t.id} position={t.position} />)}
       <LeashModel nodes={leashNodes.current} tension={localUiTension} />
       <Box args={[8, 0.2, 2000]} position={[0, -0.1, -450]} receiveShadow><meshStandardMaterial color="#444" /></Box>
@@ -416,7 +378,7 @@ export default function App() {
   const [distance, setDistance] = useState(0);
   const [isMovingForward, setIsMovingForward] = useState(false);
   const [positions, setPositions] = useState({ px: 0, pz: 0, dx: 0, dz: 0 });
-  const [scents, setScentsState] = useState<Scent[]>([]);
+  const [scents] = useState<Scent[]>([]);
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   useEffect(() => {
     const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -437,7 +399,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
-        <SceneContent gameState={gameState} setGameState={setGameState} onTensionUpdate={setTension} onProgressUpdate={setDistance} onPositionsUpdate={setPositions} dogState={dogState} setDogState={setDogState} scentsState={scents} setScentsState={setScentsState} isMovingForward={isMovingForward} onTug={(fn) => { tugHandler.current = fn; }} onGo={(fn) => { goHandler.current = fn; }} />
+        <SceneContent gameState={gameState} setGameState={setGameState} onTensionUpdate={setTension} onProgressUpdate={setDistance} onPositionsUpdate={setPositions} dogState={dogState} setDogState={setDogState} isMovingForward={isMovingForward} onTug={(fn) => { tugHandler.current = fn; }} onGo={(fn) => { goHandler.current = fn; }} />
       </Canvas>
 
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', color: 'white', fontFamily: 'monospace', zIndex: 10 }}>
@@ -447,7 +409,10 @@ export default function App() {
               <SmartwatchMinimap scents={scents} {...positions} />
             </div>
             <div style={{ position: 'absolute', bottom: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom left' }}>
-              <div onClick={handleTug} style={{ width: '130px', background: 'rgba(0,0,0,0.85)', borderRadius: '16px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto', cursor: 'pointer' }}>
+              <div 
+                onClick={handleTug}
+                style={{ width: '130px', background: 'rgba(0,0,0,0.85)', borderRadius: '16px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto', cursor: 'pointer' }}
+              >
                 <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderBottom: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min(100, (distance / 150) * 100)}%`, background: 'rgba(68, 136, 255, 0.4)', transition: 'width 0.3s ease-out' }} />
                   <div style={{ zIndex: 1, textAlign: 'center' }}>
@@ -489,8 +454,11 @@ export default function App() {
                 <div onClick={() => setIsMovingForward(!isMovingForward)} style={{ position: 'absolute', left: '110px', top: '110px', width: '90px', height: '90px', borderRadius: '50%', background: isMovingForward ? 'rgba(68, 255, 68, 0.7)' : 'rgba(0,0,0,0.85)', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', userSelect: 'none', boxShadow: '0 6px 20px rgba(0,0,0,0.6)', transition: 'all 0.1s', zIndex: 2, pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>
                   <div style={{ fontSize: '14px', fontWeight: '900', color: 'white' }}>{isMovingForward ? 'STOP' : 'WALK'}</div>
                 </div>
+                {/* 1: STOP (180°) - Active if Standing or Idling */}
                 <button onClick={() => setDogState('STANDING')} style={{ position: 'absolute', left: '35px', top: '110px', width: '50px', height: '50px', borderRadius: '50%', background: (dogState === 'STANDING' || dogState === 'IDLING') ? '#44ff44' : 'rgba(0,0,0,0.85)', color: (dogState === 'STANDING' || dogState === 'IDLING') ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>STOP</button>
+                {/* 2: SIT (240°) */}
                 <button onClick={() => setDogState('SITTING')} style={{ position: 'absolute', left: '72.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'SITTING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'SITTING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>SIT</button>
+                {/* 3: GO/TUG Button */}
                 <button onClick={handleGo} style={{ position: 'absolute', left: '147.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: `linear-gradient(to top, ${tension > 0.85 ? '#ff4444' : '#44ff44'} ${tension * 100}%, rgba(0,0,0,0.85) ${tension * 100}%)`, color: (tension > 0.5 && dogState !== 'WALKING') ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)', overflow: 'hidden' }}>
                   <div style={{ zIndex: 1 }}>{dogState === 'WALKING' ? 'TUG' : 'GO'}</div>
                 </button>
