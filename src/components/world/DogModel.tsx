@@ -42,6 +42,8 @@ export const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPo
   return (
     <group ref={groupRef}>
       <Box args={[0.45, 0.4, 1.6]} castShadow position={[0, 0.3, 0]}><meshStandardMaterial color="#8b4513" /></Box>
+      {/* Collar - Front Facet */}
+      <Box args={[0.4, 0.3, 0.05]} position={[0, 0.3, -0.81]}><meshStandardMaterial color="#ff0000" /></Box>
       <group position={[0, 0.5, -0.9]} ref={headRef}>
         <Box args={[0.35, 0.35, 0.4]}><meshStandardMaterial color="#8b4513" /></Box>
         <Box args={[0.2, 0.2, 0.2]} position={[0, -0.05, -0.25]}><meshStandardMaterial color="#8b4513" /></Box>

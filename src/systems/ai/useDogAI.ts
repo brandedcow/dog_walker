@@ -10,6 +10,7 @@ export const useDogAI = () => {
   const lastDogUpdatePos = useRef(new Vector3(0, 0, -1));
   const stationaryTime = useRef(0);
   const idleTarget = useRef<Vector3 | null>(null);
+  const currentRotation = useRef(0);
 
   const update = (
     delta: number, 
@@ -17,6 +18,15 @@ export const useDogAI = () => {
     dogState: DogState, 
     setDogState: (s: DogState) => void
   ) => {
+    // Rotation logic (copied logic from DogModel visualization for physics sync)
+    if (dogState === 'WALKING' || dogState === 'COMING') {
+      const DOG_MOVE_SPEED = 9.0;
+      const moveX = Math.sin(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
+      const moveZ = -Math.cos(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
+      const targetRot = Math.atan2(moveX, moveZ);
+      currentRotation.current += (targetRot - currentRotation.current) * 0.1;
+    }
+
     // Idling logic
     if (dogState === 'STANDING') {
       stationaryTime.current += delta;
@@ -72,5 +82,5 @@ export const useDogAI = () => {
     stationaryTime.current = 0;
   };
 
-  return { dogPos, dogDistance, update, startWalking };
+  return { dogPos, dogDistance, currentRotation, update, startWalking };
 };

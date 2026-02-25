@@ -112,7 +112,7 @@ const SceneContent = () => {
     let lastAIState: any = null;
 
     while (accumulator.current >= FIXED_DELTA) {
-      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current);
+      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
       lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState);
 
       // Player Movement (Inside fixed update for consistent physics)
@@ -165,14 +165,13 @@ const SceneContent = () => {
 
 export default function App() {
   const handleGo = () => { if ((window as any).handleGo) (window as any).handleGo(); };
-  const handleTug = () => { if ((window as any).handleTug) (window as any).handleTug(); };
 
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
         <SceneContent />
       </Canvas>
-      <HUD handleGo={handleGo} handleTug={handleTug} />
+      <HUD handleGo={handleGo} />
     </div>
   );
 }
