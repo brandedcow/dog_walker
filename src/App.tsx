@@ -420,17 +420,17 @@ export default function App() {
             <div style={{ position: 'absolute', bottom: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom left' }}>
               <div 
                 onClick={handleTug}
-                style={{ width: '130px', background: 'rgba(0,0,0,0.85)', borderRadius: '16px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto', cursor: 'pointer' }}
+                style={{ width: '115px', background: 'rgba(0,0,0,0.85)', borderRadius: '16px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto', cursor: 'pointer' }}
               >
                 <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderBottom: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min(100, (distance / 150) * 100)}%`, background: 'rgba(68, 136, 255, 0.4)', transition: 'width 0.3s ease-out' }} />
-                  <div style={{ zIndex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: '7px', fontWeight: '900', letterSpacing: '0.6px', opacity: 0.8 }}>WALK METER</div>
-                    <div style={{ fontSize: '9px', fontWeight: 'bold', color: '#4488ff', lineHeight: '1' }}>{Math.floor(distance)}m</div>
+                  <div style={{ zIndex: 1, display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                    <span style={{ fontSize: '7px', fontWeight: '900', letterSpacing: '0.6px', opacity: 0.8 }}>WALK METER:</span>
+                    <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#4488ff' }}>{Math.floor(distance)}m</span>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px', gap: '4px', width: '100%' }}>
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: '14px', width: '100%', boxSizing: 'border-box' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                     <div style={{ position: 'relative', width: '36px', height: '28px', background: '#8b4513', borderRadius: '6px' }}>
                       <div style={{ position: 'absolute', top: '3px', left: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
                       <div style={{ position: 'absolute', top: '3px', right: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
@@ -438,13 +438,10 @@ export default function App() {
                       <div style={{ position: 'absolute', top: '8px', right: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
                       <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '8px', height: '6px', background: '#000', borderRadius: '2px' }} />
                     </div>
-                    <div style={{ fontSize: '16px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
-                      {dogState === 'WALKING' ? '🐾' : dogState === 'SNIFFING' ? '👃' : dogState === 'SITTING' ? '🪑' : dogState === 'IDLING' ? '💤' : dogState === 'COMING' ? '🐕' : '🧍'}
-                    </div>
+                    <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '0.3px', textAlign: 'center' }}>BUSTER</div>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '0.3px' }}>BUSTER</div>
-                    <div style={{ fontSize: '8px', opacity: 0.7, color: '#44ff44' }}>Dachshund</div>
+                  <div style={{ fontSize: '20px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))', minWidth: '24px', textAlign: 'center' }}>
+                    {dogState === 'WALKING' ? '🐾' : dogState === 'SNIFFING' ? '👃' : dogState === 'SITTING' ? '🪑' : dogState === 'IDLING' ? '💤' : dogState === 'COMING' ? '🐕' : '🧍'}
                   </div>
                 </div>
               </div>
