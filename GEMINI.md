@@ -8,16 +8,17 @@
 
 ---
 
-## 2. Systems Architecture
+## 2. Systems Architecture (Modular)
 
 ### 2.1 Component Breakdown
 
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
 | **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED` (7.0), `panSlowdown`, `uiScale`    |
-| **Physics Engine**    | Verlet Integration + Position-Based Dynamics (PBD) for leash.      | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
-| **Canine Logic (AI)** | State machine managing dog behavior and autonomous pathing.        | `dogFacingYaw`, `dogDistance`, `COMING`, `IDLING`      |
-| **Responsive UI**     | HUD with dynamic scaling and integrated tension feedback.          | `edgeOffset`, `tensionMeter` (GO background)           |
+| **Physics (useLeash)**| Verlet Integration + Position-Based Dynamics (PBD) for leash.      | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
+| **Canine AI (useDogAI)**| State machine managing dog behavior and autonomous pathing.      | `dogFacingYaw`, `dogDistance`, `COMING`, `IDLING`      |
+| **State (Zustand)**   | Centralized event-driven state for HUD and 3rd-person sync.        | `useGameStore`: `gameState`, `dogState`, `tension`     |
+| **HUD (React)**       | Modular UI components with dynamic scaling and safety locks.       | `ProfileCard`, `PawControls`, `SmartwatchMinimap`      |
 
 ---
 
@@ -27,7 +28,7 @@
 The leash is simulated as a chain of 60 nodes using Verlet Integration and PBD distance constraints.
 - **Tension Visuals:** The leash transitions from Dark Gray to Yellow (75%) to Bright Red (90%) as it stretches.
 - **Player Impact:** Non-linear slowdown occurs as tension increases. Full speed up to 75% tension, ramping down to 10% speed at 100% tension.
-- **Physical Limits:** The dog is physically constrained to a 15m radius. If the player exceeds this, they are pulled back; if the dog exceeds it while walking, its position is clamped.
+- **Sub-stepping:** Physics calculations run at a fixed 480Hz (8 steps per 60fps frame) via a time-accumulator pattern to ensure stability across variable framerates.
 
 ### 3.2 Command System (The "Paw" Controls)
 The player interacts with the dog through a cluster of 3 main command buttons:
@@ -64,6 +65,7 @@ The player interacts with the dog through a cluster of 3 main command buttons:
 ## 5. Level Design: "The Infinite Road"
 
 - **Environment:** 3D sidewalk with depth, grass, and procedural trees.
+- **Performance:** Trees are rendered using `InstancedMesh` to allow for high-density environments with a single draw call.
 - **Win Condition:** Dog travels a total of **150 meters** in the `WALKING` state.
 - **Success State:** Reaching 150m triggers the "Mission Success" screen.
 
@@ -71,7 +73,8 @@ The player interacts with the dog through a cluster of 3 main command buttons:
 
 ## 6. Technical Implementation Notes
 
-### 6.1 State Management
-- **Verlet Data:** Handled using `useRef` for 60fps physics stability without React re-render overhead.
+### 6.1 State & Logic
+- **Modular Hooks:** Physics and AI logic are decoupled into `useLeash` and `useDogAI` respectively.
+- **Global State:** Zustand handles cross-component synchronization between the 3D SceneContent and the HUD.
 - **Responsive Logic:** `useWindowSize` hook calculates dynamic scaling for UI components to support mobile and desktop aspect ratios.
-- **Safety:** All UI elements use `WebkitUserSelect: none` and `WebkitTouchCallout: none` to prevent long-press context menus on mobile devices.
+- **Mobile Optimization:** All UI elements use `WebkitUserSelect: none` and `WebkitTouchCallout: none` to prevent long-press context menus.
