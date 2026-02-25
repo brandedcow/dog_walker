@@ -3,8 +3,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Vector3, CatmullRomCurve3, Color } from 'three';
 import { Line, Sky, Plane, Sphere, Box, Text } from '@react-three/drei';
 
-const MAX_LEASH_LENGTH = 10;
-const LEASH_NODES = 40;
+const MAX_LEASH_LENGTH = 15;
+const LEASH_NODES = 60;
 const SEGMENT_LENGTH = MAX_LEASH_LENGTH / (LEASH_NODES - 1);
 const LEASH_STIFFNESS = 15;
 const LEASH_GRAVITY = -9.8;
@@ -27,7 +27,7 @@ const Tree = ({ position }: { position: [number, number, number] }) => (
   </group>
 );
 
-const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPos: Vector3, state: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING', visualOffset?: number, gameState: string }) => {
+const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPos: Vector3, state: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING', visualOffset?: number, gameState: string }) => {
   const groupRef = useRef<any>(null);
   const headRef = useRef<any>(null);
   const earsRef = useRef<[any, any]>([null, null]);
@@ -38,7 +38,8 @@ const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPos: Vect
     if (groupRef.current) {
       const isPlaying = gameState === 'PLAYING';
       const time = clock.getElapsedTime();
-      const bob = (isPlaying && state === 'WALKING') ? Math.abs(Math.sin(time * 15)) * 0.02 : 0;
+      const isMoving = state === 'WALKING' || state === 'COMING';
+      const bob = (isPlaying && isMoving) ? Math.abs(Math.sin(time * 15)) * 0.02 : 0;
       const movement = new Vector3().subVectors(dogPos, lastPos.current);
       if (isPlaying && movement.length() > 0.001) {
         const targetRot = Math.atan2(movement.x, movement.z);
@@ -47,13 +48,13 @@ const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPos: Vect
       const yPos = state === 'SITTING' ? -0.2 : 0;
       groupRef.current.position.set(dogPos.x, dogPos.y + bob + yPos, dogPos.z + visualOffset);
       groupRef.current.rotation.y = currentRotation.current + Math.PI;
-      groupRef.current.rotation.z = (isPlaying && state === 'WALKING') ? Math.sin(time * 15) * 0.02 : 0;
+      groupRef.current.rotation.z = (isPlaying && isMoving) ? Math.sin(time * 15) * 0.02 : 0;
       if (headRef.current) {
         const sittingTilt = state === 'SITTING' ? -0.4 : 0;
         headRef.current.rotation.x = (visualOffset * -1.5) + sittingTilt;
       }
       if (earsRef.current[0] && earsRef.current[1]) {
-        const earWiggle = (isPlaying && state === 'WALKING') ? Math.sin(time * 20) * 0.1 : 0;
+        const earWiggle = (isPlaying && isMoving) ? Math.sin(time * 20) * 0.1 : 0;
         const earYank = visualOffset * 2;
         earsRef.current[0].rotation.z = -0.2 + earWiggle + earYank;
         earsRef.current[1].rotation.z = 0.2 - earWiggle - earYank;
@@ -88,7 +89,8 @@ const LeashModel = ({ nodes, tension }: { nodes: Vector3[], tension: number }) =
   const curve = useMemo(() => new CatmullRomCurve3(nodes), [nodes]);
   const color = useMemo(() => {
     const c = new Color('#111');
-    return c.lerp(new Color('#ff0000'), Math.pow(tension, 2));
+    const tensionColor = tension > 0.9 ? new Color('#ff0000') : tension > 0.75 ? new Color('#ffff00') : new Color('#44ff44');
+    return c.lerp(tensionColor, Math.pow(tension, 2));
   }, [tension]);
   return <Line points={curve.getPoints(30)} color={color} lineWidth={4} />;
 };
@@ -101,7 +103,7 @@ const SceneContent = ({
   onTensionUpdate: (t: number) => void,
   onProgressUpdate: (p: number) => void,
   onPositionsUpdate: (pos: any) => void,
-  dogState: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING',
+  dogState: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING',
   setDogState: (s: any) => void,
   isMovingForward: boolean,
   onTug: (fn: () => void) => void,
@@ -133,13 +135,11 @@ const SceneContent = ({
 
   useEffect(() => {
     const doGo = () => {
-      // If dog is already walking or sniffing, any press of this button acts as a TUG
-      if (dogState === 'WALKING' || dogState === 'SNIFFING') {
+      if (dogState === 'WALKING' || dogState === 'SNIFFING' || dogState === 'COMING') {
         const dirToPlayer = new Vector3(playerPos.current.x - dogPos.current.x, 0, playerPos.current.z - dogPos.current.z).normalize();
         dogPos.current.add(dirToPlayer.multiplyScalar(0.35)); 
         tugRecoil.current = 1.0; 
-        
-        if (dogState === 'WALKING') {
+        if (dogState === 'WALKING' || dogState === 'COMING') {
           setDogState('STANDING');
           stationaryTime.current = 0;
         }
@@ -209,7 +209,6 @@ const SceneContent = ({
 
     if (gameState !== 'PLAYING') return;
 
-    // Capture position before all movement and constraints
     const prevDogPos = dogPos.current.clone();
 
     // Verlet Leash Update
@@ -251,16 +250,16 @@ const SceneContent = ({
       onTensionUpdate(t);
     }
 
-    // Player Movement with Non-Linear Slowdown
+    // Player Movement
     const PLAYER_BASE_SPEED = 7.0;
     if (isMovingForwardRef.current) {
       let tensionSlowdown = 1.0;
       if (rawTension > 0.9) {
         const normalized = (rawTension - 0.9) / 0.1; 
-        tensionSlowdown = 0.4 - (normalized * 0.3); // 0.4 down to 0.1
+        tensionSlowdown = 0.4 - (normalized * 0.3);
       } else if (rawTension > 0.75) {
         const normalized = (rawTension - 0.75) / 0.15;
-        tensionSlowdown = 1.0 - (normalized * 0.6); // 1.0 down to 0.4
+        tensionSlowdown = 1.0 - (normalized * 0.6);
       }
       const speed = PLAYER_BASE_SPEED * tensionSlowdown;
       const moveX = Math.sin(povRotation.current.yaw) * speed * delta;
@@ -292,14 +291,25 @@ const SceneContent = ({
         dogPos.current.add(pushDir.multiplyScalar(0.05));
         idleTarget.current = null;
       }
+    } else if (dogState === 'COMING') {
+      const targetPos = playerPos.current.clone();
+      targetPos.y = 0;
+      const dir = new Vector3().subVectors(targetPos, dogPos.current);
+      const dist = dir.length();
+      if (dist < 1.2) {
+        setDogState('STANDING');
+        stationaryTime.current = 0;
+      } else {
+        const moveSpeed = 12.0 * delta;
+        dogPos.current.add(dir.normalize().multiplyScalar(moveSpeed));
+      }
     }
 
-    // Leash constraint: pull player back or pull dog forward
     const preConstraintDist = new Vector3(playerPos.current.x, 0, playerPos.current.z).distanceTo(new Vector3(dogPos.current.x, 0, dogPos.current.z));
     if (preConstraintDist > MAX_LEASH_LENGTH) {
       const overshot = preConstraintDist - MAX_LEASH_LENGTH;
       const dirToDog = new Vector3(dogPos.current.x - playerPos.current.x, 0, dogPos.current.z - playerPos.current.z).normalize();
-      if (dogState !== 'WALKING') {
+      if (dogState !== 'WALKING' && dogState !== 'COMING') {
         playerPos.current.x += dirToDog.x * overshot;
         playerPos.current.z += dirToDog.z * overshot;
       } else {
@@ -318,7 +328,6 @@ const SceneContent = ({
       dogPos.current.z += moveZ;
     }
 
-    // Final distance calculation after all movement and constraints applied
     if (dogState === 'WALKING') {
       const actualMoveDist = new Vector3(dogPos.current.x, 0, dogPos.current.z).distanceTo(new Vector3(prevDogPos.x, 0, prevDogPos.z));
       dogDistance.current += actualMoveDist;
@@ -373,7 +382,7 @@ const SmartwatchMinimap = ({ px, pz, dx, dz, scents }: { px: number, pz: number,
 
 export default function App() {
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'FINISHED'>('START');
-  const [dogState, setDogState] = useState<'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING'>('STANDING');
+  const [dogState, setDogState] = useState<'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING'>('STANDING');
   const [tension, setTension] = useState(0);
   const [distance, setDistance] = useState(0);
   const [isMovingForward, setIsMovingForward] = useState(false);
@@ -421,30 +430,21 @@ export default function App() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px', gap: '4px', width: '100%' }}>
-                  <div style={{ position: 'relative', width: '36px', height: '28px', background: '#8b4513', borderRadius: '6px' }}>
-                    <div style={{ position: 'absolute', top: '3px', left: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
-                    <div style={{ position: 'absolute', top: '3px', right: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
-                    <div style={{ position: 'absolute', top: '8px', left: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
-                    <div style={{ position: 'absolute', top: '8px', right: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
-                    <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '8px', height: '6px', background: '#000', borderRadius: '2px' }} />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gap: '10px' }}>
+                    <div style={{ position: 'relative', width: '36px', height: '28px', background: '#8b4513', borderRadius: '6px' }}>
+                      <div style={{ position: 'absolute', top: '3px', left: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
+                      <div style={{ position: 'absolute', top: '3px', right: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
+                      <div style={{ position: 'absolute', top: '8px', left: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
+                      <div style={{ position: 'absolute', top: '8px', right: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
+                      <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '8px', height: '6px', background: '#000', borderRadius: '2px' }} />
+                    </div>
+                    <div style={{ fontSize: '16px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+                      {dogState === 'WALKING' ? '🐾' : dogState === 'SNIFFING' ? '👃' : dogState === 'SITTING' ? '🪑' : dogState === 'IDLING' ? '💤' : dogState === 'COMING' ? '🐕' : '🧍'}
+                    </div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '0.3px' }}>BUSTER</div>
                     <div style={{ fontSize: '8px', opacity: 0.7, color: '#44ff44' }}>Dachshund</div>
-                  </div>
-                  <div style={{ width: '100%', padding: '3px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', fontWeight: 'bold', color: dogState === 'SNIFFING' ? '#ffff00' : '#44ff44', textTransform: 'uppercase' }}>
-                      {dogState === 'WALKING' ? 'Walking' : dogState === 'SNIFFING' ? 'Sniffing!' : dogState === 'SITTING' ? 'Sitting' : dogState === 'IDLING' ? 'Idling' : 'Standing'}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderTop: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${tension * 100}%`, background: tension > 0.85 ? 'rgba(255, 68, 68, 0.4)' : 'rgba(68, 255, 68, 0.4)', transition: 'width 0.1s linear' }} />
-                  <div style={{ zIndex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', fontWeight: '900', letterSpacing: '0.8px', opacity: 0.8 }}>TENSION METER</div>
-                    <div style={{ fontSize: '10px', fontWeight: 'bold', color: gameState === 'START' ? '#ffffff' : (tension > 0.85 ? '#ff4444' : '#44ff44'), lineHeight: '1' }}>
-                      {gameState === 'START' ? '0%' : `${Math.floor(tension * 100)}%`}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -454,13 +454,13 @@ export default function App() {
                 <div onClick={() => setIsMovingForward(!isMovingForward)} style={{ position: 'absolute', left: '110px', top: '110px', width: '90px', height: '90px', borderRadius: '50%', background: isMovingForward ? 'rgba(68, 255, 68, 0.7)' : 'rgba(0,0,0,0.85)', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', userSelect: 'none', boxShadow: '0 6px 20px rgba(0,0,0,0.6)', transition: 'all 0.1s', zIndex: 2, pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>
                   <div style={{ fontSize: '14px', fontWeight: '900', color: 'white' }}>{isMovingForward ? 'STOP' : 'WALK'}</div>
                 </div>
-                {/* 1: STOP (180°) - Active if Standing or Idling */}
-                <button onClick={() => setDogState('STANDING')} style={{ position: 'absolute', left: '35px', top: '110px', width: '50px', height: '50px', borderRadius: '50%', background: (dogState === 'STANDING' || dogState === 'IDLING') ? '#44ff44' : 'rgba(0,0,0,0.85)', color: (dogState === 'STANDING' || dogState === 'IDLING') ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>STOP</button>
+                {/* 1: COME (180°) - Active if Coming */}
+                <button onClick={() => setDogState('COMING')} style={{ position: 'absolute', left: '35px', top: '110px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'COMING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'COMING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>COME</button>
                 {/* 2: SIT (240°) */}
                 <button onClick={() => setDogState('SITTING')} style={{ position: 'absolute', left: '72.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'SITTING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'SITTING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>SIT</button>
                 {/* 3: GO/TUG Button */}
-                <button onClick={handleGo} style={{ position: 'absolute', left: '147.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: `linear-gradient(to top, ${tension > 0.85 ? '#ff4444' : '#44ff44'} ${tension * 100}%, rgba(0,0,0,0.85) ${tension * 100}%)`, color: (tension > 0.5 && dogState !== 'WALKING') ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)', overflow: 'hidden' }}>
-                  <div style={{ zIndex: 1 }}>{dogState === 'WALKING' ? 'TUG' : 'GO'}</div>
+                <button onClick={handleGo} style={{ position: 'absolute', left: '147.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: `linear-gradient(to top, ${tension > 0.9 ? '#ff4444' : tension > 0.75 ? '#ffff00' : '#44ff44'} ${tension * 100}%, rgba(0,0,0,0.85) ${tension * 100}%)`, color: (tension > 0.5 && dogState !== 'WALKING') ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)', overflow: 'hidden' }}>
+                  <div style={{ zIndex: 1 }}>{(dogState === 'WALKING' || dogState === 'COMING') ? 'TUG' : 'GO'}</div>
                 </button>
               </div>
             )}
