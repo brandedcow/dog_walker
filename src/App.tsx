@@ -112,6 +112,7 @@ const SceneContent = ({
   const dogPos = useRef(new Vector3(0, 0, -1));
   const playerPos = useRef(new Vector3(0, 1.7, 0));
   const dogDistance = useRef(0);
+  const lastDogUpdatePos = useRef(new Vector3(0, 0, -1));
   const { camera } = useThree();
 
   const trees = useMemo(() => Array.from({ length: 40 }, (_, i) => ({
@@ -121,6 +122,7 @@ const SceneContent = ({
   const [localUiTension, setLocalUiTension] = useState(0);
   const tugRecoil = useRef(0);
   const povRotation = useRef({ yaw: 0, pitch: 0 });
+  const lastYaw = useRef(0);
   const isDragging = useRef(false);
   const lastMousePos = useRef({ x: 0, y: 0 });
   const swipeStartPos = useRef<{ x: number, y: number } | null>(null);
@@ -200,16 +202,21 @@ const SceneContent = ({
       tugRecoil.current *= 0.85; 
       if (tugRecoil.current < 0.01) tugRecoil.current = 0;
     }
-    camera.position.set(playerPos.current.x, playerPos.current.y, playerPos.current.z);
-    const lookDistance = 10;
-    const targetX = playerPos.current.x + Math.sin(povRotation.current.yaw) * lookDistance;
-    const targetY = playerPos.current.y + Math.sin(povRotation.current.pitch) * lookDistance;
-    const targetZ = playerPos.current.z - Math.cos(povRotation.current.yaw) * lookDistance;
+
+    // 3rd Person Camera Logic
+    const camDistance = 6;
+    const camHeight = 2.5;
+    const camX = playerPos.current.x - Math.sin(povRotation.current.yaw) * camDistance;
+    const camZ = playerPos.current.z + Math.cos(povRotation.current.yaw) * camDistance;
+    const camY = playerPos.current.y + camHeight;
+    camera.position.set(camX, camY, camZ);
+    const lookAheadDist = 5;
+    const targetX = playerPos.current.x + Math.sin(povRotation.current.yaw) * lookAheadDist;
+    const targetZ = playerPos.current.z - Math.cos(povRotation.current.yaw) * lookAheadDist;
+    const targetY = playerPos.current.y + Math.sin(povRotation.current.pitch) * lookAheadDist;
     camera.lookAt(targetX, targetY, targetZ);
 
     if (gameState !== 'PLAYING') return;
-
-    const prevDogPos = dogPos.current.clone();
 
     // Verlet Leash Update
     const nodes = leashNodes.current;
@@ -250,7 +257,7 @@ const SceneContent = ({
       onTensionUpdate(t);
     }
 
-    // Player Movement
+    // Player Movement with Non-Linear Slowdown and Pan Slowdown
     const PLAYER_BASE_SPEED = 7.0;
     if (isMovingForwardRef.current) {
       let tensionSlowdown = 1.0;
@@ -261,12 +268,18 @@ const SceneContent = ({
         const normalized = (rawTension - 0.75) / 0.15;
         tensionSlowdown = 1.0 - (normalized * 0.6);
       }
-      const speed = PLAYER_BASE_SPEED * tensionSlowdown;
+
+      // Pan Slowdown Calculation
+      const yawDelta = Math.abs(povRotation.current.yaw - lastYaw.current);
+      const panSlowdown = Math.max(0.3, 1.0 - (yawDelta * 10)); // Slow down up to 70% if panning fast
+      
+      const speed = PLAYER_BASE_SPEED * tensionSlowdown * panSlowdown;
       const moveX = Math.sin(povRotation.current.yaw) * speed * delta;
       const moveZ = -Math.cos(povRotation.current.yaw) * speed * delta;
       playerPos.current.x += moveX;
       playerPos.current.z += moveZ;
     }
+    lastYaw.current = povRotation.current.yaw;
 
     if (dogState === 'STANDING') {
       stationaryTime.current += delta;
@@ -329,11 +342,14 @@ const SceneContent = ({
     }
 
     if (dogState === 'WALKING') {
-      const actualMoveDist = new Vector3(dogPos.current.x, 0, dogPos.current.z).distanceTo(new Vector3(prevDogPos.x, 0, prevDogPos.z));
-      dogDistance.current += actualMoveDist;
+      const distFromLastUpdate = new Vector3(dogPos.current.x, 0, dogPos.current.z).distanceTo(lastDogUpdatePos.current);
+      if (distFromLastUpdate > 0.25) { // 25cm threshold
+        dogDistance.current += distFromLastUpdate;
+        lastDogUpdatePos.current.copy(dogPos.current);
+        onProgressUpdate(dogDistance.current);
+      }
     }
 
-    onProgressUpdate(dogDistance.current);
     onPositionsUpdate({ px: playerPos.current.x, pz: playerPos.current.z, dx: dogPos.current.x, dz: dogPos.current.z });
 
     if (dogDistance.current > 150) setGameState('FINISHED');
