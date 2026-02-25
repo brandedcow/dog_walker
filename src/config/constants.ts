@@ -7,3 +7,6 @@ export const LEASH_FRICTION = 0.98;
 export const SNIFF_RADIUS = 2.5;
 export const PLAYER_BASE_SPEED = 7.0;
 export const DOG_MOVE_SPEED = 9.0;
+
+export const PHYSICS_SUBSTEPS = 8;
+export const FIXED_DELTA = 1 / 60 / PHYSICS_SUBSTEPS;
