@@ -374,7 +374,7 @@ export default function App() {
   const handleTug = () => { if (tugHandler.current) tugHandler.current(); };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
         <SceneContent gameState={gameState} setGameState={setGameState} onTensionUpdate={setTension} onProgressUpdate={setDistance} onPositionsUpdate={setPositions} dogState={dogState} setDogState={setDogState} scentsState={scents} setScentsState={setScentsState} isMovingForward={isMovingForward} onTug={(fn) => { tugHandler.current = fn; }} />
       </Canvas>
@@ -386,40 +386,43 @@ export default function App() {
               <SmartwatchMinimap scents={scents} {...positions} />
             </div>
             <div style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 10 }}>
-              <div style={{ width: '135px', background: 'rgba(0,0,0,0.85)', borderRadius: '18px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto' }}>
-                <div style={{ width: '100%', height: '32px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderBottom: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div 
+                onClick={handleTug}
+                style={{ width: '130px', background: 'rgba(0,0,0,0.85)', borderRadius: '16px', border: '1.5px solid white', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', pointerEvents: 'auto', cursor: 'pointer' }}
+              >
+                <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderBottom: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.min(100, (distance / 150) * 100)}%`, background: 'rgba(68, 136, 255, 0.4)', transition: 'width 0.3s ease-out' }} />
                   <div style={{ zIndex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', fontWeight: '900', letterSpacing: '0.8px', opacity: 0.8 }}>WALK METER</div>
-                    <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#4488ff' }}>{Math.floor(distance)}m</div>
+                    <div style={{ fontSize: '7px', fontWeight: '900', letterSpacing: '0.6px', opacity: 0.8 }}>WALK METER</div>
+                    <div style={{ fontSize: '9px', fontWeight: 'bold', color: '#4488ff', lineHeight: '1' }}>{Math.floor(distance)}m</div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px', gap: '8px', width: '100%' }}>
-                  <div style={{ position: 'relative', width: '32px', height: '26px', background: '#8b4513', borderRadius: '6px' }}>
-                    <div style={{ position: 'absolute', top: '3px', left: '-6px', width: '10px', height: '18px', background: '#5d4037', borderRadius: '3px' }} />
-                    <div style={{ position: 'absolute', top: '3px', right: '-6px', width: '10px', height: '18px', background: '#5d4037', borderRadius: '3px' }} />
-                    <div style={{ position: 'absolute', top: '8px', left: '6px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
-                    <div style={{ position: 'absolute', top: '8px', right: '6px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
-                    <div style={{ position: 'absolute', bottom: '5px', left: '50%', transform: 'translateX(-50%)', width: '8px', height: '5px', background: '#000', borderRadius: '2px' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px', gap: '4px', width: '100%' }}>
+                  <div style={{ position: 'relative', width: '36px', height: '28px', background: '#8b4513', borderRadius: '6px' }}>
+                    <div style={{ position: 'absolute', top: '3px', left: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
+                    <div style={{ position: 'absolute', top: '3px', right: '-8px', width: '10px', height: '20px', background: '#5d4037', borderRadius: '3px' }} />
+                    <div style={{ position: 'absolute', top: '8px', left: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
+                    <div style={{ position: 'absolute', top: '8px', right: '8px', width: '3px', height: '3px', background: '#000', borderRadius: '50%' }} />
+                    <div style={{ position: 'absolute', bottom: '6px', left: '50%', transform: 'translateX(-50%)', width: '8px', height: '6px', background: '#000', borderRadius: '2px' }} />
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '12px', letterSpacing: '0.4px' }}>BUSTER</div>
-                    <div style={{ fontSize: '9px', opacity: 0.8, color: '#44ff44', marginBottom: '2px' }}>Dachshund</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '0.3px' }}>BUSTER</div>
+                    <div style={{ fontSize: '8px', opacity: 0.7, color: '#44ff44' }}>Dachshund</div>
                   </div>
-                  <div style={{ width: '100%', padding: '4px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 'bold', color: dogState === 'SNIFFING' ? '#ffff00' : '#44ff44', textTransform: 'uppercase' }}>
+                  <div style={{ width: '100%', padding: '3px 0', borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '8px', fontWeight: 'bold', color: dogState === 'SNIFFING' ? '#ffff00' : '#44ff44', textTransform: 'uppercase' }}>
                       {dogState === 'WALKING' ? 'Walking' : dogState === 'SNIFFING' ? 'Sniffing!' : dogState === 'SITTING' ? 'Sitting' : dogState === 'IDLING' ? 'Idling' : 'Standing'}
                     </div>
                     {dogState === 'SNIFFING' && (
-                      <div style={{ fontSize: '7px', color: 'white', marginTop: '2px', opacity: 0.9 }}>TAP PULL TO TUG</div>
+                      <div style={{ fontSize: '6px', color: 'white', marginTop: '1px', opacity: 0.9 }}>TAP PULL TO TUG</div>
                     )}
                   </div>
                 </div>
-                <div style={{ width: '100%', height: '32px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderTop: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '100%', height: '24px', background: 'rgba(255,255,255,0.05)', position: 'relative', borderTop: '1.5px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${tension * 100}%`, background: tension > 0.85 ? 'rgba(255, 68, 68, 0.4)' : 'rgba(68, 255, 68, 0.4)', transition: 'width 0.1s linear' }} />
                   <div style={{ zIndex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: '8px', fontWeight: '900', letterSpacing: '0.8px', opacity: 0.8 }}>TENSION METER</div>
-                    <div style={{ fontSize: '10px', fontWeight: 'bold', color: gameState === 'START' ? '#ffffff' : (tension > 0.85 ? '#ff4444' : '#44ff44') }}>
+                    <div style={{ fontSize: '7px', fontWeight: '900', letterSpacing: '0.6px', opacity: 0.8 }}>TENSION METER</div>
+                    <div style={{ fontSize: '9px', fontWeight: 'bold', color: gameState === 'START' ? '#ffffff' : (tension > 0.85 ? '#ff4444' : '#44ff44'), lineHeight: '1' }}>
                       {gameState === 'START' ? '0%' : `${Math.floor(tension * 100)}%`}
                     </div>
                   </div>
@@ -431,14 +434,12 @@ export default function App() {
                 <div style={{ position: 'absolute', left: '110px', top: '110px', width: '90px', height: '90px', borderRadius: '50%', background: isMovingForward ? 'rgba(68, 255, 68, 0.7)' : 'rgba(0,0,0,0.85)', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', userSelect: 'none', boxShadow: '0 6px 20px rgba(0,0,0,0.6)', transition: 'all 0.1s', zIndex: 2, pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }} onMouseDown={() => setIsMovingForward(true)} onMouseUp={() => setIsMovingForward(false)} onMouseLeave={() => setIsMovingForward(false)} onTouchStart={(e) => { e.preventDefault(); setIsMovingForward(true); }} onTouchEnd={(e) => { e.preventDefault(); setIsMovingForward(false); }}>
                   <div style={{ fontSize: '14px', fontWeight: '900', color: 'white' }}>WALK</div>
                 </div>
-                {/* 1: STOP (165°) */}
-                <button onClick={() => setDogState('STANDING')} style={{ position: 'absolute', left: '37.5px', top: '129.4px', width: '45px', height: '45px', borderRadius: '50%', background: dogState === 'STANDING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'STANDING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '7px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>STOP</button>
-                {/* 2: SIT (210°) */}
-                <button onClick={() => setDogState('SITTING')} style={{ position: 'absolute', left: '45.1px', top: '72.5px', width: '45px', height: '45px', borderRadius: '50%', background: dogState === 'SITTING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'SITTING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '7px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>SIT</button>
-                {/* 3: PULL (255°) */}
-                <button onClick={handleTug} style={{ position: 'absolute', left: '90.6px', top: '37.5px', width: '45px', height: '45px', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', color: 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '7px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>PULL</button>
-                {/* 4: GO (300°) */}
-                <button onClick={() => setDogState('WALKING')} style={{ position: 'absolute', left: '147.5px', top: '45px', width: '45px', height: '45px', borderRadius: '50%', background: dogState === 'WALKING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'WALKING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '7px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>GO</button>
+                {/* 1: STOP (180°) */}
+                <button onClick={() => setDogState('STANDING')} style={{ position: 'absolute', left: '35px', top: '110px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'STANDING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'STANDING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>STOP</button>
+                {/* 2: SIT (240°) */}
+                <button onClick={() => setDogState('SITTING')} style={{ position: 'absolute', left: '72.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'SITTING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'SITTING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>SIT</button>
+                {/* 3: GO (300°) */}
+                <button onClick={() => setDogState('WALKING')} style={{ position: 'absolute', left: '147.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', background: dogState === 'WALKING' ? '#44ff44' : 'rgba(0,0,0,0.85)', color: dogState === 'WALKING' ? 'black' : 'white', border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', pointerEvents: 'auto', transform: 'translate(-50%, -50%)' }}>GO</button>
               </div>
             )}
           </>
