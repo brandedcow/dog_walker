@@ -4,71 +4,71 @@
 
 ## 1. Project Vision
 
-**Barking Mad** is a first-person simulation focusing on the mechanical relationship between a human walker and a reactive Dachshund.
- The game challenges the player to manage a variable physical constraint (the leash) while the dog autonomously seeks out distractions.
+**Barking Mad** is a first-person dog walking simulation focusing on the mechanical and physical relationship between a human walker and a Dachshund. The game features manual movement, physics-based leash constraints, and a command-driven AI.
 
 ---
 
 ## 2. Systems Architecture
 
-The MVP is built using React, Three.js, and React Three Fiber, leveraging a centralized state management pattern for physical and AI synchronization.
-
 ### 2.1 Component Breakdown
 
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
-| **Locomotion Engine** | Manages player forward velocity and camera positioning.            | `PLAYER_BASE_SPEED`, `TensionValue`, `Progress`        |
-| **Canine Logic (AI)** | Determines dog movement, pulling patterns, and sniff interactions. | `DOG_BASE_SPEED`, `DetectionRadius`, `PullStrength`    |
-| **Physics Bridge**    | Calculates tension and enforces leash constraints in 2D space.     | `MaxLeashLength`, `TensionFormula`, `LateralSteering` |
+| **Locomotion Engine** | Manages player/dog velocity and camera positioning.                | `PLAYER_BASE_SPEED` (7.0), `DOG_MOVE_SPEED` (9.0)      |
+| **Physics Engine**    | Verlet Integration + Position-Based Dynamics (PBD) for leash.      | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
+| **Canine Logic (AI)** | State machine managing dog behavior and autonomous pathing.        | `dogFacingYaw`, `dogDistance`, `COMING`, `IDLING`      |
+| **Responsive UI**     | HUD with dynamic scaling and integrated tension feedback.          | `uiScale`, `edgeOffset`, `tensionMeter` (GO background)|
 
 ---
 
 ## 3. Core Mechanics & Logic
 
-### 3.1 Leash Tension Physics
-The leash acts as a dynamic modifier to movement. Tension is calculated on a 2D plane (XZ) to prevent vertical pulling.
-- **Tension Formula:** $T = \max(0, \min(\frac{	ext{Dist}(P, D) - 1.5}{MAX\_LEASH - 1.5}, 1.0))$
-- **Movement Impact:** $	ext{Velocity}_{final} = 	ext{Velocity}_{base} 	imes (1 - T)$
-- **Constraint:** The dog is physically clamped to stay within `MAX_LEASH_LENGTH` of the player.
+### 3.1 Leash Physics (Verlet Integration)
+The leash is simulated as a chain of 60 nodes using Verlet Integration and PBD distance constraints.
+- **Tension Visuals:** The leash transitions from Dark Gray to Yellow (75%) to Bright Red (100%) as it stretches.
+- **Player Impact:** Non-linear slowdown occurs as tension increases. Full speed up to 75% tension, ramping down to 10% speed at 100% tension.
+- **Physical Limits:** The dog is physically constrained to a 15m radius. If the player exceeds this, they are pulled back; if the dog exceeds it while walking, its position is clamped.
 
-### 3.2 Dog AI & Autonomous Steering
-The dog actively seeks distractions along the path.
-- **Detection:** Dog identifies the nearest active scent point within a **25m radius**.
-- **Autonomous Pull:** Dog steers its lateral position towards the nearest scent with ramping intensity as it nears the target.
-- **Sniff State:** Triggered when distance to scent is $< 2.5	ext{m}$. Forward movement stops.
-- **Multi-Tug Mechanic:** Distractions require **2 tugs** to clear. Once cleared, the scent point is removed, and the dog pivots to the next available distraction.
+### 3.2 Command System (The "Paw" Controls)
+The player interacts with the dog through a cluster of 3 main command buttons:
+- **GO / TUG:** 
+    - **GO:** Sets the dog to `WALKING` and captures the player's current facing direction as the dog's path.
+    - **TUG:** Active when the dog is `WALKING`, `COMING`, or `SNIFFING`. Moves the dog 0.35m towards the player and releases 10% tension.
+- **COME:** Commands the dog to move directly towards the player at high speed (`12.0`) until within `1.2m`.
+- **SIT:** Anchors the dog to its current position.
+
+### 3.3 Dog AI & State Machine
+- **WALKING:** Dog moves autonomously along the captured yaw direction.
+- **IDLING:** After 5 seconds of the player being stationary, the dog roams randomly within a slack-leash radius.
+- **COMING:** Dog prioritizes returning to the player over its current path.
+- **STANDING/SITTING:** Stationary states used for control and anchoring.
 
 ---
 
 ## 4. Interaction Model
 
-### 4.1 Input Mapping
-- **Lateral Steering:** 
-  - **Mouse/Touch:** Click/Tap left or right side of the screen.
-  - **Keyboard:** A/D or Left/Right Arrow keys.
-- **Tug Mechanic:** 
-  - **Mouse/Touch:** Any click/tap while the dog is in the `SNIFFING` state.
-  - **Keyboard:** Spacebar.
+### 4.1 Movement
+- **Walk Toggle:** A single tap on the large central button toggles the player's walking state.
+- **POV Panning:** Swipe anywhere on the screen to look around. Eye level is set to `1.7m` with an `80°` downward tilt to see feet level.
+
+### 4.2 HUD (Profile Card)
+- **Walk Meter:** Driven by the actual physical distance the dog travels while in the `WALKING` state.
+- **Status Emojis:** Visual feedback for dog states (🐾 WALKING, 🐕 COMING, 🪑 SITTING, 💤 IDLING, 🧍 STANDING).
+- **Integrated Tension:** The GO/TUG button's background acts as a vertical progress meter for leash tension.
 
 ---
 
-## 5. Level Design: "The Suburban Sidewalk"
+## 5. Level Design: "The Infinite Road"
 
-- **Total Length:** 150 meters.
-- **Obstacles:** Alternating scent points on the left (-3.5) and right (3.5) edges of the sidewalk.
 - **Environment:** 3D sidewalk with depth, grass, and procedural trees.
-- **UI:** Tension meter (0-100%) and Progress to Park indicator.
-- **Win Condition:** Reaching the 150m mark triggers the "Mission Success" screen.
+- **Win Condition:** Dog travels a total of **150 meters** in the `WALKING` state.
+- **Success State:** Reaching 150m triggers the "Mission Success" screen.
 
 ---
 
 ## 6. Technical Implementation Notes
 
-### 6.1 Rendering & POV
-- **Camera:** First-person POV locked to player head height (2.2m).
-- **Stability:** `camera.lookAt` target is calculated 10m ahead of the player for maximum horizon stability.
-- **Dog Model:** Custom Dachshund model with procedural walking bob, tail, and floppy ears.
-- **Leash:** Dynamic Catmull-Rom spline that sags when tension is low.
-
-### 6.2 State Management
-- **Persistence:** Uses a combination of `useState` for UI/Rendering and `useRef` for physics/input handling to prevent stale closures and ensure 60fps responsiveness.
+### 6.1 State Management
+- **Verlet Data:** Handled using `useRef` for 60fps physics stability without React re-render overhead.
+- **Responsive Logic:** `useWindowSize` hook calculates dynamic scaling for UI components to support mobile and desktop aspect ratios.
+- **Safety:** All UI elements use `WebkitUserSelect: none` and `WebkitTouchCallout: none` to prevent long-press context menus on mobile devices.
