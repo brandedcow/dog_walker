@@ -65,8 +65,6 @@ export const TrainingOverlay = () => {
     respecSkills,
     attributes,
     progression,
-    race,
-    setRace,
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
@@ -215,31 +213,6 @@ export const TrainingOverlay = () => {
       }}>
         {activeTab === 'STATS' && (
           <>
-            {/* Race Selection */}
-            <div style={{ display: 'flex', gap: '20px' }}>
-              {['Human', 'Elf', 'Dwarf'].map((r) => (
-                <div
-                  key={r}
-                  onClick={() => setRace(r as any)}
-                  style={{
-                    flex: 1,
-                    padding: '15px',
-                    background: race === r ? '#2c3e50' : '#ffffff',
-                    color: race === r ? 'white' : '#2c3e50',
-                    border: '3px solid #2c3e50',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    fontWeight: '900',
-                    fontSize: '18px',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {r.toUpperCase()}
-                </div>
-              ))}
-            </div>
-
             {/* XP & Rank */}
             <div style={{ background: 'rgba(0,0,0,0.05)', padding: '25px', borderRadius: '20px', border: '3px dashed #2c3e50' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>

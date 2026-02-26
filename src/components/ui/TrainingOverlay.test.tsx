@@ -21,7 +21,6 @@ describe('TrainingOverlay Component', () => {
     render(<TrainingOverlay />);
     
     expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
-    expect(screen.getByText('HUMAN')).toBeInTheDocument();
     expect(screen.getByText('WALKER RANK 1')).toBeInTheDocument();
     expect(screen.getAllByText('LEVEL 2').length).toBeGreaterThan(0); // Human base levels
   });
@@ -82,17 +81,5 @@ describe('TrainingOverlay Component', () => {
     
     // Should NOT have been called
     expect(purchaseSkill).not.toHaveBeenCalled();
-  });
-
-  it('allows changing race in STATS tab', () => {
-    const setRace = vi.fn();
-    useGameStore.setState({ setRace });
-    
-    render(<TrainingOverlay />);
-    
-    const elfBtn = screen.getByText('ELF');
-    fireEvent.click(elfBtn);
-    
-    expect(setRace).toHaveBeenCalledWith('Elf');
   });
 });

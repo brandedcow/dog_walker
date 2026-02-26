@@ -1,9 +1,9 @@
 # Player Progression System: Specialized Builds
 
 ## 1. Overview
-Barking Mad uses a flexible, skill-driven progression system built upon a fixed **Race (Archetype)** foundation. A player's "Race" defines their starting base stats, while the skill tree allows for "Augments" to those stats and unique mechanical abilities.
+Barking Mad uses a flexible, skill-driven progression system built upon a permanent **Race (Archetype)** foundation. A player's "Race" defines their starting base stats, while the skill tree allows for "Augments" to those stats and unique mechanical abilities.
 
-Players can **Respec** their skill points at any time, but their **Race** is a permanent choice that dictates their high-level potential.
+Players can **Respec** their skill points at any time, but their **Race** is a fixed choice (set during character creation) that dictates their high-level potential and cannot be changed in the Training Manual.
 
 ---
 

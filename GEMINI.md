@@ -65,7 +65,7 @@ Player attributes are dynamically calculated from a base **Race (Dwarf, Elf, Hum
 
 ### 3.5 Progression & Persistence
 The game utilizes Zustand's `persist` middleware to ensure long-term growth is preserved across sessions.
-- **Race Archetypes:** Permanent base stat distributions (Dwarf, Elf, Human) that define starting potential.
+- **Race Archetypes:** Permanent, non-selectable base stat distributions (Dwarf, Elf, Human) that define starting potential.
 - **Skill Tree Augments:** A horizontal row-based specialization tree (Handler, Athlete, Analyst, Whisperer) where nodes provide flat attribute bonuses and unique mechanical traits.
 - **Economy:** Players earn 2 Skill Points (SP) per Rank up. Skills require both SP and Grit to unlock.
 - **Respec Mechanism:** Players can reset their skill allocation in the Hub for a Grit cost, allowing for build experimentation.
