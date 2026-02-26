@@ -109,5 +109,6 @@ The Training Manual features three distinct functional tabs:
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
-- **UI Mapping:** The Field Notes UI uses a fixed `distanceFactor` and transparent HTML overlays to achieve a 1:1 mapping with the physical 3D notebook page.
-- **Camera Stability:** Implemented micro-offsets and locking thresholds in `useMenuCamera` to prevent gimbal lock and precision jitter during object-focus views.
+- **UI Mapping:** The Field Notes UI uses a dynamic `distanceFactor` and transparent HTML overlays to achieve a sharp, legible mapping with the physical 3D notebook page across different screen resolutions.
+- **Camera Stability & Framing:** Implemented micro-offsets, locking thresholds, and aspect-ratio aware dynamic zoom in `useMenuCamera` to ensure 3D menus (like the Training Manual) remain perfectly framed on both mobile portrait and desktop landscape viewports.
+- **Global HUD Controls:** High-priority menu interactions (like the "X" Close button) are promoted from 3D space to the global React HUD to ensure accessibility and consistent positioning across all devices.
