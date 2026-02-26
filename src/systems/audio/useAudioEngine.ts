@@ -27,14 +27,14 @@ export const useAudioEngine = () => {
     camera.add(listener.current);
 
     const soundFiles = [
-      { id: 'CLICK', path: '/audio/click.mp3' },
-      { id: 'TUG', path: '/audio/tug.mp3' },
-      { id: 'BARK', path: '/audio/bark.mp3' },
-      { id: 'SUCCESS', path: '/audio/success.mp3' },
-      { id: 'GRIT', path: '/audio/grit.mp3' },
-      { id: 'STRAIN', path: '/audio/strain.mp3', loop: true },
-      { id: 'ROOM_AMBI', path: '/audio/room_ambi.mp3', loop: true },
-      { id: 'ROAD_AMBI', path: '/audio/road_ambi.mp3', loop: true }
+      { id: 'CLICK', path: '/audio/click.wav' },
+      { id: 'TUG', path: '/audio/tug.wav' },
+      { id: 'BARK', path: '/audio/bark.wav' },
+      { id: 'SUCCESS', path: '/audio/success.wav' },
+      { id: 'GRIT', path: '/audio/grit.wav' },
+      { id: 'STRAIN', path: '/audio/strain.wav', loop: true },
+      { id: 'ROOM_AMBI', path: '/audio/room_ambi.wav', loop: true },
+      { id: 'ROAD_AMBI', path: '/audio/road_ambi.wav', loop: true }
     ];
 
     soundFiles.forEach(file => {
