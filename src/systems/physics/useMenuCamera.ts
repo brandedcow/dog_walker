@@ -7,6 +7,8 @@ import { CAMERA_TARGETS } from '../../config/constants';
 export const useMenuCamera = () => {
   const { camera, size } = useThree();
   const menuState = useGameStore((state) => state.menuState);
+  const setIsMenuReady = useGameStore((state) => state.setIsMenuReady);
+  const isMenuReady = useGameStore((state) => state.isMenuReady);
 
   const targetPos = useRef(new Vector3());
   const targetLookAt = useRef(new Vector3());
@@ -21,10 +23,6 @@ export const useMenuCamera = () => {
     // Dynamic Zoom for Training Manual on mobile/narrow screens
     let zOffset = 0;
     if (menuState === 'TRAINING' && aspect < 1.1) {
-      // Increase camera height (Y) or distance to fit the notebook width-wise
-      // On narrow screens, the notebook width is the constraint.
-      // Base width is ~0.7m. At 0.8m height, 75 FOV, it barely fits landscape.
-      // For portrait, we need more height.
       zOffset = (1.1 - aspect) * 0.85; 
     }
 
@@ -33,24 +31,28 @@ export const useMenuCamera = () => {
 
     // 1. Position Interpolation with Threshold
     const dist = camera.position.distanceTo(targetPos.current);
-    if (dist > 0.001) {
+    if (dist > 0.005) {
       camera.position.lerp(targetPos.current, delta * 6);
     } else {
       camera.position.copy(targetPos.current);
     }
 
     // 2. Rotation Interpolation with Threshold
-    // Calculate target quaternion by temporarily looking at target
     const oldQuaternion = camera.quaternion.clone();
     camera.lookAt(targetLookAt.current);
     targetQuaternion.current.copy(camera.quaternion);
     camera.quaternion.copy(oldQuaternion);
 
     const angleDist = camera.quaternion.angleTo(targetQuaternion.current);
-    if (angleDist > 0.001) {
+    if (angleDist > 0.005) {
       camera.quaternion.slerp(targetQuaternion.current, delta * 6);
     } else {
       camera.quaternion.copy(targetQuaternion.current);
+    }
+
+    // Notify store when stable
+    if (dist <= 0.005 && angleDist <= 0.005 && !isMenuReady) {
+      setIsMenuReady(true);
     }
   });
 };

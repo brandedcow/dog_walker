@@ -9,14 +9,14 @@ import { useHUDLayout } from '../../hooks/useHUDLayout';
 
 export const HUD = ({ handleGo }: { handleGo: () => void }) => {
   const { 
-    gameState, setGameState, menuState, positions, finalizeWalk 
+    gameState, setGameState, menuState, positions, finalizeWalk, isMenuReady 
   } = useGameStore();
   const { uiScale, topSafe, bottomSafe, leftSafe, rightSafe, baseOffset } = useHUDLayout();
   
   const scents: any[] = []; 
 
   const renderHomeOverlays = () => {
-    if (gameState !== 'HOME') return null;
+    if (gameState !== 'HOME' || !isMenuReady) return null;
     
     return (
       <>

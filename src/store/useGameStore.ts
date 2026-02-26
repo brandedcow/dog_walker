@@ -39,6 +39,7 @@ interface GameStore {
   sessionGrit: number;
   hasStrained: boolean;
   unlockedSkills: string[];
+  isMenuReady: boolean;
   
   // New Progression Stats
   attributes: PlayerAttributes;
@@ -47,6 +48,7 @@ interface GameStore {
   setGameState: (state: GameState) => void;
   setDogState: (state: DogState) => void;
   setMenuState: (state: MenuState) => void;
+  setIsMenuReady: (ready: boolean) => void;
   setTension: (tension: number) => void;
   setDistance: (distance: number) => void;
   setPositions: (positions: { px: number; pz: number; dx: number; dz: number }) => void;
@@ -89,6 +91,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   sessionGrit: 0,
   hasStrained: false,
   unlockedSkills: ['FOUNDATION'],
+  isMenuReady: false,
   
   // Initial Progression Values
   attributes: {
@@ -113,7 +116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ gameState });
   },
   setDogState: (dogState) => set({ dogState }),
-  setMenuState: (menuState) => set({ menuState }),
+  setMenuState: (menuState) => set({ menuState, isMenuReady: false }),
+  setIsMenuReady: (isMenuReady) => set({ isMenuReady }),
   setTension: (tension) => {
     const { attributes } = get();
     // Strength 1 = 0.8, Strength 10 = 0.98
