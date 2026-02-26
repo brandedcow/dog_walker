@@ -99,12 +99,14 @@ export const TrainingManual = ({
     unlockedSkills,
     purchaseSkill,
     attributes,
-    progression
+    progression,
   } = useGameStore();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
+  const [activeTab, setActiveTab] = useState<"STATS" | "SKILLS" | "COMMANDS">(
+    "STATS",
+  );
   const { camera, size } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
@@ -145,7 +147,11 @@ export const TrainingManual = ({
     if (aspect < 1.1) {
       zOffset = (1.1 - aspect) * 0.85;
     }
-    const targetPos = new Vector3(target.pos[0], target.pos[1] + zOffset, target.pos[2]);
+    const targetPos = new Vector3(
+      target.pos[0],
+      target.pos[1] + zOffset,
+      target.pos[2],
+    );
     const isCameraClose = camera.position.distanceTo(targetPos) < 0.15;
     const isCoverOpen =
       coverRef.current && coverRef.current.rotation.z < -Math.PI * 0.8;
@@ -188,7 +194,11 @@ export const TrainingManual = ({
 
         {/* Pages */}
         <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
-          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.1} />
+          <meshStandardMaterial
+            color="#ffffff"
+            emissive="#ffffff"
+            emissiveIntensity={0.1}
+          />
         </Box>
 
         {/* Top Page Physical Texture (Visible while opening) */}
@@ -317,11 +327,13 @@ export const TrainingManual = ({
         >
           <div
             style={{
-              width: "480px",
-              height: isPortrait ? "620px" : "680px",
+              width: "500px",
+              height: isPortrait ? "640px" : "680px",
               background: "transparent",
               border: "none",
-              padding: isPortrait ? "30px 20px 20px 70px" : "40px 30px 20px 85px",
+              padding: isPortrait
+                ? "30px 20px 20px 80px"
+                : "40px 30px 20px 95px",
               color: "#2c3e50",
               fontFamily: '"Courier New", Courier, monospace',
               display: "flex",
@@ -331,24 +343,48 @@ export const TrainingManual = ({
               userSelect: "none",
               overflow: "visible",
               boxSizing: "border-box",
-              position: "relative"
+              position: "relative",
             }}
           >
-            {/* Side Tabs (Attached further right to create spacing) */}
-            <div style={{ position: "absolute", right: "-60px", top: "80px", display: "flex", flexDirection: "column", gap: "12px" }}>
-              {['STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
-                <div 
+            {/* Side Tabs (Positioned just off the notebook edge) */}
+            <div
+              style={{
+                position: "absolute",
+                right: "-70px",
+                top: "0px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {["STATS", "SKILLS", "COMMANDS"].map((tab) => (
+                <div
                   key={tab}
-                  onClick={(e) => { e.stopPropagation(); setActiveTab(tab as any); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTab(tab as any);
+                  }}
                   style={{
-                    width: "45px", height: "90px", background: activeTab === tab ? "#ffffff" : "#d1cdb0",
-                    border: "1px solid #bcba9a", borderLeft: "2px solid rgba(0,0,0,0.1)", borderRadius: "0 12px 12px 0",
-                    writingMode: "vertical-rl", textOrientation: "mixed", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontSize: "11px", fontWeight: "900", cursor: "pointer",
-                    boxShadow: activeTab === tab ? "6px 0 12px rgba(0,0,0,0.15)" : "2px 0 5px rgba(0,0,0,0.05)",
+                    width: "45px",
+                    height: "90px",
+                    background: activeTab === tab ? "#ffffff" : "#d1cdb0",
+                    border: "1px solid #bcba9a",
+                    borderLeft: "1px solid rgba(0,0,0,0.1)",
+                    borderRadius: "0 12px 12px 0",
+                    writingMode: "vertical-rl",
+                    textOrientation: "mixed",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "11px",
+                    fontWeight: "900",
+                    cursor: "pointer",
+                    boxShadow:
+                      activeTab === tab
+                        ? "4px 2px 10px rgba(0,0,0,0.12)"
+                        : "2px 1px 4px rgba(0,0,0,0.08)",
                     color: activeTab === tab ? "#2c3e50" : "#6e6c56",
                     transition: "all 0.2s",
-                    paddingLeft: "2px"
+                    paddingLeft: "2px",
                   }}
                 >
                   {tab}
@@ -356,59 +392,204 @@ export const TrainingManual = ({
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "25px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative", marginRight: "10px" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "5px",
+                marginBottom: "25px",
+                borderBottom: "2px solid #2c3e50",
+                paddingBottom: "10px",
+                position: "relative",
+                marginRight: "10px",
+              }}
+            >
               <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
-                {activeTab === 'STATS' ? 'DASHBOARD' : activeTab === 'SKILLS' ? 'FIELD NOTES' : 'COMMANDS'}
+                {activeTab === "STATS"
+                  ? "DASHBOARD"
+                  : activeTab === "SKILLS"
+                    ? "FIELD NOTES"
+                    : "COMMANDS"}
               </h1>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ fontSize: "10px", opacity: 0.7 }}>GRIT CACHE:</div>
-                  <div style={{ fontSize: "18px", fontWeight: "bold", color: "#2e7d32" }}>{playerStats.grit} G</div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <div style={{ fontSize: "10px", opacity: 0.7 }}>
+                    GRIT CACHE:
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "bold",
+                      color: "#2e7d32",
+                    }}
+                  >
+                    {playerStats.grit} G
+                  </div>
                 </div>
-                {activeTab === 'SKILLS' && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ fontSize: "10px", opacity: 0.7 }}>SKILL POINTS:</div>
-                    <div style={{ fontSize: "18px", fontWeight: "bold", color: "#d32f2f" }}>{progression.skillPoints} SP</div>
+                {activeTab === "SKILLS" && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <div style={{ fontSize: "10px", opacity: 0.7 }}>
+                      SKILL POINTS:
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                        color: "#d32f2f",
+                      }}
+                    >
+                      {progression.skillPoints} SP
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {activeTab === 'STATS' ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "25px", flex: 1 }}>
+            {activeTab === "STATS" ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "25px",
+                  flex: 1,
+                }}
+              >
                 {/* XP & Rank */}
-                <div style={{ background: "rgba(0,0,0,0.03)", padding: "15px", borderRadius: "10px", border: "1px dashed #2c3e50" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-                    <span style={{ fontWeight: "900", fontSize: "14px" }}>WALKER RANK {progression.walkerRank}</span>
-                    <span style={{ fontSize: "12px" }}>{progression.xp % 1000}/1000 XP</span>
+                <div
+                  style={{
+                    background: "rgba(0,0,0,0.03)",
+                    padding: "15px",
+                    borderRadius: "10px",
+                    border: "1px dashed #2c3e50",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <span style={{ fontWeight: "900", fontSize: "14px" }}>
+                      WALKER RANK {progression.walkerRank}
+                    </span>
+                    <span style={{ fontSize: "12px" }}>
+                      {progression.xp % 1000}/1000 XP
+                    </span>
                   </div>
-                  <div style={{ width: "100%", height: "8px", background: "#e0e0e0", borderRadius: "4px", overflow: "hidden" }}>
-                    <div style={{ width: `${(progression.xp % 1000) / 10}%`, height: "100%", background: "#2c3e50" }} />
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "8px",
+                      background: "#e0e0e0",
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${(progression.xp % 1000) / 10}%`,
+                        height: "100%",
+                        background: "#2c3e50",
+                      }}
+                    />
                   </div>
                 </div>
 
                 {/* Attributes */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "15px",
+                  }}
+                >
                   {[
-                    { label: 'STRENGTH', value: attributes.strength, color: '#d32f2f', desc: 'Strain threshold' },
-                    { label: 'FOCUS', value: attributes.focus, color: '#1976d2', desc: 'Grit & Pan stability' },
-                    { label: 'AGILITY', value: attributes.agility, color: '#388e3c', desc: 'Movement speed' },
-                    { label: 'BOND', value: attributes.bond, color: '#fbc02d', desc: 'Recall & Calmness' }
+                    {
+                      label: "STRENGTH",
+                      value: attributes.strength,
+                      color: "#d32f2f",
+                      desc: "Strain threshold",
+                    },
+                    {
+                      label: "FOCUS",
+                      value: attributes.focus,
+                      color: "#1976d2",
+                      desc: "Grit & Pan stability",
+                    },
+                    {
+                      label: "AGILITY",
+                      value: attributes.agility,
+                      color: "#388e3c",
+                      desc: "Movement speed",
+                    },
+                    {
+                      label: "BOND",
+                      value: attributes.bond,
+                      color: "#fbc02d",
+                      desc: "Recall & Calmness",
+                    },
                   ].map((attr) => (
                     <div key={attr.label}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          fontSize: "12px",
+                          marginBottom: "3px",
+                        }}
+                      >
                         <span style={{ fontWeight: "900" }}>{attr.label}</span>
-                        <span style={{ fontWeight: "900" }}>LVL {attr.value}</span>
+                        <span style={{ fontWeight: "900" }}>
+                          LVL {attr.value}
+                        </span>
                       </div>
-                      <div style={{ width: "100%", height: "12px", background: "#e0e0e0", borderRadius: "2px", border: "1px solid #2c3e50", position: "relative" }}>
-                        <div style={{ width: `${(attr.value / 10) * 100}%`, height: "100%", background: attr.color }} />
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "12px",
+                          background: "#e0e0e0",
+                          borderRadius: "2px",
+                          border: "1px solid #2c3e50",
+                          position: "relative",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${(attr.value / 10) * 100}%`,
+                            height: "100%",
+                            background: attr.color,
+                          }}
+                        />
                       </div>
-                      <div style={{ fontSize: "9px", opacity: 0.6, marginTop: "2px" }}>{attr.desc}</div>
+                      <div
+                        style={{
+                          fontSize: "9px",
+                          opacity: 0.6,
+                          marginTop: "2px",
+                        }}
+                      >
+                        {attr.desc}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : activeTab === 'SKILLS' ? (
+            ) : activeTab === "SKILLS" ? (
               <div
                 style={{
                   flex: 1,
@@ -422,7 +603,8 @@ export const TrainingManual = ({
                 {SKILLS.map((skill) => {
                   const unlocked = unlockedSkills.includes(skill.id);
                   const available =
-                    !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
+                    !skill.dependsOn ||
+                    unlockedSkills.includes(skill.dependsOn);
                   const canAfford = playerStats.grit >= skill.cost;
 
                   return (
@@ -438,21 +620,75 @@ export const TrainingManual = ({
                 })}
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px", flex: 1 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                  flex: 1,
+                }}
+              >
                 {[
-                  { cmd: '🐾 GO', desc: 'Click the "🐾" paw or look ahead to start walking. Buster follows your gaze.' },
-                  { cmd: '🪢 TUG', desc: 'When Buster stops or pulls, click the paw to gently reel him in (0.35m recall).' },
-                  { cmd: '🐕 COME', desc: 'A focused recall. Brings Buster back to your side at high speed. (Unlocks via Skills)' },
-                  { cmd: '🛑 SIT', desc: 'Command Buster to sit and wait. Useful for managing tension or taking a break.' },
-                  { cmd: '🏠 RETURN', desc: 'End the walk early from the HUD to bank your current Grit and XP.' }
+                  {
+                    cmd: "🐾 GO",
+                    desc: 'Click the "🐾" paw or look ahead to start walking. Buster follows your gaze.',
+                  },
+                  {
+                    cmd: "🪢 TUG",
+                    desc: "When Buster stops or pulls, click the paw to gently reel him in (0.35m recall).",
+                  },
+                  {
+                    cmd: "🐕 COME",
+                    desc: "A focused recall. Brings Buster back to your side at high speed. (Unlocks via Skills)",
+                  },
+                  {
+                    cmd: "🛑 SIT",
+                    desc: "Command Buster to sit and wait. Useful for managing tension or taking a break.",
+                  },
+                  {
+                    cmd: "🏠 RETURN",
+                    desc: "End the walk early from the HUD to bank your current Grit and XP.",
+                  },
                 ].map((item) => (
-                  <div key={item.cmd} style={{ borderBottom: "1px solid rgba(0,0,0,0.1)", paddingBottom: "10px" }}>
-                    <div style={{ fontWeight: "900", fontSize: "16px", color: "#2c3e50", marginBottom: "5px" }}>{item.cmd}</div>
-                    <div style={{ fontSize: "12px", opacity: 0.8, lineHeight: "1.4" }}>{item.desc}</div>
+                  <div
+                    key={item.cmd}
+                    style={{
+                      borderBottom: "1px solid rgba(0,0,0,0.1)",
+                      paddingBottom: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: "900",
+                        fontSize: "16px",
+                        color: "#2c3e50",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      {item.cmd}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        opacity: 0.8,
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      {item.desc}
+                    </div>
                   </div>
                 ))}
-                <div style={{ marginTop: "auto", fontSize: "10px", fontStyle: "italic", opacity: 0.5, textAlign: "center" }}>
-                  * Commands are more effective as BOND and WALKER RANK increase.
+                <div
+                  style={{
+                    marginTop: "auto",
+                    fontSize: "10px",
+                    fontStyle: "italic",
+                    opacity: 0.5,
+                    textAlign: "center",
+                  }}
+                >
+                  * Commands are more effective as BOND and WALKER RANK
+                  increase.
                 </div>
               </div>
             )}
