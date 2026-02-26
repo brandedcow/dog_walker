@@ -120,7 +120,7 @@ export const RoomScene = () => {
       {standingLampOn && <pointLight position={[-4.5, 1.7, -3.5]} intensity={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} color="#ffcc88" />}
 
       {/* Floor */}
-      <Box args={[12, 0.1, 12]} position={[0, -0.05, 0]} castShadow receiveShadow onClick={() => setMenuState('IDLE')}>
+      <Box args={[12, 0.1, 12]} position={[0, -0.05, 0]} castShadow receiveShadow>
         <meshStandardMaterial 
           map={floorTexture} 
           roughness={1.0} 
