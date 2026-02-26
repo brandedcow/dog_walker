@@ -209,12 +209,19 @@ export const TrainingOverlay = () => {
     unlockedSkills,
     purchaseSkill,
     respecSkills,
-    traits,
-    rawTraits,
+    traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
+    rawTraits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     progression,
-    resonanceType,
+    resonanceType = ResonanceType.ANCHOR,
     secondaryFocus,
-    affinityXP,
+    affinityXP = {
+      [ResonanceType.ANCHOR]: 0,
+      [ResonanceType.WHISPERER]: 0,
+      [ResonanceType.TACTICIAN]: 0,
+      [ResonanceType.NOMAD]: 0,
+      [ResonanceType.URBANIST]: 0,
+      [ResonanceType.SPECIALIST]: 0,
+    },
     setResonanceType
   } = useGameStore();
 
