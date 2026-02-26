@@ -49,17 +49,22 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 ### 4.1 Spatial 3D Hub (The Room)
 - **Geometry:** 10m x 8m square layout (5m ceiling).
 - **Structural Layout:**
-    - **South Wall:** Entrance door (4m height, 80% of wall) offset to the West. Improved doorknob and panel visuals.
+    - **South Wall:** Entrance door (4m height, 80% of wall) offset to the West. Improved doorknob and panel visuals. Trophy Shelf mounted at 2.2m height between door and bed.
     - **North Wall:** Features a physical aperture for a large 4m x 2.5m window. A detailed Calendar is mounted to its right.
 - **Backyard (Outdoor View):** Fully enclosed backyard visible through the window, featuring a 1.2m wooden fence, fence posts, stylized trees, and a sky backdrop.
 - **Furniture & Zoning:**
     - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and Training Manual.
-    - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with golden handles and proximity-based transparency.
-    - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand with inset drawers and golden horizontal handles. Player spawns next to the bed facing the window (North).
-    - **West Wall:** Trophy Shelf mounted at 1.5m height.
+    - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with vertical golden handles and proximity-based transparency.
+    - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand with inset drawers and horizontal golden handles. Player spawns next to the bed facing the window (North).
+    - **Corner (North-West):** 2.4m Standing Lamp with open shade and visible internal bulb.
+- **Hanging Leash:** A red leash hangs from a hook beneath the trophy shelf on the South wall, providing visual context for the dog being "off-leash" in the hub.
 - **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected.
 
 ### 4.2 HUD & Metadata
+- **Lighting Model:** 
+    - **Real-Time Sun:** Hub lighting (position, color, and intensity) dynamically matches the current system time on a 24-hour cycle. 
+    - **Independent Lamps:** The Nightstand and Standing Lamp are individually toggleable interactables, casting warm point-light shadows.
+    - **Physical Occlusion:** All walls, the floor (Minecraft voxel style), and the ceiling are shadow-casters that physically block outside light.
 - **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
 - **Skill Tree:** Branching progression system at the Training Manual. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
 - **Return Home:** A functional button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
