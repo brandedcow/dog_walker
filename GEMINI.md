@@ -70,7 +70,7 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 
 ## 5. Level Design & Environments
 
-- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture. Dog movement is physically clamped within the room boundaries to prevent wall clipping.
+- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture. Dog movement is physically clamped within the room boundaries and includes collision detection for major furniture items (Desk, Closet, Bed, etc.) to prevent clipping during idle roaming.
 - **The Infinite Road:** Procedural environment using `InstancedMesh` for high-performance tree and foliage rendering.
 - **Session Conclusion:** A walk concludes automatically after accumulating 150m of distance, or manually at any point via the "Return Home" button. Both trigger the Mission Success screen and Grit rewards.
 

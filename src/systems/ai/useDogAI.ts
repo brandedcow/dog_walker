@@ -26,6 +26,24 @@ export const useDogAI = () => {
     if (unlockedSkills.includes('RECALL_1')) recallSpeed += 1.5;
     if (unlockedSkills.includes('RECALL_2')) recallSpeed += 3.0;
 
+    const furnitureZones = [
+      { minX: -3.5, maxX: -0.5, minZ: -4.0, maxZ: -2.5 }, // Desk Area
+      { minX: 2.0, maxX: 4.5, minZ: -4.0, maxZ: -2.8 },  // Closet Area
+      { minX: 0.5, maxX: 5.0, minZ: 2.8, maxZ: 5.0 },   // Bed Area
+      { minX: 4.0, maxX: 5.0, minZ: 1.5, maxZ: 2.5 },   // Nightstand Area
+      { minX: -1.6, maxX: -0.2, minZ: 4.5, maxZ: 5.0 }, // Trophy Shelf Area
+    ];
+
+    const checkCollision = (pos: Vector3) => {
+      for (const zone of furnitureZones) {
+        if (pos.x >= zone.minX && pos.x <= zone.maxX && 
+            pos.z >= zone.minZ && pos.z <= zone.maxZ) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     // Idling logic
     if (dogState === 'STANDING') {
       stationaryTime.current += delta;
@@ -38,10 +56,30 @@ export const useDogAI = () => {
         const currentAngle = Math.atan2(dogPos.current.z - playerPos.z, dogPos.current.x - playerPos.x);
         const targetAngle = currentAngle + (Math.random() - 0.5) * Math.PI;
         const idleDist = 1.2 + Math.random() * 1.3;
-        idleTarget.current = new Vector3(playerPos.x + Math.cos(targetAngle) * idleDist, 0, playerPos.z + Math.sin(targetAngle) * idleDist);
+        const candidate = new Vector3(
+          playerPos.x + Math.cos(targetAngle) * idleDist, 
+          0, 
+          playerPos.z + Math.sin(targetAngle) * idleDist
+        );
+        
+        // Ensure idle target isn't inside furniture or walls
+        if (!checkCollision(candidate)) {
+          idleTarget.current = candidate;
+        } else {
+          idleTarget.current = null; // Re-roll next frame
+        }
       }
-      const moveDir = new Vector3().subVectors(idleTarget.current, dogPos.current).normalize();
-      dogPos.current.add(moveDir.multiplyScalar(0.5 * delta));
+
+      if (idleTarget.current) {
+        const moveDir = new Vector3().subVectors(idleTarget.current, dogPos.current).normalize();
+        const nextPos = dogPos.current.clone().add(moveDir.multiplyScalar(0.5 * delta));
+        
+        if (!checkCollision(nextPos)) {
+          dogPos.current.copy(nextPos);
+        } else {
+          idleTarget.current = null; // Stop and re-roll
+        }
+      }
 
       // Clamp to Room Boundaries (10x8 room)
       dogPos.current.x = Math.max(-4.5, Math.min(4.5, dogPos.current.x));
