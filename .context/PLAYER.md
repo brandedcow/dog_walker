@@ -12,10 +12,9 @@ Each Race provides a unique starting distribution of the four core attributes.
 
 | Race | Strength | Agility | Focus | Bond | Description |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Power Lifter** | 4 | 1 | 2 | 2 | High control and leash snap resistance. |
-| **Sprinter** | 1 | 4 | 2 | 2 | Maximum walk speed and movement efficiency. |
-| **Zen Master** | 2 | 2 | 3 | 3 | High Grit rewards and calm dog behavior. |
-| **Balanced** | 2 | 2 | 2 | 3 | A solid all-rounder for any playstyle. |
+| **Dwarf** | 4 | 1 | 2 | 2 | High control and leash snap resistance. |
+| **Elf** | 1 | 4 | 2 | 2 | Maximum walk speed and movement efficiency. |
+| **Human** | 2 | 2 | 2 | 3 | A solid all-rounder for any playstyle. |
 
 ---
 
