@@ -67,6 +67,105 @@ const SkillNode = ({
   </div>
 );
 
+const HexagramVisualizer = ({ 
+  currentAffinity, 
+  onAffinitySelect, 
+  canSwitch 
+}: { 
+  currentAffinity: AffinityType, 
+  onAffinitySelect: (type: AffinityType) => void,
+  canSwitch: boolean
+}) => {
+  const size = 300;
+  const center = size / 2;
+  const radius = 85;
+  const labelRadius = 115;
+
+  const points = AFFINITY_ORDER.map((_, i) => {
+    const angle = (i * 60 - 90) * (Math.PI / 180);
+    return {
+      x: center + radius * Math.cos(angle),
+      y: center + radius * Math.sin(angle),
+      lx: center + labelRadius * Math.cos(angle),
+      ly: center + labelRadius * Math.sin(angle),
+    };
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative' }}>
+      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', textAlign: 'center' }}>Canine Affinity Hexagram</h3>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <svg width={size} height={size + 40} style={{ overflow: 'visible' }}>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(' ')}
+            fill="rgba(44, 62, 80, 0.05)"
+            stroke="#2c3e50"
+            strokeWidth="2"
+          />
+          
+          {points.map((p, i) => (
+            <line
+              key={`line-${i}`}
+              x1={p.x} y1={p.y}
+              x2={points[(i + 3) % 6].x} y2={points[(i + 3) % 6].y}
+              stroke="rgba(44, 62, 80, 0.15)"
+              strokeWidth="1"
+              strokeDasharray="4 2"
+            />
+          ))}
+
+          {AFFINITY_ORDER.map((type, i) => {
+            const p = points[i];
+            const isCurrent = type === currentAffinity;
+            const efficiency = getSkillEfficiency(currentAffinity, type);
+            
+            return (
+              <g key={type} onClick={() => canSwitch && onAffinitySelect(type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
+                <circle
+                  cx={p.x} cy={p.y} r={isCurrent ? 8 : 5}
+                  fill={isCurrent ? "#2c3e50" : "#d1cdb0"}
+                  stroke="#2c3e50"
+                  strokeWidth="2"
+                />
+                <text
+                  x={p.lx} y={p.ly}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  style={{ 
+                    fontSize: '11px', 
+                    fontWeight: '900', 
+                    fill: isCurrent ? '#2c3e50' : '#6e6c56',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {type}
+                </text>
+                <text
+                  x={p.lx} y={p.ly + 14}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  style={{ 
+                    fontSize: '10px', 
+                    fontWeight: 'bold', 
+                    fill: efficiency === 1 ? '#2e7d32' : efficiency >= 0.6 ? '#fbc02d' : '#d32f2f'
+                  }}
+                >
+                  {Math.round(efficiency * 100)}%
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      {canSwitch && (
+        <div style={{ position: 'absolute', bottom: '10px', left: '0', right: '0', textAlign: 'center', fontSize: '10px', fontStyle: 'italic', opacity: 0.6 }}>
+          * Tap an affinity to switch (Rank 1 only)
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const TrainingOverlay = () => {
   const {
     setMenuState,
@@ -251,35 +350,12 @@ export const TrainingOverlay = () => {
               </div>
             </div>
 
-            {/* Affinity Efficiency Chart */}
-            <div style={{ border: '2px solid #2c3e50', borderRadius: '15px', padding: '20px', background: 'white' }}>
-              <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', fontWeight: '900' }}>Canine Affinity Hexagram</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                {AFFINITY_ORDER.map(type => {
-                  const eff = getSkillEfficiency(affinityType, type);
-                  return (
-                    <div 
-                      key={type}
-                      onClick={() => progression.walkerRank === 1 && setAffinityType(type)}
-                      style={{ 
-                        padding: '10px', 
-                        border: '1.5px solid #2c3e50', 
-                        borderRadius: '8px',
-                        background: type === affinityType ? '#2c3e50' : 'transparent',
-                        color: type === affinityType ? 'white' : '#2c3e50',
-                        opacity: eff === 1 ? 1 : eff >= 0.8 ? 0.9 : 0.7,
-                        cursor: progression.walkerRank === 1 ? 'pointer' : 'default',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      <div style={{ fontSize: '10px', fontWeight: 'bold' }}>{type}</div>
-                      <div style={{ fontSize: '16px', fontWeight: '900' }}>{Math.round(eff * 100)}%</div>
-                    </div>
-                  );
-                })}
-              </div>
-              {progression.walkerRank === 1 && <div style={{ fontSize: '10px', marginTop: '10px', fontStyle: 'italic', opacity: 0.6 }}>* Tap an affinity to switch (Rank 1 only)</div>}
-            </div>
+            {/* Affinity Efficiency Hexagram */}
+            <HexagramVisualizer 
+              currentAffinity={affinityType} 
+              onAffinitySelect={setAffinityType} 
+              canSwitch={progression.walkerRank === 1} 
+            />
 
             {/* Attributes */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>

@@ -104,6 +104,7 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 - **DASHBOARD (Stats):** Tracks the player's numerical growth.
 - **FIELD NOTES (Skills):** A branching progression tree.
 - **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics.
+- **Affinity Hexagram:** An interactive SVG-based visualizer on the Stats page that illustrates the 6 affinity relationships and their current learning efficiency based on the player's primary type. Allows for affinity switching at Rank 1.
 
 ### 4.3 HUD & Metadata
 - **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success, Training) are extracted into standalone components.
