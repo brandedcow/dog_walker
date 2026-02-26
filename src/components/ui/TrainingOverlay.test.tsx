@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TrainingOverlay } from './TrainingOverlay';
 import { useGameStore } from '../../store/useGameStore';
-import { MenuState, Race } from '../../types';
+import { MenuState, AffinityType } from '../../types';
 
 describe('TrainingOverlay Component', () => {
   beforeEach(() => {
@@ -12,8 +12,8 @@ describe('TrainingOverlay Component', () => {
       playerStats: { strength: 1, grit: 100 },
       progression: { walkerRank: 1, xp: 0, skillPoints: 5 },
       unlockedSkills: ['FOUNDATION'],
-      race: Race.HUMAN,
-      attributes: { strength: 2, agility: 2, focus: 2, bond: 3 }
+      affinityType: AffinityType.ANCHOR,
+      attributes: { strength: 4, agility: 1, focus: 2, bond: 2, awareness: 1 }
     });
   });
 
@@ -21,8 +21,9 @@ describe('TrainingOverlay Component', () => {
     render(<TrainingOverlay />);
     
     expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
-    expect(screen.getByText('WALKER RANK 1')).toBeInTheDocument();
-    expect(screen.getAllByText('LEVEL 2').length).toBeGreaterThan(0); // Human base levels
+    expect(screen.getByText('WALKER RANK:')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getAllByText('LV 4.0').length).toBeGreaterThan(0); // Anchor base levels
   });
 
   it('switches between tabs', () => {
@@ -31,8 +32,8 @@ describe('TrainingOverlay Component', () => {
     const skillsTab = screen.getByText('SKILLS');
     fireEvent.click(skillsTab);
     
-    expect(screen.getByText(/HANDLER/i)).toBeInTheDocument();
-    expect(screen.getByText(/ATHLETE/i)).toBeInTheDocument();
+    expect(screen.getByText(/ANCHOR/i)).toBeInTheDocument();
+    expect(screen.getByText(/WHISPERER/i)).toBeInTheDocument();
   });
 
   it('calls setMenuState(IDLE) when close button is clicked', () => {
@@ -48,7 +49,7 @@ describe('TrainingOverlay Component', () => {
   });
 
   it('renders skill nodes and allows purchasing', () => {
-    const purchaseSkill = vi.fn();
+    const purchaseSkill = vi.fn().mockReturnValue(true);
     useGameStore.setState({ purchaseSkill });
     
     render(<TrainingOverlay />);

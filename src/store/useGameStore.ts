@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { PlayerAttributes, Progression, Race as PlayerRace } from '../types';
-import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, Race, RACE_STATS } from '../types';
+import type { PlayerAttributes, Progression, AffinityType as PlayerAffinity } from '../types';
+import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, AffinityType, AFFINITY_STATS } from '../types';
 import { SKILLS } from '../config/skills';
 
 export interface DogMetadata {
@@ -23,6 +23,33 @@ export interface DogStats {
   recallSpeed: number;
 }
 
+export const AFFINITY_ORDER = [
+  AffinityType.ANCHOR,
+  AffinityType.WHISPERER,
+  AffinityType.TACTICIAN,
+  AffinityType.NOMAD,
+  AffinityType.URBANIST,
+  AffinityType.SPECIALIST,
+];
+
+export const getSkillEfficiency = (playerAffinity: PlayerAffinity, skillAffinity: AffinityType | 'GENERAL'): number => {
+  if (skillAffinity === 'GENERAL') return 1.0;
+  if (!playerAffinity) return 1.0; // Fallback for undefined affinity
+  
+  const pIdx = AFFINITY_ORDER.indexOf(playerAffinity);
+  const sIdx = AFFINITY_ORDER.indexOf(skillAffinity);
+  
+  if (pIdx === -1 || sIdx === -1) return 1.0; // Fallback if not found
+  
+  const diff = Math.abs(pIdx - sIdx);
+  const distance = Math.min(diff, AFFINITY_ORDER.length - diff);
+  
+  if (distance === 0) return 1.0;
+  if (distance === 1) return 0.8;
+  if (distance === 2) return 0.6;
+  return 0.4; // distance 3 (Opposite)
+};
+
 interface GameStore {
   gameState: GameState;
   dogState: DogState;
@@ -42,7 +69,7 @@ interface GameStore {
   isMenuReady: boolean;
   
   // Refined Progression
-  race: PlayerRace;
+  affinityType: PlayerAffinity;
   attributes: PlayerAttributes;
   progression: Progression;
 
@@ -63,11 +90,11 @@ interface GameStore {
   purchaseSkill: (skillId: string, gritCost: number, spCost?: number) => boolean;
   respecSkills: (gritCost: number) => boolean;
   resetProgress: () => void;
-  setRace: (race: PlayerRace) => void;
+  setAffinityType: (affinity: PlayerAffinity) => void;
 }
 
 const DEFAULT_PROG_STATE = {
-  race: Race.HUMAN,
+  affinityType: AffinityType.ANCHOR,
   dogMetadata: {
     name: 'BUSTER',
     trainingLevel: TrainingLevel.COMPETENT,
@@ -85,7 +112,7 @@ const DEFAULT_PROG_STATE = {
     recallSpeed: 12.0,
   },
   unlockedSkills: ['FOUNDATION'],
-  attributes: RACE_STATS[Race.HUMAN],
+  attributes: AFFINITY_STATS[AffinityType.ANCHOR],
   progression: {
     walkerRank: 1,
     xp: 0,
@@ -110,8 +137,8 @@ export const useGameStore = create<GameStore>()(
       hasStrained: false,
       isMenuReady: false,
 
-      setRace: (race: PlayerRace) => {
-        set({ race, attributes: RACE_STATS[race] });
+      setAffinityType: (affinityType: PlayerAffinity) => {
+        set({ affinityType, attributes: AFFINITY_STATS[affinityType] });
       },
 
       setGameState: (gameState) => {
@@ -127,7 +154,7 @@ export const useGameStore = create<GameStore>()(
       setMenuState: (menuState) => set({ menuState, isMenuReady: false }),
       setIsMenuReady: (isMenuReady) => set({ isMenuReady }),
       setTension: (tension) => {
-        const { attributes } = get();
+        const { attributes = { strength: 1 } } = get();
         // Total Strength affects threshold
         const threshold = 0.78 + (attributes.strength * 0.02);
 
@@ -160,16 +187,11 @@ export const useGameStore = create<GameStore>()(
       setHasStrained: (hasStrained) => set({ hasStrained }),
       
       finalizeWalk: () => {
-        const { distance, hasStrained, playerStats, unlockedSkills, progression, attributes, totalDistanceWalked } = get();
+        const { distance, hasStrained, playerStats, progression, attributes = { focus: 1 }, totalDistanceWalked } = get();
         const baseGrit = Math.floor(distance / 10);
         const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
         let totalGrit = baseGrit + bonusGrit;
         
-        // Skill bonuses
-        if (unlockedSkills.includes('GRIT_FOCUS')) {
-          totalGrit = Math.floor(totalGrit * 1.25);
-        }
-
         // Dynamic attribute bonus: Focus grants +5% per level
         const focusMultiplier = 1.0 + (attributes.focus * 0.05);
         totalGrit = Math.floor(totalGrit * focusMultiplier);
@@ -194,24 +216,27 @@ export const useGameStore = create<GameStore>()(
       },
 
       purchaseSkill: (skillId, gritCost, spCost = 0) => {
-        const { playerStats, unlockedSkills, progression, race } = get();
+        const { playerStats, unlockedSkills, progression, affinityType = AffinityType.ANCHOR } = get();
         const canAffordGrit = playerStats.grit >= gritCost;
         const canAffordSP = progression.skillPoints >= spCost;
 
         if (canAffordGrit && canAffordSP && !unlockedSkills.includes(skillId)) {
           const newSkills = [...unlockedSkills, skillId];
           
-          // Recalculate attributes based on race + new skill set
-          const base = RACE_STATS[race];
+          // Recalculate attributes based on base + new skill set with efficiency
+          const base = AFFINITY_STATS[affinityType] || AFFINITY_STATS[AffinityType.ANCHOR];
           const totalAttrs = { ...base };
           
           newSkills.forEach(id => {
             const skill = SKILLS.find(s => s.id === id);
             if (skill?.augments) {
-              totalAttrs.strength += (skill.augments.strength || 0);
-              totalAttrs.agility += (skill.augments.agility || 0);
-              totalAttrs.focus += (skill.augments.focus || 0);
-              totalAttrs.bond += (skill.augments.bond || 0);
+              const efficiency = getSkillEfficiency(affinityType, skill.affinity);
+              
+              totalAttrs.strength += (skill.augments.strength || 0) * efficiency;
+              totalAttrs.agility += (skill.augments.agility || 0) * efficiency;
+              totalAttrs.focus += (skill.augments.focus || 0) * efficiency;
+              totalAttrs.bond += (skill.augments.bond || 0) * efficiency;
+              totalAttrs.awareness += (skill.augments.awareness || 0) * efficiency;
             }
           });
 
@@ -227,23 +252,22 @@ export const useGameStore = create<GameStore>()(
       },
 
       respecSkills: (gritCost: number) => {
-        const { playerStats, progression, race, unlockedSkills } = get();
+        const { playerStats, progression, affinityType = AffinityType.ANCHOR, unlockedSkills } = get();
         if (playerStats.grit < gritCost) return false;
 
-        // Calculate total SP spent (excluding FOUNDATION which is free/base)
+        // Calculate total SP spent
         let totalSPSpent = 0;
         unlockedSkills.forEach(id => {
           if (id === 'FOUNDATION') return;
-          // Note: In current SKILLS config, cost is in Grit, we need SP cost mapping
-          // For now, let's assume 1 SP per skill for MVP logic
-          totalSPSpent += 1; 
+          const skill = SKILLS.find(s => s.id === id);
+          if (skill) totalSPSpent += skill.spCost;
         });
 
         set({
           playerStats: { ...playerStats, grit: playerStats.grit - gritCost },
           progression: { ...progression, skillPoints: progression.skillPoints + totalSPSpent },
           unlockedSkills: ['FOUNDATION'],
-          attributes: RACE_STATS[race] // Reset to base race stats
+          attributes: AFFINITY_STATS[affinityType] || AFFINITY_STATS[AffinityType.ANCHOR]
         });
         return true;
       },
@@ -256,7 +280,7 @@ export const useGameStore = create<GameStore>()(
       name: 'barking-mad-save',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        race: state.race,
+        affinityType: state.affinityType,
         dogMetadata: state.dogMetadata,
         playerStats: state.playerStats,
         dogStats: state.dogStats,

@@ -5,10 +5,11 @@ export interface Scent {
 }
 
 export interface PlayerAttributes {
-  strength: number;  // Affects tension threshold (0.8 -> 1.0)
-  focus: number;     // Affects Grit multiplier & Pan stability
-  agility: number;   // Affects base move speed (7.0 -> 9.0)
-  bond: number;      // Affects Dog recall speed & idle calmness
+  strength: number;  // Capacity to resist lunges (0.8 -> 1.0)
+  focus: number;     // Detection Radius for triggers
+  agility: number;   // Base movement velocity
+  bond: number;      // Responsiveness to verbal cues
+  awareness: number; // Environmental mastery / shortcuts
 }
 
 export interface Progression {
@@ -70,15 +71,21 @@ export const DogSize = {
 } as const;
 export type DogSize = typeof DogSize[keyof typeof DogSize];
 
-export const Race = {
-  HUMAN: 'Human',
-  ELF: 'Elf',
-  DWARF: 'Dwarf'
+export const AffinityType = {
+  ANCHOR: 'Anchor',       // Enhancer: Strength
+  WHISPERER: 'Whisperer', // Emitter: Bond
+  TACTICIAN: 'Tactician', // Manipulator: Focus
+  NOMAD: 'Nomad',         // Transmuter: Agility
+  URBANIST: 'Urbanist',   // Conjurer: Awareness
+  SPECIALIST: 'Specialist' // Specialist: Niche Mastery
 } as const;
-export type Race = typeof Race[keyof typeof Race];
+export type AffinityType = typeof AffinityType[keyof typeof AffinityType];
 
-export const RACE_STATS: Record<Race, PlayerAttributes> = {
-  [Race.HUMAN]: { strength: 2, agility: 2, focus: 2, bond: 3 },
-  [Race.ELF]: { strength: 1, agility: 4, focus: 2, bond: 2 },
-  [Race.DWARF]: { strength: 4, agility: 1, focus: 2, bond: 2 },
+export const AFFINITY_STATS: Record<AffinityType, PlayerAttributes> = {
+  [AffinityType.ANCHOR]: { strength: 4, agility: 1, focus: 2, bond: 2, awareness: 1 },
+  [AffinityType.WHISPERER]: { strength: 2, agility: 2, focus: 2, bond: 4, awareness: 1 },
+  [AffinityType.TACTICIAN]: { strength: 1, agility: 2, focus: 4, bond: 2, awareness: 2 },
+  [AffinityType.NOMAD]: { strength: 1, agility: 4, focus: 2, bond: 1, awareness: 3 },
+  [AffinityType.URBANIST]: { strength: 2, agility: 1, focus: 3, bond: 1, awareness: 4 },
+  [AffinityType.SPECIALIST]: { strength: 2, agility: 2, focus: 2, bond: 3, awareness: 2 },
 };
