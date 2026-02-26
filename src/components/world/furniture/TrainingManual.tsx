@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3 } from 'three';
+import { Vector3, MathUtils } from 'three';
 import { Box, Html, Billboard, Text } from '@react-three/drei';
 import { useGameStore } from '../../../store/useGameStore';
 import { SKILLS, type Skill } from '../../../config/skills';
@@ -11,7 +11,7 @@ const SkillNode = ({ skill, unlocked, available, canAfford, onPurchase }: {
   <div 
     onClick={(e) => { e.stopPropagation(); if (available && !unlocked && canAfford) onPurchase(); }}
     style={{
-      width: '120px', height: '120px', background: unlocked ? '#44ff44' : available ? '#1a1a1a' : '#0a0a0a',
+      width: '120px', height: '120px', background: unlocked ? '#44ff44' : available ? '#4b5320' : '#0a0a0a',
       border: `3px solid ${unlocked ? '#fff' : available ? (canAfford ? '#44ff44' : '#ff4444') : '#222'}`,
       borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       textAlign: 'center', padding: '15px', cursor: available && !unlocked && canAfford ? 'pointer' : 'default',
@@ -38,19 +38,27 @@ export const TrainingManual = ({ position }: { position: [number, number, number
   const [focused, setFocused] = useState(false);
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
+  const coverRef = useRef<any>(null);
   const isOpen = menuState === 'TRAINING';
 
-  useFrame(() => {
-    if (!groupRef.current || isOpen) return;
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
     
-    const worldPos = new Vector3();
-    groupRef.current.getWorldPosition(worldPos);
-    const viewPos = worldPos.clone().project(camera);
-    
-    const isCenter = Math.abs(viewPos.x) < 0.2 && Math.abs(viewPos.y) < 0.2;
-    const isInFront = viewPos.z < 1.0;
-    
-    setFocused(isCenter && isInFront);
+    // Gaze-based focus detection
+    if (!isOpen) {
+      const worldPos = new Vector3();
+      groupRef.current.getWorldPosition(worldPos);
+      const viewPos = worldPos.clone().project(camera);
+      const isCenter = Math.abs(viewPos.x) < 0.2 && Math.abs(viewPos.y) < 0.2;
+      const isInFront = viewPos.z < 1.0;
+      setFocused(isCenter && isInFront);
+    }
+
+    // Cover Flip Animation
+    if (coverRef.current) {
+      const targetRotation = isOpen ? -Math.PI * 0.9 : 0;
+      coverRef.current.rotation.z = MathUtils.lerp(coverRef.current.rotation.z, targetRotation, delta * 10);
+    }
   });
 
   return (
@@ -66,14 +74,44 @@ export const TrainingManual = ({ position }: { position: [number, number, number
     >
       {/* Physical Notebook Model */}
       <group>
-        {/* Cover */}
+        {/* Back Cover */}
         <Box args={[0.5, 0.05, 0.7]} castShadow receiveShadow>
-          <meshStandardMaterial color="#1a1a1a" emissive={isOpen ? "#44ff44" : hovered ? "#ffffff" : "#000000"} emissiveIntensity={isOpen ? 0.2 : hovered ? 0.1 : 0} />
+          <meshStandardMaterial color="#4b5320" emissive={isOpen ? "#44ff44" : hovered ? "#ffffff" : "#000000"} emissiveIntensity={isOpen ? 0.2 : hovered ? 0.1 : 0} />
         </Box>
+        
         {/* Pages */}
         <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
           <meshStandardMaterial color="#fff" />
         </Box>
+
+        {/* Front Cover with Pivot at Binding */}
+        <group position={[-0.25, 0.05, 0]} ref={coverRef}>
+          <group position={[0.25, 0.005, 0]}>
+            <Box args={[0.5, 0.01, 0.7]} castShadow receiveShadow>
+              <meshStandardMaterial color="#4b5320" emissive={hovered && !isOpen ? "#ffffff" : "#000000"} emissiveIntensity={0.1} />
+            </Box>
+            {/* Title on physical cover */}
+            <Text
+              position={[0, 0.006, 0]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              fontSize={0.035}
+              color="#ffd700"
+              fontStyle="italic"
+              fontWeight="900"
+              anchorX="center"
+              anchorY="middle"
+              maxWidth={0.4}
+              textAlign="center"
+            >
+              TRAINING{"\n"}NOTES
+            </Text>
+            {/* Decorative line */}
+            <Box args={[0.3, 0.001, 0.005]} position={[0, 0.006, 0.08]}>
+              <meshStandardMaterial color="#ffd700" transparent opacity={0.6} />
+            </Box>
+          </group>
+        </group>
+
         {/* Spiral Binding */}
         {Array.from({ length: 12 }).map((_, i) => (
           <mesh key={i} position={[-0.26, 0.03, -0.3 + i * 0.055]} rotation={[Math.PI / 2, 0, 0]}>

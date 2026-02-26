@@ -95,7 +95,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setDogState: (dogState) => set({ dogState }),
   setMenuState: (menuState) => set({ menuState }),
   setTension: (tension) => {
-    if (tension > 0.8) set({ hasStrained: true });
+    const { unlockedSkills } = get();
+    let threshold = 0.8;
+    if (unlockedSkills.includes('STRENGTH_1')) threshold += 0.05;
+    if (unlockedSkills.includes('STRENGTH_2')) threshold += 0.10;
+
+    if (tension > threshold) set({ hasStrained: true });
     set({ tension });
   },
   setDistance: (distance) => set({ distance }),
