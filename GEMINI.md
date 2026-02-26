@@ -7,6 +7,9 @@
 - **Approval Requirement:** Any large-scale changes, architectural shifts, or significant feature expansions **MUST** be proposed to the user and receive express approval before implementation.
 - **Surgical Updates:** Minor bug fixes and UI polish (within existing patterns) can be performed autonomously, but must be communicated clearly.
 - **Input Safety & NaN Protection:** All mouse/touch input handling MUST explicitly check for `undefined` or `0` before using fallbacks (e.g., `e.clientX !== undefined ? e.clientX : fallback`). Physics and camera loops MUST implement safety checks (e.g., division-by-zero guards) to prevent `NaN` propagation that causes scene blackouts.
+- **Mobile Layout & Viewport Safety:** 
+    - Always use `100dvh` (Dynamic Viewport Height) for the main application container to account for mobile browser chrome (address bars, nav controls).
+    - HUD elements MUST use `env(safe-area-inset-*)` combined with base offsets via `calc()` to prevent clipping by hardware notches, home indicators, or rounded screen corners.
 - **Build Integrity:** Any UI component intended for use in the HUD or central scenes MUST be explicitly exported and verified via `npm run build` or `npm run lint` before finishing a task.
 
 ---

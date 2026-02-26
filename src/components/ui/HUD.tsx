@@ -20,7 +20,14 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
 
   const isLargeScreen = windowSize.width > 1000;
   const uiScale = isLargeScreen ? Math.min(1.5, windowSize.width / 1200) : 1.0;
-  const edgeOffset = isLargeScreen ? Math.min(60, 20 + (windowSize.width - 1000) * 0.1) : 20;
+  
+  // Use CSS variables for safe area insets with fallbacks
+  const topSafe = 'env(safe-area-inset-top, 0px)';
+  const bottomSafe = 'env(safe-area-inset-bottom, 0px)';
+  const leftSafe = 'env(safe-area-inset-left, 0px)';
+  const rightSafe = 'env(safe-area-inset-right, 0px)';
+
+  const baseOffset = isLargeScreen ? Math.min(60, 20 + (windowSize.width - 1000) * 0.1) : 20;
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', color: 'white', fontFamily: 'monospace', zIndex: 10 }}>
@@ -34,7 +41,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
 
       {(gameState === 'HOME' || gameState === 'PLAYING' || gameState === 'FINISHED') && (
         <>
-          <div style={{ position: 'absolute', top: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, width: `${120 * uiScale}px`, height: `${120 * uiScale}px`, transform: `scale(${uiScale})`, transformOrigin: 'top left' }}>
+          <div style={{ position: 'absolute', top: `calc(${topSafe} + ${baseOffset}px)`, left: `calc(${leftSafe} + ${baseOffset}px)`, zIndex: 10, width: `${120 * uiScale}px`, height: `${120 * uiScale}px`, transform: `scale(${uiScale})`, transformOrigin: 'top left' }}>
             <SmartwatchMinimap scents={scents} {...positions} />
           </div>
 
@@ -45,7 +52,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
                 setGameState('FINISHED');
               }}
               style={{ 
-                position: 'absolute', top: `${edgeOffset}px`, right: `${edgeOffset}px`, zIndex: 10, 
+                position: 'absolute', top: `calc(${topSafe} + ${baseOffset}px)`, right: `calc(${rightSafe} + ${baseOffset}px)`, zIndex: 10, 
                 padding: `${12 * uiScale}px ${20 * uiScale}px`, background: 'rgba(0,0,0,0.8)', border: '2px solid white', 
                 borderRadius: '12px', color: 'white', fontWeight: 'bold', fontSize: `${14 * uiScale}px`, 
                 cursor: 'pointer', pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '8px',
@@ -56,11 +63,11 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
             </div>
           )}
 
-          <div style={{ position: 'absolute', bottom: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom left' }}>
+          <div style={{ position: 'absolute', bottom: `calc(${bottomSafe} + ${baseOffset}px)`, left: `calc(${leftSafe} + ${baseOffset}px)`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom left' }}>
             <ProfileCard />
           </div>
           {((gameState === 'PLAYING' || gameState === 'FINISHED') || (gameState === 'HOME' && menuState === 'IDLE')) && (
-            <div style={{ position: 'absolute', bottom: `${edgeOffset}px`, right: `${edgeOffset}px`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom right' }}>
+            <div style={{ position: 'absolute', bottom: `calc(${bottomSafe} + ${baseOffset}px)`, right: `calc(${rightSafe} + ${baseOffset}px)`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom right' }}>
               <PawControls handleGo={handleGo} />
             </div>
           )}

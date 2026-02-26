@@ -10,7 +10,7 @@ export default function App() {
   const handleGo = () => { if ((window as any).handleGo) (window as any).handleGo(); };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
+    <div style={{ width: '100vw', height: '100dvh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
         {gameState === 'HOME' || gameState === 'START' ? (
           <RoomScene />
