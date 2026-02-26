@@ -30,7 +30,7 @@
 | **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
-| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `attributes.strength`, `progression`   |
+| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync. Uses type-safe constant objects for finite state machines. | `useGameStore`: `GameState`, `DogState`, `MenuState` |
 | **HUD (React)**       | Scalable, modular UI components using a primitive-first library. | `MissionSuccessOverlay`, `barkos/PrimitiveComponents` |
 
 ---
@@ -109,7 +109,7 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 ## 6. Technical Implementation Notes
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
-- **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
+- **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`. Core states (`GameState`, `DogState`, `MenuState`) are implemented as type-safe constant objects (`as const`) to ensure compliance with `erasableSyntaxOnly` while maintaining enum-like developer experience.
 - **Camera-UI Coordination:** Implemented a `isMenuReady` handshake between the `useMenuCamera` physics loop and the React HUD to prevent UI "pop-in" before cinematic transitions finish.
 - **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
 - **UI Mapping:** The Field Notes UI uses a full-screen overlay for accessibility, replacing the previous 3D-mapped HTML to ensure perfect legibility across all phone display ratios.
