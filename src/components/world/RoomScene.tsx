@@ -25,6 +25,7 @@ import { Bed } from './furniture/Bed';
 import { Laptop } from './furniture/Laptop';
 import { Calendar } from './furniture/Calendar';
 import { TrainingManual } from './furniture/TrainingManual';
+import { DeskLamp } from './furniture/DeskLamp';
 
 export const RoomScene = () => {
   const { 
@@ -33,6 +34,7 @@ export const RoomScene = () => {
   } = useGameStore();
   const [nightstandLampOn, setNightstandLampOn] = useState(true);
   const [standingLampOn, setStandingLampOn] = useState(true);
+  const [deskLampOn, setDeskLampOn] = useState(true);
   
   const sunlight = useSunlight();
   const floorTexture = useFloorTexture();
@@ -185,6 +187,11 @@ export const RoomScene = () => {
         <Chair position={[0, 0, 1.3]} />
         <Laptop position={[-0.6, 1.0, 0]} />
         <TrainingManual position={[0.6, 1.0, 0]} />
+        
+        {/* New Desk Lamp to the top-right corner of the desk surface */}
+        <Interactable position={[1.3, 1.0, -0.6]} args={[0.3, 0.6, 0.3]} color="#333" label="DESK LAMP" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} onClickOverride={() => { setDeskLampOn(!deskLampOn); setMenuState('IDLE'); }}>
+          <DeskLamp position={[0, 0, 0]} rotation={[0, -Math.PI / 4, 0]} isOn={deskLampOn} />
+        </Interactable>
       </group>
 
       <Interactable position={[3.25, 0, -3.4]} args={[2.5, 3.8, 1.2]} color="#4e342e" label="GEAR CLOSET" targetState="GEAR" currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 4.0, 1.0]}><Closet position={[0, 0, 0]} /></Interactable>

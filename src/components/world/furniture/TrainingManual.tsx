@@ -178,7 +178,7 @@ export const TrainingManual = ({
 
         {/* Pages */}
         <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
-          <meshStandardMaterial color="#fffef2" />
+          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.1} />
         </Box>
 
         {/* Top Page Physical Texture (Visible while opening) */}
@@ -190,9 +190,11 @@ export const TrainingManual = ({
           <planeGeometry args={[0.48, 0.68]} />
           <meshStandardMaterial
             transparent
-            opacity={0.6}
+            opacity={1.0}
             polygonOffset
             polygonOffsetFactor={-1}
+            emissive="#ffffff"
+            emissiveIntensity={0.05}
           >
             <canvasTexture
               attach="map"
@@ -201,7 +203,7 @@ export const TrainingManual = ({
                 canvas.width = 512;
                 canvas.height = 512;
                 const ctx = canvas.getContext("2d")!;
-                ctx.fillStyle = "#fffef2";
+                ctx.fillStyle = "#ffffff";
                 ctx.fillRect(0, 0, 512, 512);
 
                 // Ruled lines
@@ -329,7 +331,7 @@ export const TrainingManual = ({
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab as any); }}
                   style={{
-                    width: "40px", height: "80px", background: activeTab === tab ? "#fffef2" : "#d1cdb0",
+                    width: "40px", height: "80px", background: activeTab === tab ? "#ffffff" : "#d1cdb0",
                     border: "1px solid #bcba9a", borderLeft: "none", borderRadius: "0 10px 10px 0",
                     writingMode: "vertical-rl", textOrientation: "mixed", display: "flex", alignItems: "center",
                     justifyContent: "center", fontSize: "12px", fontWeight: "900", cursor: "pointer",
