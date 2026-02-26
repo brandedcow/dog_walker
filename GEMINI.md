@@ -32,6 +32,7 @@
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
 | **State (Zustand)**   | Centralized event-driven state with **localStorage persistence**.  | `useGameStore`: `GameState`, `DogState`, `MenuState` |
+| **Audio (useAudioEngine)** | Manages 3D spatial audio and dynamic mechanical feedback.       | `AudioListener`, `THREE.Audio`, `fade()`            |
 | **HUD (React)**       | Scalable, modular UI components using a primitive-first library. | `MissionSuccessOverlay`, `barkos/PrimitiveComponents` |
 
 ---
@@ -67,6 +68,12 @@ The game utilizes Zustand's `persist` middleware to ensure long-term growth is p
 - **Surgical Serialization:** Only progression-critical keys (`playerStats`, `attributes`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
 - **Lifetime Stats:** `totalDistanceWalked` tracks the cumulative distance covered across all sessions, distinct from the transient session-based `distance`.
 - **State Reset:** A secure reset mechanism is available in the Hub's Records menu to clear all persistent data and return to default values.
+
+### 3.6 Audio Engine & Dynamic Feedback
+The game features a state-driven audio system powered by `THREE.Audio`.
+- **Dynamic Strain:** Pitch and volume of leash strain increase dynamically as tension passes the 75% threshold.
+- **Ambient Crossfading:** Seamlessly transitions between Hub (Room) and Walk (Road) background loops using `lerp`-based volume fading.
+- **Mechanical Cues:** Tactical audio feedback for `TUG` actions and mission success events.
 
 ---
 
@@ -118,8 +125,10 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`. 
 - **Persistence Architecture:** Implemented via `persist` middleware with `createJSONStorage`. Uses `partialize` to prevent transient session state (e.g., tension, positions) from being serialized, ensuring save file integrity.
+- **Audio Architecture:** `AudioEngine` is injected into the global `Canvas`, ensuring a single `AudioListener` persists across scene transitions.
 - **Testing Framework (Vitest + RTL):** A comprehensive QA suite is established covering:
     - **Unit (Logic):** `useGameStore` (Grit/XP/Skills), `useLeash` (Verlet/Tension), `useDogAI` (State/Recall).
+    - **Unit (Audio):** `useAudioEngine.test.ts` (Listener registration and state-driven triggers).
     - **Persistence:** `persistence.test.ts` verifies correct serialization/deserialization and exclusion of transient data.
     - **Unit (UI):** `HUD`, `TrainingOverlay`, `PawControls` (State-driven rendering & interaction).
     - **Integration:** "Golden Path" verifying the full Home -> Walk -> Reward -> Skill loop.

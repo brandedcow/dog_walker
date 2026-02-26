@@ -3,6 +3,7 @@ import { useGameStore } from './store/useGameStore';
 import { RoadScene } from './components/world/RoadScene';
 import { RoomScene } from './components/world/RoomScene';
 import { HUD } from './components/ui/HUD';
+import { AudioEngine } from './systems/audio/AudioEngine';
 
 export default function App() {
   const { gameState } = useGameStore();
@@ -12,6 +13,7 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100dvh', backgroundColor: '#000', position: 'relative', margin: 0, padding: 0, overflow: 'hidden', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}>
       <Canvas shadows camera={{ fov: 75 }}>
+        <AudioEngine />
         {gameState === 'HOME' || gameState === 'START' ? (
           <RoomScene />
         ) : (
