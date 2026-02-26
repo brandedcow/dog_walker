@@ -69,99 +69,135 @@ const SkillNode = ({
 
 const HexagramVisualizer = ({ 
   currentResonance, 
+  secondaryFocus,
+  rawTraits,
+  affinityXP,
   onResonanceSelect, 
   canSwitch 
 }: { 
   currentResonance: ResonanceType, 
+  secondaryFocus: ResonanceType | null,
+  rawTraits: any,
+  affinityXP: Record<ResonanceType, number>,
   onResonanceSelect: (type: ResonanceType) => void,
   canSwitch: boolean
 }) => {
-  const size = 300;
+  const size = 340;
   const center = size / 2;
-  const radius = 85;
-  const labelRadius = 115;
+  const maxRadius = 110;
+  const labelRadius = 145;
 
-  const points = RESONANCE_ORDER.map((_, i) => {
+  // Max value for raw traits scaling: assume 20 is "full" for visual scaling
+  const maxTraitVal = 20;
+
+  const points = RESONANCE_ORDER.map((type, i) => {
     const angle = (i * 60 - 90) * (Math.PI / 180);
+    const traitVal = (rawTraits as any)[type.toLowerCase()] || 1;
+    const dynamicRadius = (traitVal / maxTraitVal) * maxRadius;
+    
     return {
-      x: center + radius * Math.cos(angle),
-      y: center + radius * Math.sin(angle),
-      lx: center + labelRadius * Math.cos(angle),
+      type,
+      angle,
+      bx: center + maxRadius * Math.cos(angle), // Blueprint Vertex
+      by: center + maxRadius * Math.sin(angle),
+      px: center + dynamicRadius * Math.cos(angle), // Pulse Vertex
+      py: center + dynamicRadius * Math.sin(angle),
+      lx: center + labelRadius * Math.cos(angle), // Label
       ly: center + labelRadius * Math.sin(angle),
     };
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative' }}>
-      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', textAlign: 'center' }}>Canine Resonance Hexagram</h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: '#0a0a0a', borderRadius: '20px', border: '2px solid #333', position: 'relative', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}>
+      <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', textAlign: 'center', color: '#666', letterSpacing: '2px' }}>NEURAL RESONANCE READOUT</h3>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <svg width={size} height={size + 40} style={{ overflow: 'visible' }}>
+        <svg width={size} height={size} style={{ overflow: 'visible' }}>
+          {/* Mastery Rings */}
+          {[0.2, 0.4, 0.6, 0.8, 1.0].map((r, idx) => (
+            <circle key={idx} cx={center} cy={center} r={maxRadius * r} fill="none" stroke="#222" strokeWidth="1" strokeDasharray="5 5" />
+          ))}
+
+          {/* The Blueprint (Static Outline) */}
           <polygon
-            points={points.map(p => `${p.x},${p.y}`).join(' ')}
-            fill="rgba(44, 62, 80, 0.05)"
-            stroke="#2c3e50"
-            strokeWidth="2"
+            points={points.map(p => `${p.bx},${p.by}`).join(' ')}
+            fill="none"
+            stroke="rgba(255,255,255,0.05)"
+            strokeWidth="1"
           />
           
+          {/* Connection Lines */}
           {points.map((p, i) => (
             <line
               key={`line-${i}`}
-              x1={p.x} y1={p.y}
-              x2={points[(i + 3) % 6].x} y2={points[(i + 3) % 6].y}
-              stroke="rgba(44, 62, 80, 0.15)"
+              x1={center} y1={center}
+              x2={p.bx} y2={p.by}
+              stroke="rgba(255,255,255,0.05)"
               strokeWidth="1"
-              strokeDasharray="4 2"
             />
           ))}
 
-          {RESONANCE_ORDER.map((type, i) => {
-            const p = points[i];
-            const isCurrent = type === currentResonance;
-            const potency = getResonanceFilter(currentResonance, type);
+          {/* The Neural Pulse (Dynamic Fill) */}
+          <polygon
+            points={points.map(p => `${p.px},${p.py}`).join(' ')}
+            fill="rgba(68, 136, 255, 0.2)"
+            stroke="#4488ff"
+            strokeWidth="2"
+            style={{ transition: 'all 0.5s ease-out' }}
+          />
+
+          {/* Vertices & Glows */}
+          {points.map((p) => {
+            const isPrimary = p.type === currentResonance;
+            const isSecondary = p.type === secondaryFocus;
+            const masteryLevel = Math.min(10, affinityXP[p.type] / 1000);
             
             return (
-              <g key={type} onClick={() => canSwitch && onResonanceSelect(type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
+              <g key={p.type} onClick={() => canSwitch && onResonanceSelect(p.type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
+                {/* Secondary Focus Pulse */}
+                {isSecondary && (
+                  <circle cx={p.bx} cy={p.by} r="12" fill="none" stroke="#00ffff" strokeWidth="2">
+                    <animate attributeName="r" from="8" to="16" dur="1.5s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" from="0.8" to="0" dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+                )}
+
+                {/* Primary/Secondary Markers */}
                 <circle
-                  cx={p.x} cy={p.y} r={isCurrent ? 8 : 5}
-                  fill={isCurrent ? "#2c3e50" : "#d1cdb0"}
-                  stroke="#2c3e50"
-                  strokeWidth="2"
+                  cx={p.bx} cy={p.by} r={isPrimary ? 6 : 4}
+                  fill={isPrimary ? "#ffd700" : isSecondary ? "#00ffff" : "#333"}
+                  stroke={isPrimary ? "#ffd700" : "#222"}
+                  strokeWidth="1"
                 />
+
+                {/* Mastery Progress Arc (Mini) */}
+                <circle
+                  cx={p.bx} cy={p.by} r="8"
+                  fill="none"
+                  stroke="#44ff44"
+                  strokeWidth="2"
+                  strokeDasharray={`${masteryLevel * 5} 50`}
+                  transform={`rotate(-90 ${p.bx} ${p.by})`}
+                />
+
                 <text
                   x={p.lx} y={p.ly}
                   textAnchor="middle"
                   alignmentBaseline="middle"
                   style={{ 
-                    fontSize: '11px', 
-                    fontWeight: '900', 
-                    fill: isCurrent ? '#2c3e50' : '#6e6c56',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  {type}
-                </text>
-                <text
-                  x={p.lx} y={p.ly + 14}
-                  textAnchor="middle"
-                  alignmentBaseline="middle"
-                  style={{ 
                     fontSize: '10px', 
-                    fontWeight: 'bold', 
-                    fill: potency === 1 ? '#2e7d32' : potency >= 0.6 ? '#fbc02d' : '#d32f2f'
+                    fontWeight: '900', 
+                    fill: isPrimary ? '#ffd700' : isSecondary ? '#00ffff' : '#888',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
                   }}
                 >
-                  {Math.round(potency * 100)}%
+                  {p.type}
                 </text>
               </g>
             );
           })}
         </svg>
       </div>
-      {canSwitch && (
-        <div style={{ position: 'absolute', bottom: '10px', left: '0', right: '0', textAlign: 'center', fontSize: '10px', fontStyle: 'italic', opacity: 0.6 }}>
-          * Tap a frequency to tune (Rank 1 only)
-        </div>
-      )}
     </div>
   );
 };
@@ -173,10 +209,12 @@ export const TrainingOverlay = () => {
     unlockedSkills,
     purchaseSkill,
     respecSkills,
-    traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
+    traits,
+    rawTraits,
     progression,
-    resonanceType = ResonanceType.ANCHOR,
+    resonanceType,
     secondaryFocus,
+    affinityXP,
     setResonanceType
   } = useGameStore();
 
@@ -193,61 +231,36 @@ export const TrainingOverlay = () => {
   };
 
   const resonancePaths = [
-    { label: 'ANCHOR', type: ResonanceType.ANCHOR, skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
-    { label: 'WHISPERER', type: ResonanceType.WHISPERER, skills: SKILLS.filter(s => s.resonance === ResonanceType.WHISPERER) },
-    { label: 'TACTICIAN', type: ResonanceType.TACTICIAN, skills: SKILLS.filter(s => s.resonance === ResonanceType.TACTICIAN) },
-    { label: 'NOMAD', type: ResonanceType.NOMAD, skills: SKILLS.filter(s => s.resonance === ResonanceType.NOMAD) },
-    { label: 'URBANIST', type: ResonanceType.URBANIST, skills: SKILLS.filter(s => s.resonance === ResonanceType.URBANIST) },
-    { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
+    { label: 'ANCHOR', type: ResonanceType.ANCHOR, traitKey: 'strength', skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
+    { label: 'WHISPERER', type: ResonanceType.WHISPERER, traitKey: 'bond', skills: SKILLS.filter(s => s.resonance === ResonanceType.WHISPERER) },
+    { label: 'TACTICIAN', type: ResonanceType.TACTICIAN, traitKey: 'focus', skills: SKILLS.filter(s => s.resonance === ResonanceType.TACTICIAN) },
+    { label: 'NOMAD', type: ResonanceType.NOMAD, traitKey: 'speed', skills: SKILLS.filter(s => s.resonance === ResonanceType.NOMAD) },
+    { label: 'URBANIST', type: ResonanceType.URBANIST, traitKey: 'awareness', skills: SKILLS.filter(s => s.resonance === ResonanceType.URBANIST) },
+    { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
   return (
     <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100dvh',
-      background: '#f4f1ea',
-      zIndex: 100,
-      display: 'flex',
-      flexDirection: 'column',
-      color: '#2c3e50',
-      fontFamily: '"Courier New", Courier, monospace',
-      pointerEvents: 'auto',
-      overflow: 'hidden'
+      position: 'absolute', top: 0, left: 0, width: '100%', height: '100dvh',
+      background: '#050505', zIndex: 100, display: 'flex', flexDirection: 'column',
+      color: '#eee', fontFamily: '"Courier New", Courier, monospace',
+      pointerEvents: 'auto', overflow: 'hidden'
     }}>
       {/* Sidebar Tabs */}
-      <div style={{
-        position: 'absolute',
-        right: 0,
-        top: '100px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '5px',
-        zIndex: 10
-      }}>
+      <div style={{ position: 'absolute', right: 0, top: '100px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 10 }}>
         {['STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
           <div
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             style={{
-              width: '50px',
-              height: '120px',
-              background: activeTab === tab ? '#ffffff' : '#d1cdb0',
-              border: '2px solid #2c3e50',
-              borderRight: 'none',
-              borderRadius: '20px 0 0 20px',
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              fontWeight: '900',
-              cursor: 'pointer',
-              color: activeTab === tab ? '#2c3e50' : '#6e6c56',
-              boxShadow: activeTab === tab ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none',
+              width: '50px', height: '120px',
+              background: activeTab === tab ? '#111' : '#222',
+              border: '1px solid #444', borderRight: 'none', borderRadius: '20px 0 0 20px',
+              writingMode: 'vertical-rl', textOrientation: 'mixed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '14px', fontWeight: '900', cursor: 'pointer',
+              color: activeTab === tab ? '#4488ff' : '#666',
+              boxShadow: activeTab === tab ? '-4px 0 15px rgba(68,136,255,0.2)' : 'none',
               transition: 'all 0.2s'
             }}
           >
@@ -257,225 +270,179 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Header */}
-      <div style={{
-        padding: '40px 80px 20px 40px',
-        borderBottom: '4px solid #2c3e50',
-        background: 'rgba(255,255,255,0.5)'
-      }}>
+      <div style={{ padding: '40px 80px 20px 40px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <h1 style={{ margin: 0, fontSize: '42px', fontWeight: '900', letterSpacing: '-1px' }}>
-            {activeTab}
-          </h1>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '4px', color: '#4488ff' }}>{activeTab}</h1>
+            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>RESONANCE PROTOCOL v2.0</div>
+          </div>
           <button 
             onClick={() => setMenuState(MenuState.IDLE)}
-            style={{
-              width: '60px',
-              height: '60px',
-              background: '#2c3e50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              fontSize: '32px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            ×
-          </button>
+            style={{ width: '50px', height: '50px', background: '#222', color: '#eee', border: '1px solid #444', borderRadius: '50%', fontSize: '24px', cursor: 'pointer' }}
+          > × </button>
         </div>
         
-        <div style={{ display: 'flex', gap: '30px', marginTop: '15px' }}>
+        <div style={{ display: 'flex', gap: '40px', marginTop: '20px', alignItems: 'flex-end' }}>
           <div>
-            <span style={{ fontSize: '14px', opacity: 0.7 }}>GRIT CACHE:</span>
-            <div style={{ fontSize: '28px', fontWeight: '900', color: '#2e7d32' }}>{playerStats.grit} G</div>
+            <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>GRIT CACHE</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#44ff44' }}>{playerStats.grit} G</div>
           </div>
           <div>
-            <span style={{ fontSize: '14px', opacity: 0.7 }}>SKILL POINTS:</span>
-            <div style={{ fontSize: '28px', fontWeight: '900', color: '#1976d2' }}>{progression.skillPoints} SP</div>
+            <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>SKILL POINTS</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#4488ff' }}>{progression.skillPoints} SP</div>
           </div>
-          {activeTab === 'SKILLS' && (
-            <button
-              onClick={handleRespec}
-              style={{
-                background: confirmRespec ? '#d32f2f' : '#2c3e50',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: '900',
-                cursor: 'pointer',
-                alignSelf: 'flex-end',
-                marginBottom: '5px'
-              }}
-            >
-              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC FREQUENCY'}
-            </button>
-          )}
+          <button
+            onClick={handleRespec}
+            style={{
+              marginLeft: 'auto',
+              background: confirmRespec ? '#d32f2f' : '#222',
+              color: '#eee',
+              border: `1px solid ${confirmRespec ? '#d32f2f' : '#444'}`,
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: '900',
+              cursor: 'pointer',
+              marginBottom: '2px'
+            }}
+          >
+            {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC FREQUENCY'}
+          </button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '30px 80px 40px 40px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '30px',
-        WebkitOverflowScrolling: 'touch'
-      }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '30px 80px 40px 40px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         {activeTab === 'STATS' && (
-          <>
-            {/* XP & Rank */}
-            <div style={{ background: 'rgba(0,0,0,0.05)', padding: '25px', borderRadius: '20px', border: '3px dashed #2c3e50', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontSize: '12px', opacity: 0.7 }}>PRIMARY AFFINITY:</div>
-                  <div style={{ fontSize: '24px', fontWeight: '900', color: '#2c3e50' }}>{resonanceType.toUpperCase()}</div>
-                  {secondaryFocus && (
-                    <div style={{ fontSize: '14px', fontWeight: '900', color: '#1976d2', marginTop: '4px' }}>
-                      SECONDARY FOCUS: {secondaryFocus.toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '12px', opacity: 0.7 }}>WALKER RANK:</div>
-                  <div style={{ fontSize: '24px', fontWeight: '900' }}>{progression.walkerRank}</div>
-                </div>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <HexagramVisualizer 
+                currentResonance={resonanceType} 
+                secondaryFocus={secondaryFocus}
+                rawTraits={rawTraits}
+                affinityXP={affinityXP}
+                onResonanceSelect={setResonanceType} 
+                canSwitch={progression.walkerRank === 1} 
+              />
               
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: '900', fontSize: '14px' }}>PROGRESSION</span>
-                  <span style={{ fontSize: '14px' }}>{progression.xp % 1000}/1000 XP</span>
+              {/* XP Progress Section */}
+              <div style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid #333' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#4488ff' }}>RANK {progression.walkerRank} PROGRESS</span>
+                  <span style={{ fontSize: '14px', color: '#888' }}>{progression.xp % 1000}/1000 XP</span>
                 </div>
-                <div style={{ width: '100%', height: '16px', background: '#d1cdb0', borderRadius: '8px', overflow: 'hidden', border: '2px solid #2c3e50' }}>
-                  <div style={{ width: `${(progression.xp % 1000) / 10}%`, height: '100%', background: '#2c3e50' }} />
+                <div style={{ width: '100%', height: '8px', background: '#222', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${(progression.xp % 1000) / 10}%`, height: '100%', background: '#4488ff' }} />
                 </div>
               </div>
             </div>
 
-            {/* Resonance Hexagram */}
-            <HexagramVisualizer 
-              currentResonance={resonanceType} 
-              onResonanceSelect={setResonanceType} 
-              canSwitch={progression.walkerRank === 1} 
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px' }}>VECTOR & MODIFIER READOUT</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
+                    <th style={{ padding: '10px 5px' }}>TRAIT</th>
+                    <th style={{ padding: '10px 5px' }}>RAW</th>
+                    <th style={{ padding: '10px 5px' }}>FILTER</th>
+                    <th style={{ padding: '10px 5px' }}>OUTPUT</th>
+                    <th style={{ padding: '10px 5px' }}>STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resonancePaths.map((path) => {
+                    const filter = getResonanceFilter(resonanceType, path.type);
+                    const raw = (rawTraits as any)[path.traitKey];
+                    const output = (traits as any)[path.traitKey];
+                    const mastery = (affinityXP[path.type] % 1000) / 10;
+                    
+                    const color = filter === 1 ? '#ffd700' : filter >= 0.8 ? '#c0c0c0' : filter >= 0.6 ? '#cd7f32' : '#666';
+                    const status = filter === 1 ? 'PURE' : filter >= 0.8 ? 'HARMONIC' : filter >= 0.6 ? 'STABLE' : 'DISSONANT';
 
-            {/* Resonance Traits */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-              {[
-                { label: 'STRENGTH', value: traits.strength, color: '#d32f2f', desc: 'Resist kinetic force & maintain control' },
-                { label: 'BOND', value: traits.bond, color: '#fbc02d', desc: 'Psychological connection & non-verbal cues' },
-                { label: 'FOCUS', value: traits.focus, color: '#1976d2', desc: 'Detection radius for environmental triggers' },
-                { label: 'SPEED', value: traits.speed, color: '#388e3c', desc: 'Optimization of gait & stamina efficiency' },
-                { label: 'AWARENESS', value: traits.awareness, color: '#8e24aa', desc: 'Environmental mastery & shortcuts' },
-                { label: 'MASTERY', value: traits.mastery, color: '#ff9800', desc: 'Specialized heuristics for chaotic cases' },
-              ].map((trait) => (
-                <div key={trait.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', marginBottom: '8px', fontWeight: '900' }}>
-                    <span>{trait.label}</span>
-                    <span>LV {(trait.value || 0).toFixed(1)}</span>
+                    return (
+                      <tr key={path.label} style={{ borderBottom: '1px solid #111' }}>
+                        <td style={{ padding: '12px 5px', fontWeight: '900', color: '#eee' }}>{path.label}</td>
+                        <td style={{ padding: '12px 5px', color: '#888' }}>{raw}</td>
+                        <td style={{ padding: '12px 5px', color: color }}>x{filter.toFixed(1)}</td>
+                        <td style={{ padding: '12px 5px', fontWeight: '900', color: color }}>{output.toFixed(1)}</td>
+                        <td style={{ padding: '12px 5px', fontSize: '10px', color: color }}>
+                          <div style={{ marginBottom: '4px' }}>{status}</div>
+                          <div style={{ width: '40px', height: '3px', background: '#222', borderRadius: '2px' }}>
+                            <div style={{ width: `${mastery}%`, height: '100%', background: '#44ff44' }} />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Hatsu & Hybrid Section */}
+              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px' }}>APEX & HYBRID SLOTTING</h3>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  <div style={{ width: '80px', height: '80px', border: '2px solid #ffd700', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,215,0,0.05)', position: 'relative' }}>
+                    <div style={{ fontSize: '10px', position: 'absolute', top: '-8px', background: '#ffd700', color: '#000', padding: '2px 6px', fontWeight: '900' }}>APEX</div>
+                    <div style={{ fontSize: '32px' }}>⚡</div>
                   </div>
-                  <div style={{ width: '100%', height: '20px', background: '#d1cdb0', borderRadius: '10px', border: '2px solid #2c3e50', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min(100, (trait.value / 10) * 100)}%`, height: '100%', background: trait.color }} />
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {[1, 2].map(i => (
+                      <div key={i} style={{ width: '60px', height: '60px', border: '1px dashed #444', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+                        <div style={{ fontSize: '20px', opacity: 0.2 }}>🔒</div>
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '6px' }}>{trait.desc}</div>
                 </div>
-              ))}
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'SKILLS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            {/* Resonance Paths */}
             {resonancePaths.map((path) => {
               const potency = getResonanceFilter(resonanceType, path.type);
               return (
                 <div key={path.label} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #2c3e50', paddingBottom: '5px' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900' }}>
-                      {path.label} ({Math.round(potency * 100)}%)
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#eee' }}>
+                      {path.label} <span style={{ fontSize: '12px', color: '#666' }}>({Math.round(potency * 100)}% Potency)</span>
                     </h3>
                   </div>
-                  <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px', WebkitOverflowScrolling: 'touch' }}>
-                    {path.skills.map((skill) => {
-                      const unlocked = unlockedSkills.includes(skill.id);
-                      const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
-                      const canAffordGrit = playerStats.grit >= skill.gritCost;
-                      const canAffordSP = progression.skillPoints >= skill.spCost;
-                      return (
-                        <div key={skill.id} style={{ flex: '0 0 280px' }}>
-                          <SkillNode
-                            skill={skill}
-                            unlocked={unlocked}
-                            available={available}
-                            canAffordGrit={canAffordGrit}
-                            canAffordSP={canAffordSP}
-                            potency={potency}
-                            onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
-                          />
-                        </div>
-                      );
-                    })}
+                  <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
+                    {path.skills.map((skill) => (
+                      <div key={skill.id} style={{ flex: '0 0 280px' }}>
+                        <SkillNode
+                          skill={skill}
+                          unlocked={unlockedSkills.includes(skill.id)}
+                          available={!skill.dependsOn || unlockedSkills.includes(skill.dependsOn)}
+                          canAffordGrit={playerStats.grit >= skill.gritCost}
+                          canAffordSP={progression.skillPoints >= skill.spCost}
+                          potency={potency}
+                          onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               );
             })}
-
-            {/* Hybrid Techniques Section */}
-            {secondaryFocus && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', padding: '20px', background: 'rgba(25, 118, 210, 0.05)', borderRadius: '15px', border: '2px solid #1976d2' }}>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#1976d2' }}>
-                  Resonant Hybridization: {resonanceType} × {secondaryFocus}
-                </h3>
-                <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
-                  {SKILLS.filter(s => s.id.startsWith('HYB')).map(skill => {
-                    // Simple logic for MVP: show all hybrids but check if they match primary/secondary
-                    // In a full implementation, we'd filter strictly by the specific primary/secondary pair
-                    const unlocked = unlockedSkills.includes(skill.id);
-                    const canAffordGrit = playerStats.grit >= skill.gritCost;
-                    const canAffordSP = progression.skillPoints >= skill.spCost;
-                    
-                    return (
-                      <div key={skill.id} style={{ flex: '0 0 280px' }}>
-                        <SkillNode
-                          skill={skill}
-                          unlocked={unlocked}
-                          available={true}
-                          canAffordGrit={canAffordGrit}
-                          canAffordSP={canAffordSP}
-                          potency={1.0}
-                          onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         {activeTab === 'COMMANDS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
             {[
-              { cmd: "🐾 GO", desc: 'Click the "🐾" paw or look ahead to start walking. Buster follows your gaze.' },
-              { cmd: "🪢 TUG", desc: "When Buster stops or pulls, click the paw to gently reel him in. Enhanced by STRENGTH." },
-              { cmd: "🐕 COME", desc: "A focused recall. Brings Buster back to your side at high speed. Enhanced by BOND." },
-              { cmd: "🛑 SIT", desc: "Command Buster to sit and wait. Useful for managing tension or taking a break." },
-              { cmd: "🏠 RETURN", desc: "End the walk early from the HUD to bank your current Grit and XP." },
+              { cmd: "🐾 GO", desc: 'Start walking or recapture heading. Buster follows your gaze.' },
+              { cmd: "🪢 TUG", desc: "Correct pathing or manage tension. Strength-dependent recoil." },
+              { cmd: "🐕 COME", desc: "High-frequency recall. Efficiency based on BOND resonance." },
+              { cmd: "🛑 SIT", desc: "Stabilize state. Zeros out kinetic momentum for safety." },
             ].map((item) => (
-              <div key={item.cmd} style={{ borderBottom: '3px solid rgba(0,0,0,0.1)', paddingBottom: '20px' }}>
-                <div style={{ fontWeight: '900', fontSize: '28px', color: '#2c3e50', marginBottom: '10px' }}>{item.cmd}</div>
-                <div style={{ fontSize: '18px', opacity: 0.9, lineHeight: '1.5' }}>{item.desc}</div>
+              <div key={item.cmd} style={{ borderBottom: '1px solid #222', paddingBottom: '20px' }}>
+                <div style={{ fontWeight: '900', fontSize: '24px', color: '#4488ff', marginBottom: '10px' }}>{item.cmd}</div>
+                <div style={{ fontSize: '16px', color: '#888', lineHeight: '1.5' }}>{item.desc}</div>
               </div>
             ))}
-            <div style={{ marginTop: '20px', fontSize: '16px', fontStyle: 'italic', opacity: 0.6, textAlign: 'center' }}>
-              * Commands are more effective as resonance traits and skill augments increase.
-            </div>
           </div>
         )}
       </div>

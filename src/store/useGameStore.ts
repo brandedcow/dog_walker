@@ -71,7 +71,8 @@ interface GameStore {
   // Refined Progression
   resonanceType: PlayerResonance;
   secondaryFocus: PlayerResonance | null;
-  traits: ResonanceTraits;
+  traits: ResonanceTraits; // Final Output (Raw * Filter)
+  rawTraits: ResonanceTraits; // Raw Organic Level
   progression: Progression;
   affinityXP: Record<ResonanceType, number>;
 
@@ -95,6 +96,48 @@ interface GameStore {
   setResonanceType: (resonance: PlayerResonance) => void;
 }
 
+const calculateFinalTraits = (
+  resonanceType: ResonanceType, 
+  affinityXP: Record<ResonanceType, number>, 
+  unlockedSkills: string[]
+): { raw: ResonanceTraits, final: ResonanceTraits } => {
+  const base = RESONANCE_STATS[resonanceType];
+  const raw: ResonanceTraits = { ...base };
+  
+  // 1. Organic Growth from XP (100 XP = +1 Raw Level for MVP)
+  raw.strength += Math.floor(affinityXP[ResonanceType.ANCHOR] / 100);
+  raw.bond += Math.floor(affinityXP[ResonanceType.WHISPERER] / 100);
+  raw.focus += Math.floor(affinityXP[ResonanceType.TACTICIAN] / 100);
+  raw.speed += Math.floor(affinityXP[ResonanceType.NOMAD] / 100);
+  raw.awareness += Math.floor(affinityXP[ResonanceType.URBANIST] / 100);
+  raw.mastery += Math.floor(affinityXP[ResonanceType.SPECIALIST] / 100);
+
+  // 2. Skill Augments (Apply to Raw)
+  unlockedSkills.forEach(id => {
+    const skill = SKILLS.find(s => s.id === id);
+    if (skill?.augments) {
+      raw.strength += (skill.augments.strength || 0);
+      raw.bond += (skill.augments.bond || 0);
+      raw.focus += (skill.augments.focus || 0);
+      raw.speed += (skill.augments.speed || 0);
+      raw.awareness += (skill.augments.awareness || 0);
+      raw.mastery += (skill.augments.mastery || 0);
+    }
+  });
+
+  // 3. Neural Filter Potency (Raw * Filter = Final)
+  const final: ResonanceTraits = {
+    strength: raw.strength * getResonanceFilter(resonanceType, ResonanceType.ANCHOR),
+    bond: raw.bond * getResonanceFilter(resonanceType, ResonanceType.WHISPERER),
+    focus: raw.focus * getResonanceFilter(resonanceType, ResonanceType.TACTICIAN),
+    speed: raw.speed * getResonanceFilter(resonanceType, ResonanceType.NOMAD),
+    awareness: raw.awareness * getResonanceFilter(resonanceType, ResonanceType.URBANIST),
+    mastery: raw.mastery * getResonanceFilter(resonanceType, ResonanceType.SPECIALIST),
+  };
+
+  return { raw, final };
+};
+
 const DEFAULT_PROG_STATE = {
   resonanceType: ResonanceType.ANCHOR,
   secondaryFocus: null,
@@ -116,6 +159,7 @@ const DEFAULT_PROG_STATE = {
   },
   unlockedSkills: ['FOUNDATION'],
   traits: RESONANCE_STATS[ResonanceType.ANCHOR],
+  rawTraits: RESONANCE_STATS[ResonanceType.ANCHOR],
   progression: {
     walkerRank: 1,
     xp: 0,
@@ -149,7 +193,9 @@ export const useGameStore = create<GameStore>()(
       isMenuReady: false,
 
       setResonanceType: (resonanceType: PlayerResonance) => {
-        set({ resonanceType, traits: RESONANCE_STATS[resonanceType] });
+        const { affinityXP, unlockedSkills } = get();
+        const { raw, final } = calculateFinalTraits(resonanceType, affinityXP, unlockedSkills);
+        set({ resonanceType, rawTraits: raw, traits: final });
       },
 
       setGameState: (gameState) => {
@@ -166,9 +212,7 @@ export const useGameStore = create<GameStore>()(
       setIsMenuReady: (isMenuReady) => set({ isMenuReady }),
       setTension: (tension) => {
         const { traits = { strength: 1 } } = get();
-        // Total Strength affects threshold
         const threshold = 0.78 + (traits.strength * 0.02);
-
         if (tension > threshold) set({ hasStrained: true });
         set({ tension });
       },
@@ -186,17 +230,13 @@ export const useGameStore = create<GameStore>()(
         const rankGained = newRank > state.progression.walkerRank;
         
         const newAffinityXP = { ...state.affinityXP };
-        if (category) {
-          newAffinityXP[category] += amount;
-        }
+        if (category) newAffinityXP[category] += amount;
 
-        // Determine Secondary Focus (second highest XP, excluding primary)
         const entries = Object.entries(newAffinityXP) as [ResonanceType, number][];
-        const sorted = entries
-          .filter(([type]) => type !== state.resonanceType)
-          .sort((a, b) => b[1] - a[1]);
-        
+        const sorted = entries.filter(([type]) => type !== state.resonanceType).sort((a, b) => b[1] - a[1]);
         const secondaryFocus = sorted[0][1] > 0 ? sorted[0][0] : null;
+
+        const { raw, final } = calculateFinalTraits(state.resonanceType, newAffinityXP, state.unlockedSkills);
 
         return {
           progression: {
@@ -206,31 +246,31 @@ export const useGameStore = create<GameStore>()(
             skillPoints: state.progression.skillPoints + (rankGained ? 2 : 0)
           },
           affinityXP: newAffinityXP,
-          secondaryFocus
+          secondaryFocus,
+          rawTraits: raw,
+          traits: final
         };
       }),
 
       setHasStrained: (hasStrained) => set({ hasStrained }),
       
       finalizeWalk: () => {
-        const { distance, hasStrained, playerStats, progression, traits = { awareness: 1, focus: 1 }, totalDistanceWalked, dogMetadata, affinityXP, resonanceType } = get();
+        const { distance, hasStrained, playerStats, progression, traits, dogMetadata, affinityXP, resonanceType, unlockedSkills } = get();
         const baseGrit = Math.floor(distance / 10);
         const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
         let totalGrit = baseGrit + bonusGrit;
         
-        // Dynamic trait bonus: Focus (Tactician) grants detection but Awareness (Urbanist) multiplies Grit
         const awarenessMultiplier = 1.0 + (traits.awareness * 0.05);
         totalGrit = Math.floor(totalGrit * awarenessMultiplier);
 
         const earnedXP = Math.floor(distance * 10);
         
-        // Breed-based leveling: map dog to resonance category
-        let category: ResonanceType = ResonanceType.URBANIST; // Default to Adapters
-        if (dogMetadata.size === DogSize.LARGE) category = ResonanceType.ANCHOR; // Titans
-        else if (dogMetadata.characteristic === DogCharacteristic.VELCRO) category = ResonanceType.WHISPERER; // Spirits
-        else if (dogMetadata.characteristic === DogCharacteristic.ADHD || dogMetadata.characteristic === DogCharacteristic.PULLER) category = ResonanceType.TACTICIAN; // High-Strung
-        else if (dogMetadata.characteristic === DogCharacteristic.SNIFFER) category = ResonanceType.NOMAD; // Sprinters (approx)
-        else if (dogMetadata.characteristic === DogCharacteristic.REACTIVE) category = ResonanceType.SPECIALIST; // Enigmas
+        let category: ResonanceType = ResonanceType.URBANIST; 
+        if (dogMetadata.size === DogSize.LARGE) category = ResonanceType.ANCHOR;
+        else if (dogMetadata.characteristic === DogCharacteristic.VELCRO) category = ResonanceType.WHISPERER;
+        else if (dogMetadata.characteristic === DogCharacteristic.ADHD || dogMetadata.characteristic === DogCharacteristic.PULLER) category = ResonanceType.TACTICIAN;
+        else if (dogMetadata.characteristic === DogCharacteristic.SNIFFER) category = ResonanceType.NOMAD;
+        else if (dogMetadata.characteristic === DogCharacteristic.REACTIVE) category = ResonanceType.SPECIALIST;
 
         const newTotalXP = progression.xp + earnedXP;
         const xpPerLevel = 1000;
@@ -240,16 +280,15 @@ export const useGameStore = create<GameStore>()(
         const newAffinityXP = { ...affinityXP };
         newAffinityXP[category] += earnedXP;
 
-        // Recalculate secondary focus
         const entries = Object.entries(newAffinityXP) as [ResonanceType, number][];
-        const sorted = entries
-          .filter(([type]) => type !== resonanceType)
-          .sort((a, b) => b[1] - a[1]);
+        const sorted = entries.filter(([type]) => type !== resonanceType).sort((a, b) => b[1] - a[1]);
         const secondaryFocus = sorted[0][1] > 0 ? sorted[0][0] : null;
+
+        const { raw, final } = calculateFinalTraits(resonanceType, newAffinityXP, unlockedSkills);
         
         set({ 
           sessionGrit: totalGrit,
-          totalDistanceWalked: totalDistanceWalked + distance,
+          totalDistanceWalked: get().totalDistanceWalked + distance,
           playerStats: { ...playerStats, grit: playerStats.grit + totalGrit },
           progression: {
             ...progression,
@@ -258,41 +297,23 @@ export const useGameStore = create<GameStore>()(
             skillPoints: progression.skillPoints + (rankGained ? 2 : 0)
           },
           affinityXP: newAffinityXP,
-          secondaryFocus
+          secondaryFocus,
+          rawTraits: raw,
+          traits: final
         });
       },
 
       purchaseSkill: (skillId, gritCost, spCost = 0) => {
-        const { playerStats, unlockedSkills, progression, resonanceType = ResonanceType.ANCHOR } = get();
-        const canAffordGrit = playerStats.grit >= gritCost;
-        const canAffordSP = progression.skillPoints >= spCost;
-
-        if (canAffordGrit && canAffordSP && !unlockedSkills.includes(skillId)) {
+        const { playerStats, unlockedSkills, progression, resonanceType, affinityXP } = get();
+        if (playerStats.grit >= gritCost && progression.skillPoints >= spCost && !unlockedSkills.includes(skillId)) {
           const newSkills = [...unlockedSkills, skillId];
-          
-          // Recalculate traits based on base + new skill set with filter potency
-          const base = RESONANCE_STATS[resonanceType] || RESONANCE_STATS[ResonanceType.ANCHOR];
-          const totalTraits = { ...base };
-          
-          newSkills.forEach(id => {
-            const skill = SKILLS.find(s => s.id === id);
-            if (skill?.augments) {
-              const filterPotency = getResonanceFilter(resonanceType, skill.resonance);
-              
-              totalTraits.strength += (skill.augments.strength || 0) * filterPotency;
-              totalTraits.bond += (skill.augments.bond || 0) * filterPotency;
-              totalTraits.focus += (skill.augments.focus || 0) * filterPotency;
-              totalTraits.speed += (skill.augments.speed || 0) * filterPotency;
-              totalTraits.awareness += (skill.augments.awareness || 0) * filterPotency;
-              totalTraits.mastery += (skill.augments.mastery || 0) * filterPotency;
-            }
-          });
-
+          const { raw, final } = calculateFinalTraits(resonanceType, affinityXP, newSkills);
           set({
             playerStats: { ...playerStats, grit: playerStats.grit - gritCost },
             progression: { ...progression, skillPoints: progression.skillPoints - spCost },
             unlockedSkills: newSkills,
-            traits: totalTraits
+            rawTraits: raw,
+            traits: final
           });
           return true;
         }
@@ -300,22 +321,16 @@ export const useGameStore = create<GameStore>()(
       },
 
       respecSkills: (gritCost: number) => {
-        const { playerStats, progression, resonanceType = ResonanceType.ANCHOR, unlockedSkills } = get();
+        const { playerStats, progression, resonanceType, affinityXP } = get();
         if (playerStats.grit < gritCost) return false;
-
-        // Calculate total SP spent
-        let totalSPSpent = 0;
-        unlockedSkills.forEach(id => {
-          if (id === 'FOUNDATION') return;
-          const skill = SKILLS.find(s => s.id === id);
-          if (skill) totalSPSpent += skill.spCost;
-        });
-
+        const newSkills = ['FOUNDATION'];
+        const { raw, final } = calculateFinalTraits(resonanceType, affinityXP, newSkills);
         set({
           playerStats: { ...playerStats, grit: playerStats.grit - gritCost },
-          progression: { ...progression, skillPoints: progression.skillPoints + totalSPSpent },
-          unlockedSkills: ['FOUNDATION'],
-          traits: RESONANCE_STATS[resonanceType] || RESONANCE_STATS[ResonanceType.ANCHOR]
+          progression: { ...progression, skillPoints: progression.skillPoints + (get().unlockedSkills.length - 1) },
+          unlockedSkills: newSkills,
+          rawTraits: raw,
+          traits: final
         });
         return true;
       },
@@ -335,6 +350,7 @@ export const useGameStore = create<GameStore>()(
         dogStats: state.dogStats,
         unlockedSkills: state.unlockedSkills,
         traits: state.traits,
+        rawTraits: state.rawTraits,
         progression: state.progression,
         affinityXP: state.affinityXP,
         totalDistanceWalked: state.totalDistanceWalked,

@@ -64,7 +64,7 @@ describe('HUD Component', () => {
     fireEvent.click(returnBtn);
     
     expect(finalizeWalk).toHaveBeenCalled();
-    expect(useGameStore.getState().gameState).toBe(GameState.FINISHED);
+    expect(useGameStore.getState().gameState).toBe(GameState.HOME);
   });
 
   it('renders TrainingOverlay only when menuState is TRAINING and isMenuReady is true', () => {

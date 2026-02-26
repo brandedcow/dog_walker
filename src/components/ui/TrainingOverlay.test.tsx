@@ -21,9 +21,8 @@ describe('TrainingOverlay Component', () => {
     render(<TrainingOverlay />);
     
     expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
-    expect(screen.getByText('WALKER RANK:')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getAllByText('LV 4.0').length).toBeGreaterThan(0); // Anchor base levels
+    expect(screen.getByText(/RANK 1 PROGRESS/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/4.0/i).length).toBeGreaterThan(0); // Anchor base levels
   });
 
   it('switches between tabs', () => {

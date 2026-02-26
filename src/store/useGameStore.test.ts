@@ -115,8 +115,8 @@ describe('useGameStore', () => {
     expect(success).toBe(true);
     
     const finalState = useGameStore.getState();
-    // SPD_1 adds +1 Speed: Anchor Base (1) + (1 * 0.4 potency) = 1.4
-    expect(finalState.traits.speed).toBe(1.4);
+    // SPD_1 adds +1 Speed: Anchor Base (1) + 1 skill = 2 raw. 2 * 0.4 potency = 0.8
+    expect(finalState.traits.speed).toBe(0.8);
   });
 
   it('resets progress back to default values', () => {
