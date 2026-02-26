@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
 import { useGameStore } from './store/useGameStore';
-import { GameState, AffinityType, AFFINITY_STATS } from './types';
+import { GameState, ResonanceType, RESONANCE_STATS } from './types';
 
 describe('Golden Path Integration', () => {
   beforeEach(() => {
@@ -13,8 +13,8 @@ describe('Golden Path Integration', () => {
       playerStats: { strength: 1, grit: 0 },
       progression: { walkerRank: 1, xp: 0, skillPoints: 0 },
       distance: 0,
-      affinityType: AffinityType.ANCHOR,
-      attributes: AFFINITY_STATS[AffinityType.ANCHOR],
+      resonanceType: ResonanceType.ANCHOR,
+      traits: RESONANCE_STATS[ResonanceType.ANCHOR],
       unlockedSkills: ['FOUNDATION'],
     });
   });
@@ -49,7 +49,7 @@ describe('Golden Path Integration', () => {
     expect(finalState.gameState).toBe(GameState.HOME);
     
     // Base Grit (100/10=10) + Bonus (5) = 15. 
-    // Anchor Focus is 2. Multiplier = 1.0 + (2 * 0.05) = 1.1
+    // Anchor Awareness is 2. Multiplier = 1.0 + (2 * 0.05) = 1.1
     // Total Grit = floor(15 * 1.1) = 16
     expect(finalState.playerStats.grit).toBe(16);
     

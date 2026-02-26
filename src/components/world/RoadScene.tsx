@@ -15,7 +15,7 @@ export const RoadScene = () => {
   const { 
     gameState, setGameState, dogState, setDogState, isMovingForward, 
     setTension, setDistance, setPositions, finalizeWalk, unlockedSkills,
-    attributes 
+    traits 
   } = useGameStore();
   const playerPos = useRef(new Vector3(0, 1.7, 0));
   const povRotation = useRef({ yaw: 0, pitch: 0 });
@@ -112,8 +112,8 @@ export const RoadScene = () => {
     let lastAIState: any = null;
 
     while (accumulator.current >= FIXED_DELTA) {
-      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
-      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills, attributes);
+      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current, setTension, traits);
+      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills, traits);
 
       if (isMovingForward && gameState === GameState.PLAYING) {
         let tensionSlowdown = 1.0;
@@ -125,17 +125,17 @@ export const RoadScene = () => {
         
         // Strength Bonus from Skill Tree (Legacy check)
         let strengthBonus = 0;
-        if (unlockedSkills.includes('STRENGTH_1')) strengthBonus += 0.05;
-        if (unlockedSkills.includes('STRENGTH_2')) strengthBonus += 0.10;
+        if (unlockedSkills.includes('STR_1')) strengthBonus += 0.05;
+        if (unlockedSkills.includes('STR_2')) strengthBonus += 0.10;
         tensionSlowdown = Math.min(1.0, tensionSlowdown + strengthBonus);
 
         const yawDelta = Math.abs(povRotation.current.yaw - lastYaw.current);
-        // Focus reduces pan slowdown: Focus 1 = base (0.3), Focus 10 = 0.65 min
-        const panBuffer = 0.3 + (attributes.focus * 0.035);
+        // Awareness reduces pan slowdown
+        const panBuffer = 0.3 + (traits.awareness * 0.035);
         const panSlowdown = Math.max(panBuffer, 1.0 - (yawDelta * 10));
         
-        // Agility adds 0.3 per level to base speed (7.0)
-        const baseSpeed = PLAYER_BASE_SPEED + (attributes.agility * 0.3);
+        // Speed trait adds 0.3 per level to base speed (7.0)
+        const baseSpeed = PLAYER_BASE_SPEED + (traits.speed * 0.3);
         const speed = baseSpeed * tensionSlowdown * panSlowdown;
         
         playerPos.current.x += Math.sin(povRotation.current.yaw) * speed * FIXED_DELTA;

@@ -4,12 +4,12 @@ export interface Scent {
   tugsRequired: number;
 }
 
-export interface PlayerAttributes {
-  strength: number;  // Capacity to resist lunges (0.8 -> 1.0)
-  focus: number;     // Detection Radius for triggers
-  agility: number;   // Base movement velocity
-  bond: number;      // Responsiveness to verbal cues
-  awareness: number; // Environmental mastery / shortcuts
+export interface ResonanceTraits {
+  strength: number;  // Kinetic Force / Physical Control
+  bond: number;      // Psychological Connection / Non-verbal cues
+  awareness: number; // Detection radius for triggers
+  speed: number;     // Optimization of gait / stamina
+  mastery: number;   // Specialized heuristics / edge cases
 }
 
 export interface Progression {
@@ -71,21 +71,21 @@ export const DogSize = {
 } as const;
 export type DogSize = typeof DogSize[keyof typeof DogSize];
 
-export const AffinityType = {
+export const ResonanceType = {
   ANCHOR: 'Anchor',       // Enhancer: Strength
   WHISPERER: 'Whisperer', // Emitter: Bond
-  TACTICIAN: 'Tactician', // Manipulator: Focus
-  NOMAD: 'Nomad',         // Transmuter: Agility
+  TACTICIAN: 'Tactician', // Manipulator: Awareness
+  NOMAD: 'Nomad',         // Transmuter: Speed
   URBANIST: 'Urbanist',   // Conjurer: Awareness
-  SPECIALIST: 'Specialist' // Specialist: Niche Mastery
+  SPECIALIST: 'Specialist' // Specialist: Mastery
 } as const;
-export type AffinityType = typeof AffinityType[keyof typeof AffinityType];
+export type ResonanceType = typeof ResonanceType[keyof typeof ResonanceType];
 
-export const AFFINITY_STATS: Record<AffinityType, PlayerAttributes> = {
-  [AffinityType.ANCHOR]: { strength: 4, agility: 1, focus: 2, bond: 2, awareness: 1 },
-  [AffinityType.WHISPERER]: { strength: 2, agility: 2, focus: 2, bond: 4, awareness: 1 },
-  [AffinityType.TACTICIAN]: { strength: 1, agility: 2, focus: 4, bond: 2, awareness: 2 },
-  [AffinityType.NOMAD]: { strength: 1, agility: 4, focus: 2, bond: 1, awareness: 3 },
-  [AffinityType.URBANIST]: { strength: 2, agility: 1, focus: 3, bond: 1, awareness: 4 },
-  [AffinityType.SPECIALIST]: { strength: 2, agility: 2, focus: 2, bond: 3, awareness: 2 },
+export const RESONANCE_STATS: Record<ResonanceType, ResonanceTraits> = {
+  [ResonanceType.ANCHOR]: { strength: 4, bond: 2, awareness: 2, speed: 1, mastery: 1 },
+  [ResonanceType.WHISPERER]: { strength: 2, bond: 4, awareness: 2, speed: 2, mastery: 1 },
+  [ResonanceType.TACTICIAN]: { strength: 1, bond: 2, awareness: 4, speed: 2, mastery: 2 },
+  [ResonanceType.NOMAD]: { strength: 1, bond: 1, awareness: 2, speed: 4, mastery: 3 },
+  [ResonanceType.URBANIST]: { strength: 2, bond: 1, awareness: 4, speed: 1, mastery: 3 },
+  [ResonanceType.SPECIALIST]: { strength: 2, bond: 2, awareness: 2, speed: 2, mastery: 4 },
 };

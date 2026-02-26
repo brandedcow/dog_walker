@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './useGameStore';
-import { GameState, DogState, MenuState, AffinityType, AFFINITY_STATS } from '../types';
+import { GameState, DogState, MenuState, ResonanceType, RESONANCE_STATS } from '../types';
 
 describe('useGameStore', () => {
   beforeEach(() => {
@@ -11,11 +11,11 @@ describe('useGameStore', () => {
       gameState: GameState.HOME,
       dogState: DogState.STANDING,
       menuState: MenuState.IDLE,
-      affinityType: AffinityType.ANCHOR,
+      resonanceType: ResonanceType.ANCHOR,
       tension: 0,
       distance: 0,
       playerStats: { strength: 1, grit: 0 },
-      attributes: AFFINITY_STATS[AffinityType.ANCHOR],
+      traits: RESONANCE_STATS[ResonanceType.ANCHOR],
       progression: { walkerRank: 1, xp: 0, skillPoints: 0 },
       unlockedSkills: ['FOUNDATION'],
       hasStrained: false,
@@ -33,8 +33,8 @@ describe('useGameStore', () => {
     
     // Base Grit = distance / 10 = 10
     // Bonus Grit = 10 * 0.5 = 5 (No strain)
-    // Total Grit (before focus) = 15
-    // Focus 2 multiplier (Anchor base) = 1.0 + (2 * 0.05) = 1.1
+    // Total Grit (before awareness) = 15
+    // Awareness 2 multiplier (Anchor base) = 1.0 + (2 * 0.05) = 1.1
     // Total Grit = floor(15 * 1.1) = 16
     expect(updatedState.playerStats.grit).toBe(16);
     
@@ -46,14 +46,14 @@ describe('useGameStore', () => {
     expect(updatedState.progression.skillPoints).toBe(2);
   });
 
-  it('scales Grit reward based on Focus attribute', () => {
+  it('scales Grit reward based on Awareness trait', () => {
     const store = useGameStore.getState();
     
-    // Set high Focus (Level 10)
+    // Set high Awareness (Level 10)
     useGameStore.setState({ 
       distance: 100, 
       hasStrained: false,
-      attributes: { strength: 4, focus: 10, agility: 1, bond: 2, awareness: 1 }
+      traits: { strength: 4, bond: 2, awareness: 10, speed: 1, mastery: 1 }
     });
     
     store.finalizeWalk();
@@ -61,7 +61,7 @@ describe('useGameStore', () => {
     const updatedState = useGameStore.getState();
     
     // Base + Bonus = 15
-    // Focus 10 multiplier = 1.0 + (10 * 0.05) = 1.5
+    // Awareness 10 multiplier = 1.0 + (10 * 0.05) = 1.5
     // Total Grit = floor(15 * 1.5) = 22
     expect(updatedState.playerStats.grit).toBe(22);
   });
@@ -77,7 +77,7 @@ describe('useGameStore', () => {
     expect(useGameStore.getState().hasStrained).toBe(true);
 
     // Reset and increase Strength
-    useGameStore.setState({ hasStrained: false, attributes: { strength: 8, focus: 2, agility: 1, bond: 2, awareness: 1 } });
+    useGameStore.setState({ hasStrained: false, traits: { strength: 8, bond: 2, awareness: 2, speed: 1, mastery: 1 } });
     
     // Strength 8: threshold = 0.78 + (8 * 0.02) = 0.94
     store.setTension(0.93);
@@ -87,7 +87,7 @@ describe('useGameStore', () => {
     expect(useGameStore.getState().hasStrained).toBe(true);
   });
 
-  it('manages skill purchases correctly with efficiency', () => {
+  it('manages skill purchases correctly with potency', () => {
     const store = useGameStore.getState();
     
     // Initial state: 0 Grit, 0 SP
@@ -101,23 +101,22 @@ describe('useGameStore', () => {
       progression: { walkerRank: 5, xp: 5000, skillPoints: 5 }
     });
 
-    // Anchor player buying Anchor skill (Efficiency 100%)
+    // Anchor player buying Anchor skill (Potency 100%)
     success = useGameStore.getState().purchaseSkill('STR_1', 50, 1);
     expect(success).toBe(true);
     
     const intermediateState = useGameStore.getState();
     expect(intermediateState.unlockedSkills).toContain('STR_1');
     // STR_1 adds +1 Strength: Anchor Base (4) + STR_1 (1) = 5
-    expect(intermediateState.attributes.strength).toBe(5);
+    expect(intermediateState.traits.strength).toBe(5);
 
-    // Anchor player buying Nomad skill (Opposite of Anchor is Nomad in some interpretations, 
-    // but in our order: Anchor (0), Whisperer (1), Tactician (2), Nomad (3) -> distance 3 = 40% efficiency)
-    success = useGameStore.getState().purchaseSkill('AGI_1', 50, 1);
+    // Anchor player buying Nomad skill (Distance 3 = 40% potency)
+    success = useGameStore.getState().purchaseSkill('SPD_1', 50, 1);
     expect(success).toBe(true);
     
     const finalState = useGameStore.getState();
-    // AGI_1 adds +1 Agility: Anchor Base (1) + (1 * 0.4 efficiency) = 1.4
-    expect(finalState.attributes.agility).toBe(1.4);
+    // SPD_1 adds +1 Speed: Anchor Base (1) + (1 * 0.4 potency) = 1.4
+    expect(finalState.traits.speed).toBe(1.4);
   });
 
   it('resets progress back to default values', () => {
@@ -125,21 +124,21 @@ describe('useGameStore', () => {
     
     // Set non-default state
     useGameStore.setState({ 
-      affinityType: AffinityType.NOMAD,
+      resonanceType: ResonanceType.NOMAD,
       playerStats: { strength: 1, grit: 500 },
       progression: { walkerRank: 10, xp: 9000, skillPoints: 8 },
-      unlockedSkills: ['FOUNDATION', 'STR_1', 'AGI_1'],
-      attributes: { strength: 5, focus: 5, agility: 5, bond: 5, awareness: 5 }
+      unlockedSkills: ['FOUNDATION', 'STR_1', 'SPD_1'],
+      traits: { strength: 5, bond: 5, awareness: 5, speed: 5, mastery: 5 }
     });
 
     store.resetProgress();
     
     const finalState = useGameStore.getState();
-    expect(finalState.affinityType).toBe(AffinityType.ANCHOR);
+    expect(finalState.resonanceType).toBe(ResonanceType.ANCHOR);
     expect(finalState.playerStats.grit).toBe(0);
     expect(finalState.progression.walkerRank).toBe(1);
     expect(finalState.unlockedSkills).toEqual(['FOUNDATION']);
     // Anchor Base Strength is 4
-    expect(finalState.attributes.strength).toBe(4);
+    expect(finalState.traits.strength).toBe(4);
   });
 });

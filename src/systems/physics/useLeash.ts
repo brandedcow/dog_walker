@@ -1,13 +1,21 @@
 import { useRef } from 'react';
 import { Vector3 } from 'three';
 import { LEASH_NODES, LEASH_FRICTION, LEASH_GRAVITY, LEASH_STIFFNESS, SEGMENT_LENGTH, MAX_LEASH_LENGTH } from '../../config/constants';
+import type { ResonanceTraits } from '../../types';
 
 export const useLeash = () => {
   const nodes = useRef<Vector3[]>(Array.from({ length: LEASH_NODES }, (_, i) => new Vector3(0, 2 - (i * 0.1), -i * 0.1)));
   const oldNodes = useRef<Vector3[]>(Array.from({ length: LEASH_NODES }, (_, i) => new Vector3(0, 2 - (i * 0.1), -i * 0.1)));
   const tugRecoil = useRef(0);
 
-  const update = (delta: number, playerPos: Vector3, dogPos: Vector3, dogRotation: number) => {
+  const update = (
+    delta: number, 
+    playerPos: Vector3, 
+    dogPos: Vector3, 
+    dogRotation: number,
+    onStrain: (tension: number) => void,
+    traits: ResonanceTraits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 }
+  ) => {
     if (tugRecoil.current > 0) {
       tugRecoil.current *= 0.85;
       if (tugRecoil.current < 0.01) tugRecoil.current = 0;
@@ -77,6 +85,12 @@ export const useLeash = () => {
 
     const rawTension = Math.max(0, Math.min((distVec - 1.5) / (MAX_LEASH_LENGTH - 1.5), 1.0));
     const t = Math.max(0, rawTension - (tugRecoil.current * 0.7));
+
+    // D. Strain Check
+    const threshold = 0.78 + (traits.strength * 0.02);
+    if (t > threshold) {
+      onStrain(t);
+    }
 
     return { nodes: n, rawTension, tension: t, tugRecoil: tugRecoil.current };
   };

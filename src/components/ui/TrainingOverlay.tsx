@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useGameStore, getSkillEfficiency, AFFINITY_ORDER } from '../../store/useGameStore';
+import { useGameStore, getResonanceFilter, RESONANCE_ORDER } from '../../store/useGameStore';
 import { SKILLS, type Skill } from '../../config/skills';
-import { MenuState, AffinityType } from '../../types';
+import { MenuState, ResonanceType } from '../../types';
 
 const SkillNode = ({
   skill,
@@ -9,7 +9,7 @@ const SkillNode = ({
   available,
   canAffordGrit,
   canAffordSP,
-  efficiency,
+  potency,
   onPurchase,
 }: {
   skill: Skill;
@@ -17,7 +17,7 @@ const SkillNode = ({
   available: boolean;
   canAffordGrit: boolean;
   canAffordSP: boolean;
-  efficiency: number;
+  potency: number;
   onPurchase: () => void;
 }) => (
   <div
@@ -58,8 +58,8 @@ const SkillNode = ({
           <span style={{ color: canAffordSP ? "#1976d2" : "#d32f2f" }}>{skill.spCost}SP</span>
         </div>
       )}
-      <div style={{ fontSize: '10px', fontWeight: 'bold', color: efficiency === 1 ? '#2e7d32' : efficiency >= 0.6 ? '#fbc02d' : '#d32f2f' }}>
-        EFFICIENCY: {Math.round(efficiency * 100)}%
+      <div style={{ fontSize: '10px', fontWeight: 'bold', color: potency === 1 ? '#2e7d32' : potency >= 0.6 ? '#fbc02d' : '#d32f2f' }}>
+        POTENCY: {Math.round(potency * 100)}%
       </div>
     </div>
     
@@ -68,12 +68,12 @@ const SkillNode = ({
 );
 
 const HexagramVisualizer = ({ 
-  currentAffinity, 
-  onAffinitySelect, 
+  currentResonance, 
+  onResonanceSelect, 
   canSwitch 
 }: { 
-  currentAffinity: AffinityType, 
-  onAffinitySelect: (type: AffinityType) => void,
+  currentResonance: ResonanceType, 
+  onResonanceSelect: (type: ResonanceType) => void,
   canSwitch: boolean
 }) => {
   const size = 300;
@@ -81,7 +81,7 @@ const HexagramVisualizer = ({
   const radius = 85;
   const labelRadius = 115;
 
-  const points = AFFINITY_ORDER.map((_, i) => {
+  const points = RESONANCE_ORDER.map((_, i) => {
     const angle = (i * 60 - 90) * (Math.PI / 180);
     return {
       x: center + radius * Math.cos(angle),
@@ -93,7 +93,7 @@ const HexagramVisualizer = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative' }}>
-      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', textAlign: 'center' }}>Canine Affinity Hexagram</h3>
+      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', textAlign: 'center' }}>Canine Resonance Hexagram</h3>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <svg width={size} height={size + 40} style={{ overflow: 'visible' }}>
           <polygon
@@ -114,13 +114,13 @@ const HexagramVisualizer = ({
             />
           ))}
 
-          {AFFINITY_ORDER.map((type, i) => {
+          {RESONANCE_ORDER.map((type, i) => {
             const p = points[i];
-            const isCurrent = type === currentAffinity;
-            const efficiency = getSkillEfficiency(currentAffinity, type);
+            const isCurrent = type === currentResonance;
+            const potency = getResonanceFilter(currentResonance, type);
             
             return (
-              <g key={type} onClick={() => canSwitch && onAffinitySelect(type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
+              <g key={type} onClick={() => canSwitch && onResonanceSelect(type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
                 <circle
                   cx={p.x} cy={p.y} r={isCurrent ? 8 : 5}
                   fill={isCurrent ? "#2c3e50" : "#d1cdb0"}
@@ -147,10 +147,10 @@ const HexagramVisualizer = ({
                   style={{ 
                     fontSize: '10px', 
                     fontWeight: 'bold', 
-                    fill: efficiency === 1 ? '#2e7d32' : efficiency >= 0.6 ? '#fbc02d' : '#d32f2f'
+                    fill: potency === 1 ? '#2e7d32' : potency >= 0.6 ? '#fbc02d' : '#d32f2f'
                   }}
                 >
-                  {Math.round(efficiency * 100)}%
+                  {Math.round(potency * 100)}%
                 </text>
               </g>
             );
@@ -159,7 +159,7 @@ const HexagramVisualizer = ({
       </div>
       {canSwitch && (
         <div style={{ position: 'absolute', bottom: '10px', left: '0', right: '0', textAlign: 'center', fontSize: '10px', fontStyle: 'italic', opacity: 0.6 }}>
-          * Tap an affinity to switch (Rank 1 only)
+          * Tap a frequency to tune (Rank 1 only)
         </div>
       )}
     </div>
@@ -173,10 +173,10 @@ export const TrainingOverlay = () => {
     unlockedSkills,
     purchaseSkill,
     respecSkills,
-    attributes = { strength: 1, bond: 1, focus: 1, agility: 1, awareness: 1 },
+    traits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 },
     progression,
-    affinityType = AffinityType.ANCHOR,
-    setAffinityType
+    resonanceType = ResonanceType.ANCHOR,
+    setResonanceType
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
@@ -191,13 +191,13 @@ export const TrainingOverlay = () => {
     }
   };
 
-  const skillPaths = [
-    { label: 'ANCHOR', type: AffinityType.ANCHOR, skills: SKILLS.filter(s => s.affinity === AffinityType.ANCHOR) },
-    { label: 'WHISPERER', type: AffinityType.WHISPERER, skills: SKILLS.filter(s => s.affinity === AffinityType.WHISPERER) },
-    { label: 'TACTICIAN', type: AffinityType.TACTICIAN, skills: SKILLS.filter(s => s.affinity === AffinityType.TACTICIAN) },
-    { label: 'NOMAD', type: AffinityType.NOMAD, skills: SKILLS.filter(s => s.affinity === AffinityType.NOMAD) },
-    { label: 'URBANIST', type: AffinityType.URBANIST, skills: SKILLS.filter(s => s.affinity === AffinityType.URBANIST) },
-    { label: 'SPECIALIST', type: AffinityType.SPECIALIST, skills: SKILLS.filter(s => s.affinity === AffinityType.SPECIALIST) },
+  const resonancePaths = [
+    { label: 'ANCHOR', type: ResonanceType.ANCHOR, skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
+    { label: 'WHISPERER', type: ResonanceType.WHISPERER, skills: SKILLS.filter(s => s.resonance === ResonanceType.WHISPERER) },
+    { label: 'TACTICIAN', type: ResonanceType.TACTICIAN, skills: SKILLS.filter(s => s.resonance === ResonanceType.TACTICIAN) },
+    { label: 'NOMAD', type: ResonanceType.NOMAD, skills: SKILLS.filter(s => s.resonance === ResonanceType.NOMAD) },
+    { label: 'URBANIST', type: ResonanceType.URBANIST, skills: SKILLS.filter(s => s.resonance === ResonanceType.URBANIST) },
+    { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
   return (
@@ -308,7 +308,7 @@ export const TrainingOverlay = () => {
                 marginBottom: '5px'
               }}
             >
-              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
+              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC FREQUENCY'}
             </button>
           )}
         </div>
@@ -331,7 +331,7 @@ export const TrainingOverlay = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontSize: '12px', opacity: 0.7 }}>PRIMARY AFFINITY:</div>
-                  <div style={{ fontSize: '24px', fontWeight: '900', color: '#2c3e50' }}>{affinityType.toUpperCase()}</div>
+                  <div style={{ fontSize: '24px', fontWeight: '900', color: '#2c3e50' }}>{resonanceType.toUpperCase()}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '12px', opacity: 0.7 }}>WALKER RANK:</div>
@@ -350,31 +350,31 @@ export const TrainingOverlay = () => {
               </div>
             </div>
 
-            {/* Affinity Efficiency Hexagram */}
+            {/* Resonance Hexagram */}
             <HexagramVisualizer 
-              currentAffinity={affinityType} 
-              onAffinitySelect={setAffinityType} 
+              currentResonance={resonanceType} 
+              onResonanceSelect={setResonanceType} 
               canSwitch={progression.walkerRank === 1} 
             />
 
-            {/* Attributes */}
+            {/* Resonance Traits */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
               {[
-                { label: 'ARM STRENGTH', value: attributes.strength, color: '#d32f2f', desc: 'Resistance to lunges & physical control' },
-                { label: 'CANINE BOND', value: attributes.bond, color: '#fbc02d', desc: 'Responsiveness to verbal cues & calm energy' },
-                { label: 'FOCUS', value: attributes.focus, color: '#1976d2', desc: 'Detection radius for triggers & environmental cues' },
-                { label: 'WALKING SPEED', value: attributes.agility, color: '#388e3c', desc: 'Base movement velocity & efficiency' },
-                { label: 'SITUATIONAL AWARENESS', value: attributes.awareness, color: '#8e24aa', desc: 'Environmental mastery & neighborhood flow' },
-              ].map((attr) => (
-                <div key={attr.label}>
+                { label: 'STRENGTH', value: traits.strength, color: '#d32f2f', desc: 'Resist kinetic force & maintain control' },
+                { label: 'BOND', value: traits.bond, color: '#fbc02d', desc: 'Psychological connection & non-verbal cues' },
+                { label: 'AWARENESS', value: traits.awareness, color: '#1976d2', desc: 'Detection radius for environmental triggers' },
+                { label: 'SPEED', value: traits.speed, color: '#388e3c', desc: 'Optimization of gait & stamina efficiency' },
+                { label: 'MASTERY', value: traits.mastery, color: '#8e24aa', desc: 'Specialized heuristics for chaotic cases' },
+              ].map((trait) => (
+                <div key={trait.label}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', marginBottom: '8px', fontWeight: '900' }}>
-                    <span>{attr.label}</span>
-                    <span>LV {(attr.value || 0).toFixed(1)}</span>
+                    <span>{trait.label}</span>
+                    <span>LV {(trait.value || 0).toFixed(1)}</span>
                   </div>
                   <div style={{ width: '100%', height: '20px', background: '#d1cdb0', borderRadius: '10px', border: '2px solid #2c3e50', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.min(100, (attr.value / 10) * 100)}%`, height: '100%', background: attr.color }} />
+                    <div style={{ width: `${Math.min(100, (trait.value / 10) * 100)}%`, height: '100%', background: trait.color }} />
                   </div>
-                  <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '6px' }}>{attr.desc}</div>
+                  <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '6px' }}>{trait.desc}</div>
                 </div>
               ))}
             </div>
@@ -383,13 +383,13 @@ export const TrainingOverlay = () => {
 
         {activeTab === 'SKILLS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            {skillPaths.map((path) => {
-              const efficiency = getSkillEfficiency(affinityType, path.type);
+            {resonancePaths.map((path) => {
+              const potency = getResonanceFilter(resonanceType, path.type);
               return (
                 <div key={path.label} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #2c3e50', paddingBottom: '5px' }}>
                     <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900' }}>
-                      {path.label} ({Math.round(efficiency * 100)}%)
+                      {path.label} ({Math.round(potency * 100)}%)
                     </h3>
                   </div>
                   <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px', WebkitOverflowScrolling: 'touch' }}>
@@ -406,7 +406,7 @@ export const TrainingOverlay = () => {
                             available={available}
                             canAffordGrit={canAffordGrit}
                             canAffordSP={canAffordSP}
-                            efficiency={efficiency}
+                            potency={potency}
                             onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
                           />
                         </div>
@@ -434,7 +434,7 @@ export const TrainingOverlay = () => {
               </div>
             ))}
             <div style={{ marginTop: '20px', fontSize: '16px', fontStyle: 'italic', opacity: 0.6, textAlign: 'center' }}>
-              * Commands are more effective as attributes and skill augments increase.
+              * Commands are more effective as resonance traits and skill augments increase.
             </div>
           </div>
         )}

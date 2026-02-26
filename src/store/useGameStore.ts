@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { PlayerAttributes, Progression, AffinityType as PlayerAffinity } from '../types';
-import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, AffinityType, AFFINITY_STATS } from '../types';
+import type { ResonanceTraits, Progression, ResonanceType as PlayerResonance } from '../types';
+import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, ResonanceType, RESONANCE_STATS } from '../types';
 import { SKILLS } from '../config/skills';
 
 export interface DogMetadata {
@@ -23,31 +23,31 @@ export interface DogStats {
   recallSpeed: number;
 }
 
-export const AFFINITY_ORDER = [
-  AffinityType.ANCHOR,
-  AffinityType.WHISPERER,
-  AffinityType.TACTICIAN,
-  AffinityType.NOMAD,
-  AffinityType.URBANIST,
-  AffinityType.SPECIALIST,
+export const RESONANCE_ORDER = [
+  ResonanceType.ANCHOR,
+  ResonanceType.WHISPERER,
+  ResonanceType.TACTICIAN,
+  ResonanceType.NOMAD,
+  ResonanceType.URBANIST,
+  ResonanceType.SPECIALIST,
 ];
 
-export const getSkillEfficiency = (playerAffinity: PlayerAffinity, skillAffinity: AffinityType | 'GENERAL'): number => {
-  if (skillAffinity === 'GENERAL') return 1.0;
-  if (!playerAffinity) return 1.0; // Fallback for undefined affinity
+export const getResonanceFilter = (playerResonance: PlayerResonance, skillResonance: ResonanceType | 'GENERAL'): number => {
+  if (skillResonance === 'GENERAL') return 1.0;
+  if (!playerResonance) return 1.0; 
   
-  const pIdx = AFFINITY_ORDER.indexOf(playerAffinity);
-  const sIdx = AFFINITY_ORDER.indexOf(skillAffinity);
+  const pIdx = RESONANCE_ORDER.indexOf(playerResonance);
+  const sIdx = RESONANCE_ORDER.indexOf(skillResonance);
   
-  if (pIdx === -1 || sIdx === -1) return 1.0; // Fallback if not found
+  if (pIdx === -1 || sIdx === -1) return 1.0; 
   
   const diff = Math.abs(pIdx - sIdx);
-  const distance = Math.min(diff, AFFINITY_ORDER.length - diff);
+  const distance = Math.min(diff, RESONANCE_ORDER.length - diff);
   
-  if (distance === 0) return 1.0;
-  if (distance === 1) return 0.8;
-  if (distance === 2) return 0.6;
-  return 0.4; // distance 3 (Opposite)
+  if (distance === 0) return 1.0; // Primary Type: 100% Resonance
+  if (distance === 1) return 0.8; // Adjacent Type: 80% Resonance
+  if (distance === 2) return 0.6; // Secondary Type: 60% Resonance
+  return 0.4; // Opposite Type: 40% Resonance
 };
 
 interface GameStore {
@@ -69,8 +69,8 @@ interface GameStore {
   isMenuReady: boolean;
   
   // Refined Progression
-  affinityType: PlayerAffinity;
-  attributes: PlayerAttributes;
+  resonanceType: PlayerResonance;
+  traits: ResonanceTraits;
   progression: Progression;
 
   setGameState: (state: GameState) => void;
@@ -90,11 +90,11 @@ interface GameStore {
   purchaseSkill: (skillId: string, gritCost: number, spCost?: number) => boolean;
   respecSkills: (gritCost: number) => boolean;
   resetProgress: () => void;
-  setAffinityType: (affinity: PlayerAffinity) => void;
+  setResonanceType: (resonance: PlayerResonance) => void;
 }
 
 const DEFAULT_PROG_STATE = {
-  affinityType: AffinityType.ANCHOR,
+  resonanceType: ResonanceType.ANCHOR,
   dogMetadata: {
     name: 'BUSTER',
     trainingLevel: TrainingLevel.COMPETENT,
@@ -112,7 +112,7 @@ const DEFAULT_PROG_STATE = {
     recallSpeed: 12.0,
   },
   unlockedSkills: ['FOUNDATION'],
-  attributes: AFFINITY_STATS[AffinityType.ANCHOR],
+  traits: RESONANCE_STATS[ResonanceType.ANCHOR],
   progression: {
     walkerRank: 1,
     xp: 0,
@@ -137,8 +137,8 @@ export const useGameStore = create<GameStore>()(
       hasStrained: false,
       isMenuReady: false,
 
-      setAffinityType: (affinityType: PlayerAffinity) => {
-        set({ affinityType, attributes: AFFINITY_STATS[affinityType] });
+      setResonanceType: (resonanceType: PlayerResonance) => {
+        set({ resonanceType, traits: RESONANCE_STATS[resonanceType] });
       },
 
       setGameState: (gameState) => {
@@ -154,9 +154,9 @@ export const useGameStore = create<GameStore>()(
       setMenuState: (menuState) => set({ menuState, isMenuReady: false }),
       setIsMenuReady: (isMenuReady) => set({ isMenuReady }),
       setTension: (tension) => {
-        const { attributes = { strength: 1 } } = get();
+        const { traits = { strength: 1 } } = get();
         // Total Strength affects threshold
-        const threshold = 0.78 + (attributes.strength * 0.02);
+        const threshold = 0.78 + (traits.strength * 0.02);
 
         if (tension > threshold) set({ hasStrained: true });
         set({ tension });
@@ -187,14 +187,14 @@ export const useGameStore = create<GameStore>()(
       setHasStrained: (hasStrained) => set({ hasStrained }),
       
       finalizeWalk: () => {
-        const { distance, hasStrained, playerStats, progression, attributes = { focus: 1 }, totalDistanceWalked } = get();
+        const { distance, hasStrained, playerStats, progression, traits = { awareness: 1 }, totalDistanceWalked } = get();
         const baseGrit = Math.floor(distance / 10);
         const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
         let totalGrit = baseGrit + bonusGrit;
         
-        // Dynamic attribute bonus: Focus grants +5% per level
-        const focusMultiplier = 1.0 + (attributes.focus * 0.05);
-        totalGrit = Math.floor(totalGrit * focusMultiplier);
+        // Dynamic trait bonus: Awareness grants +5% per level
+        const awarenessMultiplier = 1.0 + (traits.awareness * 0.05);
+        totalGrit = Math.floor(totalGrit * awarenessMultiplier);
 
         const earnedXP = Math.floor(distance * 10);
         const newXP = progression.xp + earnedXP;
@@ -216,27 +216,27 @@ export const useGameStore = create<GameStore>()(
       },
 
       purchaseSkill: (skillId, gritCost, spCost = 0) => {
-        const { playerStats, unlockedSkills, progression, affinityType = AffinityType.ANCHOR } = get();
+        const { playerStats, unlockedSkills, progression, resonanceType = ResonanceType.ANCHOR } = get();
         const canAffordGrit = playerStats.grit >= gritCost;
         const canAffordSP = progression.skillPoints >= spCost;
 
         if (canAffordGrit && canAffordSP && !unlockedSkills.includes(skillId)) {
           const newSkills = [...unlockedSkills, skillId];
           
-          // Recalculate attributes based on base + new skill set with efficiency
-          const base = AFFINITY_STATS[affinityType] || AFFINITY_STATS[AffinityType.ANCHOR];
-          const totalAttrs = { ...base };
+          // Recalculate traits based on base + new skill set with filter potency
+          const base = RESONANCE_STATS[resonanceType] || RESONANCE_STATS[ResonanceType.ANCHOR];
+          const totalTraits = { ...base };
           
           newSkills.forEach(id => {
             const skill = SKILLS.find(s => s.id === id);
             if (skill?.augments) {
-              const efficiency = getSkillEfficiency(affinityType, skill.affinity);
+              const filterPotency = getResonanceFilter(resonanceType, skill.resonance);
               
-              totalAttrs.strength += (skill.augments.strength || 0) * efficiency;
-              totalAttrs.agility += (skill.augments.agility || 0) * efficiency;
-              totalAttrs.focus += (skill.augments.focus || 0) * efficiency;
-              totalAttrs.bond += (skill.augments.bond || 0) * efficiency;
-              totalAttrs.awareness += (skill.augments.awareness || 0) * efficiency;
+              totalTraits.strength += (skill.augments.strength || 0) * filterPotency;
+              totalTraits.bond += (skill.augments.bond || 0) * filterPotency;
+              totalTraits.awareness += (skill.augments.awareness || 0) * filterPotency;
+              totalTraits.speed += (skill.augments.speed || 0) * filterPotency;
+              totalTraits.mastery += (skill.augments.mastery || 0) * filterPotency;
             }
           });
 
@@ -244,7 +244,7 @@ export const useGameStore = create<GameStore>()(
             playerStats: { ...playerStats, grit: playerStats.grit - gritCost },
             progression: { ...progression, skillPoints: progression.skillPoints - spCost },
             unlockedSkills: newSkills,
-            attributes: totalAttrs
+            traits: totalTraits
           });
           return true;
         }
@@ -252,7 +252,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       respecSkills: (gritCost: number) => {
-        const { playerStats, progression, affinityType = AffinityType.ANCHOR, unlockedSkills } = get();
+        const { playerStats, progression, resonanceType = ResonanceType.ANCHOR, unlockedSkills } = get();
         if (playerStats.grit < gritCost) return false;
 
         // Calculate total SP spent
@@ -267,7 +267,7 @@ export const useGameStore = create<GameStore>()(
           playerStats: { ...playerStats, grit: playerStats.grit - gritCost },
           progression: { ...progression, skillPoints: progression.skillPoints + totalSPSpent },
           unlockedSkills: ['FOUNDATION'],
-          attributes: AFFINITY_STATS[affinityType] || AFFINITY_STATS[AffinityType.ANCHOR]
+          traits: RESONANCE_STATS[resonanceType] || RESONANCE_STATS[ResonanceType.ANCHOR]
         });
         return true;
       },
@@ -280,16 +280,15 @@ export const useGameStore = create<GameStore>()(
       name: 'barking-mad-save',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        affinityType: state.affinityType,
+        resonanceType: state.resonanceType,
         dogMetadata: state.dogMetadata,
         playerStats: state.playerStats,
         dogStats: state.dogStats,
         unlockedSkills: state.unlockedSkills,
-        attributes: state.attributes,
+        traits: state.traits,
         progression: state.progression,
         totalDistanceWalked: state.totalDistanceWalked,
       }),
     }
   )
 );
-

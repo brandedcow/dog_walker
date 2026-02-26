@@ -27,9 +27,9 @@
 
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
-| **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED`, `attributes.agility/focus`        |
+| **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED`, `traits.speed/awareness`          |
 | **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
-| **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
+| **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `traits.bond`               |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
 | **State (Zustand)**   | Centralized event-driven state with **localStorage persistence**.  | `useGameStore`: `GameState`, `DogState`, `MenuState` |
 | **Audio (useAudioEngine)** | Manages 3D spatial audio and dynamic mechanical feedback.       | `AudioListener`, `THREE.Audio`, `fade()`            |
@@ -56,21 +56,21 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 - **COME:** High-speed recall toward the player.
 - **SIT:** Stationary anchor state.
 
-### 3.4 Attribute Scaling
-Player attributes are dynamically calculated from a base **Affinity Type** (Anchor, Whisperer, Tactician, Nomad, Urbanist, Specialist) foundation plus active **Skill Tree Augments**. These values directly modify physical gameplay:
-- **Arm Strength:** Increases the tension threshold before the leash strains (`0.78 + (total_strength * 0.02)`).
-- **Canine Bond:** Accelerates the dog's recall speed when executing commands (`12.0 + (total_bond * 1.5)`).
-- **Focus:** Multiplies final Grit earned (`1.0 + (total_focus * 0.05)`) and stabilizes camera pan speed.
-- **Walking Speed:** Increases base player movement speed on the road (`7.0 + (total_agility * 0.3)`).
-- **Situational Awareness:** Environmental mastery; increases discovery radius and reward efficiency.
+### 3.4 The Resonance System (Attribute Scaling)
+Player attributes are dynamically calculated from a base **Resonance Type** (Anchor, Whisperer, Tactician, Nomad, Urbanist, Specialist) foundation plus active **Skill Tree Augments**. These values directly modify physical gameplay:
+- **Strength:** Increases the tension threshold before the leash strains (`0.78 + (total_strength * 0.02)`).
+- **Bond:** Accelerates the dog's recall speed when executing commands (`12.0 + (total_bond * 1.5)`).
+- **Awareness:** Multiplies final Grit earned (`1.0 + (total_awareness * 0.05)`) and stabilizes camera pan speed.
+- **Speed:** Increases base player movement speed on the road (`7.0 + (total_speed * 0.3)`).
+- **Mastery:** Specialized heuristics for managing "unwalkable" or chaotic dog types.
 
 ### 3.5 Progression & Persistence
 The game utilizes Zustand's `persist` middleware to ensure long-term growth is preserved across sessions.
-- **Canine Affinity Hexagram:** A player's starting personality determines their learning efficiency across the Hexagram (100% for Primary, down to 40% for the Opposite Type).
+- **Resonance Hexagram:** A player's starting frequency determines their learning potency across the Hexagram (100% for Primary, down to 40% for the Opposite Type).
 - **Skill Tree Augments:** Six specialization paths based on the Hexagram. Each path concludes with a "Hatsu" (Ultimate Ability).
 - **Economy:** Players earn 2 Skill Points (SP) per Rank up. Skills require both SP and Grit to unlock.
-- **Respec Mechanism:** Players can reset their skill allocation in the Hub for a Grit cost, allowing for build experimentation.
-- **Surgical Serialization:** Only progression-critical keys (`affinityType`, `playerStats`, `attributes`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
+- **Respec Mechanism:** Players can reset their resonance tuning in the Hub for a Grit cost, allowing for build experimentation.
+- **Surgical Serialization:** Only progression-critical keys (`resonanceType`, `playerStats`, `traits`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
 - **Lifetime Stats:** `totalDistanceWalked` tracks cumulative progress across all walks.
 
 ### 3.6 Audio Engine & Dynamic Feedback
@@ -101,10 +101,10 @@ The game features a state-driven audio system powered by `THREE.Audio`.
 ### 4.2 Tabbed Progression System (Training Overlay)
 The Training Manual is implemented as a full-screen 2D React overlay (`TrainingOverlay.tsx`) for maximum legibility on mobile devices.
 - **Coordination:** The overlay only renders after the 3D camera transition completes, signaled by the `isMenuReady` state in the `useGameStore`.
-- **DASHBOARD (Stats):** Tracks the player's numerical growth.
-- **FIELD NOTES (Skills):** A branching progression tree.
+- **DASHBOARD (Stats):** Tracks the player's numerical growth and resonance traits.
+- **FIELD NOTES (Skills):** A branching progression tree based on the Resonance Filter.
 - **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics.
-- **Affinity Hexagram:** An interactive SVG-based visualizer on the Stats page that illustrates the 6 affinity relationships and their current learning efficiency based on the player's primary type. Allows for affinity switching at Rank 1.
+- **Resonance Hexagram:** An interactive SVG-based visualizer on the Stats page that illustrates the 6 resonance relationships and their current potency based on the player's primary frequency. Allows for tuning at Rank 1.
 
 ### 4.3 HUD & Metadata
 - **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success, Training) are extracted into standalone components.

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TrainingOverlay } from './TrainingOverlay';
 import { useGameStore } from '../../store/useGameStore';
-import { MenuState, AffinityType } from '../../types';
+import { MenuState, ResonanceType } from '../../types';
 
 describe('TrainingOverlay Component', () => {
   beforeEach(() => {
@@ -12,8 +12,8 @@ describe('TrainingOverlay Component', () => {
       playerStats: { strength: 1, grit: 100 },
       progression: { walkerRank: 1, xp: 0, skillPoints: 5 },
       unlockedSkills: ['FOUNDATION'],
-      affinityType: AffinityType.ANCHOR,
-      attributes: { strength: 4, agility: 1, focus: 2, bond: 2, awareness: 1 }
+      resonanceType: ResonanceType.ANCHOR,
+      traits: { strength: 4, bond: 2, awareness: 2, speed: 1, mastery: 1 }
     });
   });
 

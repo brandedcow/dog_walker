@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Vector3 } from 'three';
 import { DOG_MOVE_SPEED } from '../../config/constants';
 import { DogState } from '../../types';
-import type { PlayerAttributes } from '../../types';
+import type { ResonanceTraits } from '../../types';
 
 export const useDogAI = () => {
   const dogPos = useRef(new Vector3(1.0, 0, 2.0));
@@ -19,12 +19,12 @@ export const useDogAI = () => {
     dogState: DogState, 
     setDogState: (s: DogState) => void,
     unlockedSkills: string[] = [],
-    attributes: PlayerAttributes = { strength: 1, focus: 1, agility: 1, bond: 1, awareness: 1 }
+    traits: ResonanceTraits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 }
   ) => {
     const prevDogPos = dogPos.current.clone();
 
     // Base recall speed (12.0) + skill bonuses + Bond bonus (1.5 per level)
-    let recallSpeed = 12.0 + (attributes.bond * 1.5);
+    let recallSpeed = 12.0 + (traits.bond * 1.5);
     if (unlockedSkills.includes('RECALL_1')) recallSpeed += 1.5;
     if (unlockedSkills.includes('RECALL_2')) recallSpeed += 3.0;
 

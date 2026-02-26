@@ -13,7 +13,7 @@ describe('useGameStore Persistence', () => {
     useGameStore.setState({ 
       playerStats: { strength: 1, grit: 123 },
       unlockedSkills: ['FOUNDATION', 'TEST_SKILL'],
-      attributes: { strength: 3, focus: 1, agility: 1, bond: 1, awareness: 1 }
+      traits: { strength: 3, bond: 1, awareness: 1, speed: 1, mastery: 1 }
     });
 
     // Zustand persistence is usually async-ish or triggered on changes
@@ -22,8 +22,8 @@ describe('useGameStore Persistence', () => {
     
     expect(savedData.state.playerStats.grit).toBe(123);
     expect(savedData.state.unlockedSkills).toContain('TEST_SKILL');
-    expect(savedData.state.attributes.strength).toBe(3);
-    expect(savedData.state.attributes.awareness).toBe(1);
+    expect(savedData.state.traits.strength).toBe(3);
+    expect(savedData.state.traits.awareness).toBe(1);
   });
 
   it('excludes transient session data from localStorage', () => {
