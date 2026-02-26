@@ -95,8 +95,53 @@ export const TrainingManual = ({ position }: { position: [number, number, number
         
         {/* Pages */}
         <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
-          <meshStandardMaterial color="#fff" />
+          <meshStandardMaterial color="#fdfcf0" />
+          {/* Ruled lines on physical pages */}
+          <meshStandardMaterial attach="material-0" color="#fdfcf0" /> {/* Side */}
+          <meshStandardMaterial attach="material-1" color="#fdfcf0" /> {/* Side */}
+          <meshStandardMaterial attach="material-2" color="#fdfcf0" /> {/* Top */}
+          <meshStandardMaterial attach="material-3" color="#fdfcf0" /> {/* Bottom */}
+          <meshStandardMaterial attach="material-4" color="#fdfcf0" /> {/* Front */}
+          <meshStandardMaterial attach="material-5" color="#fdfcf0" /> {/* Back */}
         </Box>
+
+        {/* Top Page Detail (Ruled Lines) */}
+        <mesh position={[0, 0.0505, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <planeGeometry args={[0.48, 0.68]} />
+          <meshStandardMaterial transparent opacity={0.3} polygonOffset polygonOffsetFactor={-1}>
+            <canvasTexture 
+              attach="map"
+              image={(function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d')!;
+                ctx.fillStyle = '#fdfcf0';
+                ctx.fillRect(0, 0, 512, 512);
+                
+                // Ruled lines
+                ctx.strokeStyle = '#abced4';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 512; i += 24) {
+                  ctx.beginPath();
+                  ctx.moveTo(0, i);
+                  ctx.lineTo(512, i);
+                  ctx.stroke();
+                }
+                
+                // Margin
+                ctx.strokeStyle = '#ffbaba';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(80, 0);
+                ctx.lineTo(80, 512);
+                ctx.stroke();
+                
+                return canvas;
+              })()}
+            />
+          </meshStandardMaterial>
+        </mesh>
 
         {/* Front Cover with Pivot at Binding */}
         <group position={[-0.25, 0.05, 0]} ref={coverRef}>
