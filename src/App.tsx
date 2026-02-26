@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useGameStore } from './store/useGameStore';
 import { RoadScene } from './components/world/RoadScene';
@@ -6,7 +5,7 @@ import { RoomScene } from './components/world/RoomScene';
 import { HUD } from './components/ui/HUD';
 
 export default function App() {
-  const { gameState, menuState } = useGameStore();
+  const { gameState } = useGameStore();
   
   const handleGo = () => { if ((window as any).handleGo) (window as any).handleGo(); };
 

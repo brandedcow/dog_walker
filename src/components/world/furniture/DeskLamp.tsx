@@ -1,4 +1,4 @@
-import { Box, Cylinder, Sphere } from "@react-three/drei";
+import { Cylinder, Sphere } from "@react-three/drei";
 
 export const DeskLamp = ({ position, rotation = [0, 0, 0], isOn }: { position: [number, number, number], rotation?: [number, number, number], isOn: boolean }) => {
   return (

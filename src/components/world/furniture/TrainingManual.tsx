@@ -110,7 +110,7 @@ export const TrainingManual = ({
   const coverRef = useRef<any>(null);
   const isOpen = menuState === "TRAINING";
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
 
     // Gaze-based focus detection
