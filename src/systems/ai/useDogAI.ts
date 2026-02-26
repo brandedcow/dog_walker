@@ -4,7 +4,7 @@ import { DOG_MOVE_SPEED } from '../../config/constants';
 import type { DogState } from '../../store/useGameStore';
 
 export const useDogAI = () => {
-  const dogPos = useRef(new Vector3(0, 0, -1));
+  const dogPos = useRef(new Vector3(0, 0, 1));
   const dogFacingYaw = useRef(0);
   const dogDistance = useRef(0);
   const lastDogUpdatePos = useRef(new Vector3(0, 0, -1));
@@ -18,14 +18,7 @@ export const useDogAI = () => {
     dogState: DogState, 
     setDogState: (s: DogState) => void
   ) => {
-    // Rotation logic (copied logic from DogModel visualization for physics sync)
-    if (dogState === 'WALKING' || dogState === 'COMING') {
-      const DOG_MOVE_SPEED = 9.0;
-      const moveX = Math.sin(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
-      const moveZ = -Math.cos(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
-      const targetRot = Math.atan2(moveX, moveZ);
-      currentRotation.current += (targetRot - currentRotation.current) * 0.1;
-    }
+    const prevDogPos = dogPos.current.clone();
 
     // Idling logic
     if (dogState === 'STANDING') {
@@ -63,6 +56,24 @@ export const useDogAI = () => {
       const moveZ = -Math.cos(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
       dogPos.current.x += moveX;
       dogPos.current.z += moveZ;
+    }
+
+    // Rotation logic (calculated after position update to capture displacement)
+    if (dogState === 'WALKING' || dogState === 'COMING' || dogState === 'IDLING') {
+      const moveX = dogPos.current.x - prevDogPos.x;
+      const moveZ = dogPos.current.z - prevDogPos.z;
+      const movementLength = Math.sqrt(moveX * moveX + moveZ * moveZ);
+      
+      if (movementLength > 0.0001) {
+        const targetRot = Math.atan2(moveX, moveZ);
+        // Smoothly interpolate towards target rotation
+        let angleDiff = targetRot - currentRotation.current;
+        // Normalize angle to -PI to PI
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        
+        currentRotation.current += angleDiff * 0.1;
+      }
     }
 
     // Distance tracking

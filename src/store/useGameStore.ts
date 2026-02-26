@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 
-export type GameState = 'START' | 'PLAYING' | 'FINISHED';
+export type GameState = 'START' | 'HOME' | 'PLAYING' | 'FINISHED';
 export type DogState = 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING';
+export type MenuState = 'IDLE' | 'KENNEL' | 'TRAINING' | 'GEAR' | 'RECORDS';
 
 export interface DogMetadata {
   name: string;
@@ -11,28 +12,46 @@ export interface DogMetadata {
   mood: string;
 }
 
+export interface PlayerStats {
+  strength: number;
+  grit: number;
+}
+
+export interface DogStats {
+  trainingLevel: number;
+  trust: number;
+  recallSpeed: number;
+}
+
 interface GameStore {
   gameState: GameState;
   dogState: DogState;
+  menuState: MenuState;
   tension: number;
   distance: number;
   positions: { px: number; pz: number; dx: number; dz: number };
   isMovingForward: boolean;
   isProfileExpanded: boolean;
   dogMetadata: DogMetadata;
+  playerStats: PlayerStats;
+  dogStats: DogStats;
 
   setGameState: (state: GameState) => void;
   setDogState: (state: DogState) => void;
+  setMenuState: (state: MenuState) => void;
   setTension: (tension: number) => void;
   setDistance: (distance: number) => void;
   setPositions: (positions: { px: number; pz: number; dx: number; dz: number }) => void;
   setIsMovingForward: (isMoving: boolean) => void;
   setIsProfileExpanded: (isExpanded: boolean) => void;
+  updatePlayerStats: (stats: Partial<PlayerStats>) => void;
+  updateDogStats: (stats: Partial<DogStats>) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
-  gameState: 'START',
+  gameState: 'HOME',
   dogState: 'STANDING',
+  menuState: 'IDLE',
   tension: 0,
   distance: 0,
   positions: { px: 0, pz: 0, dx: 0, dz: -1 },
@@ -45,12 +64,24 @@ export const useGameStore = create<GameStore>((set) => ({
     size: 'Small',
     mood: 'Curious',
   },
+  playerStats: {
+    strength: 1,
+    grit: 0,
+  },
+  dogStats: {
+    trainingLevel: 1,
+    trust: 0,
+    recallSpeed: 12.0,
+  },
 
   setGameState: (gameState) => set({ gameState }),
   setDogState: (dogState) => set({ dogState }),
+  setMenuState: (menuState) => set({ menuState }),
   setTension: (tension) => set({ tension }),
   setDistance: (distance) => set({ distance }),
   setPositions: (positions) => set({ positions }),
   setIsMovingForward: (isMovingForward) => set({ isMovingForward }),
   setIsProfileExpanded: (isProfileExpanded) => set({ isProfileExpanded }),
+  updatePlayerStats: (stats) => set((state) => ({ playerStats: { ...state.playerStats, ...stats } })),
+  updateDogStats: (stats) => set((state) => ({ dogStats: { ...state.dogStats, ...stats } })),
 }));

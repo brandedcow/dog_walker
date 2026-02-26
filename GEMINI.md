@@ -1,10 +1,10 @@
-# Project Specification: Barking Mad (MVP)
+# Project Specification: Barking Mad (Modular MVP)
 
 ---
 
 ## 1. Project Vision
 
-**Barking Mad** is a third-person dog walking simulation focusing on the mechanical and physical relationship between a human walker and a Dachshund. The game features manual movement, physics-based leash constraints, and a command-driven AI.
+**Barking Mad** is a third-person simulation focusing on the mechanical and physical relationship between a human walker and a Dachshund. The game features a spatial 3D hub for progression and management, transitioning seamlessly into physics-based "Infinite Road" gameplay.
 
 ---
 
@@ -15,66 +15,64 @@
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
 | **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED` (7.0), `panSlowdown`, `uiScale`    |
-| **Physics (useLeash)**| Verlet Integration + Position-Based Dynamics (PBD) for leash.      | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
-| **Canine AI (useDogAI)**| State machine managing dog behavior and autonomous pathing.      | `dogFacingYaw`, `dogDistance`, `COMING`, `IDLING`      |
-| **State (Zustand)**   | Centralized event-driven state for HUD and 3rd-person sync.        | `useGameStore`: `gameState`, `dogState`, `tension`     |
-| **HUD (React)**       | Modular UI components with dynamic scaling and safety locks.       | `ProfileCard`, `PawControls`, `SmartwatchMinimap`      |
+| **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
+| **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `IDLING`, `currentRotation`  |
+| **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
+| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `gameState`, `menuState`, `dogStats`   |
+| **HUD (React)**       | Modular UI components: Profile Card, Overlays, and Paw Controls.   | `KennelOverlay`, `TrainingOverlay`, `RecordsOverlay`   |
 
 ---
 
 ## 3. Core Mechanics & Logic
 
-### 3.1 Leash Physics (Verlet Integration)
-The leash is simulated as a chain of 60 nodes using Verlet Integration and PBD distance constraints.
-- **Tension Visuals:** The leash transitions from Dark Gray to Yellow (75%) to Bright Red (90%) as it stretches.
-- **Player Impact:** Non-linear slowdown occurs as tension increases. Full speed up to 75% tension, ramping down to 10% speed at 100% tension.
-- **Sub-stepping:** Physics calculations run at a fixed 480Hz (8 steps per 60fps frame) via a time-accumulator pattern to ensure stability across variable framerates.
+### 3.1 Leash Physics (Verlet + Dynamic Length)
+The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub-stepping (480Hz).
+- **Dynamic Retraction:** Leash segments contract when the dog is close and stretch to full length as tension increases.
+- **Collar Attachment:** Physically pinned to the dog's front "chest" facet, synchronized with the dog's rotation.
+- **Constraints:** Hard physical clamp at 15m; ground collision ensures visibility even when slack.
+- **Visuals:** Interpolates from Gray to Yellow (75%) to Red (90%+) based on stress.
 
-### 3.2 Command System (The "Paw" Controls)
-The player interacts with the dog through a cluster of 3 main command buttons:
-- **GO / TUG:** 
-    - **GO:** Sets the dog to `WALKING` and captures the player's current facing direction as the dog's path.
-    - **TUG:** Active when the dog is `WALKING`, `COMING`, or `SNIFFING`. Moves the dog 0.35m towards the player and releases 10% tension.
-- **COME:** Commands the dog to move directly towards the player at high speed (`12.0`) until within `1.2m`.
-- **SIT:** Anchors the dog to its current position.
+### 3.2 Canine AI & Unified Rotation
+- **Displacement-Driven Orientation:** The dog model smoothly rotates to face its actual travel vector calculated every frame.
+- **States:** WALKING (🐾), STANDING (🧍), SITTING (🪑), IDLING (💤), COMING (🐕).
+- **Idling:** Dog roams randomly within the leash slack if the player remains stationary.
 
-### 3.3 Dog AI & State Machine
-- **WALKING:** Dog moves autonomously along the captured yaw direction.
-- **IDLING:** After 5 seconds of the player being stationary, the dog roams randomly within a slack-leash radius.
-- **COMING:** Dog prioritizes returning to the player over its current path.
-- **STANDING/SITTING:** Stationary states used for control and anchoring.
+### 3.3 Command System (The "Paw")
+- **GO / TUG:** Captures camera heading for pathing (GO) or pulls the dog 0.35m closer (TUG).
+- **COME:** High-speed recall toward the player.
+- **SIT:** Stationary anchor state.
 
 ---
 
 ## 4. Interaction Model
 
-### 4.1 Movement
-- **Walk Toggle:** A single tap on the large central button toggles the player's walking state.
-- **3rd Person POV:** Camera is positioned `6m` behind and `2.5m` above the player.
-- **POV Panning:** Swipe anywhere on the screen to look around. 
-- **Pan Slowdown:** Player's move speed is reduced by up to `70%` during rapid camera panning to simulate loss of forward momentum.
+### 4.1 Spatial 3D Hub (The Room)
+- **Manual Navigation:** 3rd-person exploration of the room hub using standard walk/pan controls.
+- **Interactive Objects:** Raycast-based triggers for room modules:
+    - **Wooden Door**: Transition to "Infinite Road" gameplay.
+    - **Laptop**: Opens the Kennel (Dog stats/roster).
+    - **Training Book**: Opens Upgrades (Strength/Recall).
+    - **Trophy Shelf**: Opens Records (Total distance/milestones).
+- **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected.
 
-### 4.2 HUD (Profile Card)
-- **Walk Meter:** A single-line horizontal header showing progress. Driven by the actual physical distance the dog travels while in the `WALKING` state, using a `0.25m` update threshold to filter jitter.
-- **Status Emojis:** Visual feedback for dog states (🐾 WALKING, 🐕 COMING, 🪑 SITTING, 💤 IDLING, 🧍 STANDING).
-- **Layout:** Compact card (`115px`) with vertically stacked dog head and name.
-- **Integrated Tension:** The GO/TUG button's background acts as a vertical progress meter for leash tension.
+### 4.2 HUD & Metadata
+- **Expandable Profile:** Tapping the dog card reveals full metadata (Training Level, Characteristics, Mood, Size).
+- **Contextual Overlays:** 2D React interfaces for specific room modules, using Zustand for real-time stat synchronization.
+- **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
 
 ---
 
-## 5. Level Design: "The Infinite Road"
+## 5. Level Design & Environments
 
-- **Environment:** 3D sidewalk with depth, grass, and procedural trees.
-- **Performance:** Trees are rendered using `InstancedMesh` to allow for high-density environments with a single draw call.
-- **Win Condition:** Dog travels a total of **150 meters** in the `WALKING` state.
-- **Success State:** Reaching 150m triggers the "Mission Success" screen.
+- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture.
+- **The Infinite Road:** Procedural environment using `InstancedMesh` for high-performance tree and foliage rendering.
+- **Win Condition:** Accumulate 150m of walking distance in a single session.
 
 ---
 
 ## 6. Technical Implementation Notes
 
-### 6.1 State & Logic
-- **Modular Hooks:** Physics and AI logic are decoupled into `useLeash` and `useDogAI` respectively.
-- **Global State:** Zustand handles cross-component synchronization between the 3D SceneContent and the HUD.
-- **Responsive Logic:** `useWindowSize` hook calculates dynamic scaling for UI components to support mobile and desktop aspect ratios.
-- **Mobile Optimization:** All UI elements use `WebkitUserSelect: none` and `WebkitTouchCallout: none` to prevent long-press context menus.
+- **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
+- **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
+- **UI Responsiveness:** Dynamic scaling via `uiScale` and `edgeOffset` calculations.
+- **Mobile Safety:** Global `user-select: none` and `WebkitTouchCallout: none` to prevent UI interference.

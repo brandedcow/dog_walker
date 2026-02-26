@@ -3,39 +3,51 @@ import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Box, Text } from '@react-three/drei';
 
-export const DogModel = ({ dogPos, state, visualOffset = 0, gameState }: { dogPos: Vector3, state: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING', visualOffset?: number, gameState: string }) => {
+export const DogModel = ({ 
+  dogPos, state, rotation = 0, visualOffset = 0, gameState 
+}: { 
+  dogPos: Vector3 | React.MutableRefObject<Vector3>, 
+  state: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING', 
+  rotation?: number | React.MutableRefObject<number>,
+  visualOffset?: number | React.MutableRefObject<number>, 
+  gameState: string 
+}) => {
   const groupRef = useRef<any>(null);
   const headRef = useRef<any>(null);
   const earsRef = useRef<[any, any]>([null, null]);
-  const lastPos = useRef(new Vector3().copy(dogPos));
-  const currentRotation = useRef(0);
   
   useFrame(({ clock }) => {
     if (groupRef.current) {
       const isPlaying = gameState === 'PLAYING';
       const time = clock.getElapsedTime();
-      const isMoving = state === 'WALKING' || state === 'COMING';
+      const isMoving = state === 'WALKING' || state === 'COMING' || state === 'IDLING';
+      
+      // Handle potential ref or direct value
+      const actualPos = (dogPos as any).current || dogPos;
+      const actualRotation = typeof rotation === 'number' ? rotation : (rotation as any).current;
+      const actualVisualOffset = typeof visualOffset === 'number' ? visualOffset : (visualOffset as any).current;
+
       const bob = (isPlaying && isMoving) ? Math.abs(Math.sin(time * 15)) * 0.02 : 0;
-      const movement = new Vector3().subVectors(dogPos, lastPos.current);
-      if (isPlaying && movement.length() > 0.001) {
-        const targetRot = Math.atan2(movement.x, movement.z);
-        currentRotation.current += (targetRot - currentRotation.current) * 0.1;
-      }
+      
       const yPos = state === 'SITTING' ? -0.2 : 0;
-      groupRef.current.position.set(dogPos.x, dogPos.y + bob + yPos, dogPos.z + visualOffset);
-      groupRef.current.rotation.y = currentRotation.current + Math.PI;
+      groupRef.current.position.set(actualPos.x, actualPos.y + bob + yPos, actualPos.z);
+      // The physical yank effect (recoil) is applied separately to the visual mesh if desired, 
+      // but here we use visualOffset for the head tilt/body displacement
+      groupRef.current.position.z += actualVisualOffset;
+
+      groupRef.current.rotation.y = actualRotation + Math.PI;
       groupRef.current.rotation.z = (isPlaying && isMoving) ? Math.sin(time * 15) * 0.02 : 0;
+      
       if (headRef.current) {
         const sittingTilt = state === 'SITTING' ? -0.4 : 0;
-        headRef.current.rotation.x = (visualOffset * -1.5) + sittingTilt;
+        headRef.current.rotation.x = (actualVisualOffset * -1.5) + sittingTilt;
       }
       if (earsRef.current[0] && earsRef.current[1]) {
         const earWiggle = (isPlaying && isMoving) ? Math.sin(time * 20) * 0.1 : 0;
-        const earYank = visualOffset * 2;
+        const earYank = actualVisualOffset * 2;
         earsRef.current[0].rotation.z = -0.2 + earWiggle + earYank;
         earsRef.current[1].rotation.z = 0.2 - earWiggle - earYank;
       }
-      lastPos.current.copy(dogPos);
     }
   });
 

@@ -1,0 +1,284 @@
+import { useRef, useState, useEffect } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Vector3 } from 'three';
+import { Sky, Box, Text } from '@react-three/drei';
+import { useGameStore } from '../../store/useGameStore';
+import type { MenuState } from '../../store/useGameStore';
+import { DogModel } from './DogModel';
+import { LeashModel } from './LeashModel';
+import { useLeash } from '../../systems/physics/useLeash';
+import { useDogAI } from '../../systems/ai/useDogAI';
+import { useMenuCamera } from '../../systems/physics/useMenuCamera';
+import { PLAYER_BASE_SPEED } from '../../config/constants';
+
+const Interactable = ({ 
+  position, args, color, label, targetState, currentMenuState, setMenuState, onClickOverride, showActiveGlow = true, children
+}: { 
+  position: [number, number, number], 
+  args: [number, number, number], 
+  color: string, 
+  label: string, 
+  targetState: MenuState, 
+  currentMenuState: MenuState,
+  setMenuState: (s: MenuState) => void,
+  onClickOverride?: () => void,
+  showActiveGlow?: boolean,
+  children?: React.ReactNode
+}) => {
+  const [hovered, setHovered] = useState(false);
+  const isActive = showActiveGlow && currentMenuState === targetState;
+
+  return (
+    <group position={position}>
+      <group
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }} 
+        onPointerOut={() => setHovered(false)}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (onClickOverride) onClickOverride();
+          else setMenuState(targetState);
+        }}
+      >
+        {children ? (
+          <group>
+            {children}
+            {isActive && (
+              <Box args={[args[0] * 1.1, 0.05, args[2] * 1.1]} position={[0, -0.05, 0]}>
+                <meshStandardMaterial color="#44ff44" emissive="#44ff44" emissiveIntensity={0.5} transparent opacity={0.4} />
+              </Box>
+            )}
+          </group>
+        ) : (
+          <Box 
+            args={args} 
+            castShadow 
+          >
+            <meshStandardMaterial 
+              color={color} 
+              emissive={isActive ? "#44ff44" : hovered ? "#ffffff" : "#000000"} 
+              emissiveIntensity={isActive ? 0.5 : hovered ? 0.3 : 0} 
+            />
+          </Box>
+        )}
+      </group>
+      {hovered && (
+        <Text position={[0, args[1]/2 + 0.4, 0]} fontSize={0.2} color="white" anchorX="center">
+          {label}
+        </Text>
+      )}
+    </group>
+  );
+};
+
+const Desk = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    <Box args={[3.0, 0.1, 2.0]} position={[0, 0.8, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color="#5d4037" />
+    </Box>
+    <Box args={[0.1, 0.8, 0.1]} position={[-1.4, 0.4, -0.9]} castShadow><meshStandardMaterial color="#3e2723" /></Box>
+    <Box args={[0.1, 0.8, 0.1]} position={[1.4, 0.4, -0.9]} castShadow><meshStandardMaterial color="#3e2723" /></Box>
+    <Box args={[0.1, 0.8, 0.1]} position={[-1.4, 0.4, 0.9]} castShadow><meshStandardMaterial color="#3e2723" /></Box>
+    <Box args={[0.1, 0.8, 0.1]} position={[1.4, 0.4, 0.9]} castShadow><meshStandardMaterial color="#3e2723" /></Box>
+  </group>
+);
+
+const Closet = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    <Box args={[3.5, 4.5, 2.0]} position={[0, 2.25, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color="#4e342e" />
+    </Box>
+    {/* Doors */}
+    <Box args={[1.6, 4.3, 0.05]} position={[-0.85, 2.25, 1.01]}><meshStandardMaterial color="#5d4037" /></Box>
+    <Box args={[1.6, 4.3, 0.05]} position={[0.85, 2.25, 1.01]}><meshStandardMaterial color="#5d4037" /></Box>
+  </group>
+);
+
+const Bed = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    <Box args={[4.5, 0.4, 3.5]} position={[0, 0.2, 0]} castShadow receiveShadow><meshStandardMaterial color="#eee" /></Box>
+    <Box args={[0.2, 1.2, 3.5]} position={[2.15, 0.6, 0]}><meshStandardMaterial color="#5d4037" /></Box> {/* Headboard */}
+    <Box args={[4.2, 0.1, 3.2]} position={[0, 0.45, 0]}><meshStandardMaterial color="#3f51b5" /></Box> {/* Blanket */}
+    <Box args={[0.8, 0.2, 1.2]} position={[1.6, 0.5, 0.8]}><meshStandardMaterial color="#fff" /></Box> {/* Pillows */}
+    <Box args={[0.8, 0.2, 1.2]} position={[1.6, 0.5, -0.8]}><meshStandardMaterial color="#fff" /></Box>
+  </group>
+);
+
+const Laptop = () => (
+  <group>
+    <Box args={[0.6, 0.04, 0.4]} position={[0, 0.02, 0]} castShadow>
+      <meshStandardMaterial color="#333" />
+    </Box>
+    <group position={[0, 0.04, -0.19]} rotation={[-0.4, 0, 0]}>
+      <Box args={[0.6, 0.4, 0.04]} position={[0, 0.2, 0]} castShadow>
+        <meshStandardMaterial color="#333" />
+      </Box>
+      <Box args={[0.54, 0.34, 0.01]} position={[0, 0.2, 0.02]}>
+        <meshStandardMaterial color="#00ccff" emissive="#00ccff" emissiveIntensity={0.5} />
+      </Box>
+    </group>
+  </group>
+);
+
+export const RoomScene = () => {
+  const { gameState, setGameState, dogState, setDogState, menuState, setMenuState, isMovingForward } = useGameStore();
+  const playerPos = useRef(new Vector3(0, 1.7, 0)); 
+  const povRotation = useRef({ yaw: Math.PI, pitch: 0 });
+  const isDragging = useRef(false);
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  
+  const { camera } = useThree();
+  const leash = useLeash();
+  const dogAI = useDogAI();
+  
+  useFrame((_, delta) => {
+    if (menuState === 'IDLE' && isMovingForward) {
+      const speed = PLAYER_BASE_SPEED * 0.6;
+      const moveX = Math.sin(povRotation.current.yaw) * speed * delta;
+      const moveZ = -Math.cos(povRotation.current.yaw) * speed * delta;
+      playerPos.current.x += moveX;
+      playerPos.current.z += moveZ;
+      playerPos.current.x = Math.max(-4.5, Math.min(4.5, playerPos.current.x));
+      playerPos.current.z = Math.max(-4.5, Math.min(4.5, playerPos.current.z));
+    }
+
+    leash.update(delta, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
+    dogAI.update(delta, playerPos.current, dogState, setDogState);
+
+    if (menuState === 'IDLE') {
+      const camDistance = 3;
+      const camHeight = 1.8;
+      const camX = Math.max(-4.8, Math.min(4.8, playerPos.current.x - Math.sin(povRotation.current.yaw) * camDistance));
+      const camZ = Math.max(-4.8, Math.min(4.8, playerPos.current.z + Math.cos(povRotation.current.yaw) * camDistance));
+      camera.position.set(camX, playerPos.current.y + camHeight, camZ);
+      const lookAheadDist = 5;
+      camera.lookAt(
+        playerPos.current.x + Math.sin(povRotation.current.yaw) * lookAheadDist,
+        playerPos.current.y + Math.sin(povRotation.current.pitch) * lookAheadDist,
+        playerPos.current.z - Math.cos(povRotation.current.yaw) * lookAheadDist
+      );
+    }
+  });
+
+  useMenuCamera();
+
+  useEffect(() => {
+    const handleDown = (e: any) => {
+      isDragging.current = true;
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      lastMousePos.current = { x, y };
+    };
+    const handleMove = (e: any) => {
+      if (!isDragging.current || menuState !== 'IDLE') return;
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      const deltaX = x - lastMousePos.current.x;
+      const deltaY = y - lastMousePos.current.y;
+      povRotation.current.yaw += deltaX * 0.005;
+      povRotation.current.pitch -= deltaY * 0.005;
+      povRotation.current.pitch = Math.max(-Math.PI/4, Math.min(Math.PI/4, povRotation.current.pitch));
+      lastMousePos.current = { x, y };
+    };
+    const handleUp = () => { isDragging.current = false; };
+    window.addEventListener('mousedown', handleDown);
+    window.addEventListener('touchstart', handleDown);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('touchend', handleUp);
+    return () => {
+      window.removeEventListener('mousedown', handleDown);
+      window.removeEventListener('touchstart', handleDown);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchend', handleUp);
+    };
+  }, [menuState]);
+
+  return (
+    <>
+      <Sky sunPosition={[100, 20, 100]} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[5, 10, 5]} intensity={0.8} castShadow />
+
+      {/* Floor */}
+      <Box args={[10, 0.1, 10]} position={[0, -0.05, 0]} receiveShadow onClick={() => setMenuState('IDLE')}>
+        <meshStandardMaterial color="#443322" />
+      </Box>
+
+      {/* Walls */}
+      <Box args={[10, 5, 0.1]} position={[0, 2.5, -5]} receiveShadow><meshStandardMaterial color="#eee" /></Box> {/* North */}
+      <Box args={[10, 5, 0.1]} position={[0, 2.5, 5]} receiveShadow><meshStandardMaterial color="#eee" /></Box>  {/* South */}
+      <Box args={[0.1, 5, 10]} position={[-5, 2.5, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box> {/* West */}
+      <Box args={[0.1, 5, 10]} position={[5, 2.5, 0]} receiveShadow><meshStandardMaterial color="#ddd" /></Box>  {/* East */}
+      <Box args={[10, 0.1, 10]} position={[0, 5, 0]} receiveShadow><meshStandardMaterial color="#fff" /></Box>
+
+      {/* North Window */}
+      <group position={[0, 2.5, -4.96]}>
+        <Box args={[2.0, 2.0, 0.05]}><meshStandardMaterial color="#88ccff" emissive="#88ccff" emissiveIntensity={0.5} transparent opacity={0.6} /></Box>
+        <Box args={[2.1, 0.1, 0.1]} position={[0, 1, 0]}><meshStandardMaterial color="#fff" /></Box>
+        <Box args={[2.1, 0.1, 0.1]} position={[0, -1, 0]}><meshStandardMaterial color="#fff" /></Box>
+        <Box args={[0.1, 2.1, 0.1]} position={[1, 0, 0]}><meshStandardMaterial color="#fff" /></Box>
+        <Box args={[0.1, 2.1, 0.1]} position={[-1, 0, 0]}><meshStandardMaterial color="#fff" /></Box>
+      </group>
+
+      {/* South Door (Offset West) */}
+      <group position={[-3, 1.25, 4.9]} onClick={() => setGameState('PLAYING')}>
+        <Interactable position={[0, 0, 0]} args={[2.0, 2.5, 0.2]} color="#8b4513" label="GO FOR A WALK" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} onClickOverride={() => setGameState('PLAYING')} showActiveGlow={false} />
+        <Box args={[0.1, 0.1, 0.3]} position={[0.8, 0, -0.15]}><meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} /></Box>
+      </group>
+
+      {/* Furniture Arrangement */}
+      
+      {/* Top-Left: Desk beneath Window */}
+      <group position={[-2, 0, -3.5]}>
+        <Desk position={[0, 0, 0]} />
+        <Interactable position={[-0.6, 0.85, 0]} args={[0.6, 0.5, 0.4]} color="#333" label="THE KENNEL" targetState="KENNEL" currentMenuState={menuState} setMenuState={setMenuState}>
+          <Laptop />
+        </Interactable>
+        <Interactable position={[0.6, 0.85, 0]} args={[0.5, 0.2, 0.7]} color="#2e7d32" label="TRAINING MANUAL" targetState="TRAINING" currentMenuState={menuState} setMenuState={setMenuState}>
+          <group>
+            <Box args={[0.5, 0.1, 0.7]} castShadow><meshStandardMaterial color="#2e7d32" /></Box>
+            <Box args={[0.4, 0.02, 0.6]} position={[0, 0.06, 0]}><meshStandardMaterial color="#fff" /></Box>
+          </group>
+        </Interactable>
+      </group>
+
+      {/* Top-Right: Standing Closet */}
+      <Interactable position={[2.75, 0, -3.5]} args={[3.5, 4.5, 2.0]} color="#4e342e" label="GEAR CLOSET" targetState="GEAR" currentMenuState={menuState} setMenuState={setMenuState}>
+        <Closet position={[0, 0, 0]} />
+      </Interactable>
+
+      {/* Bottom-Right: Bed */}
+      <Bed position={[2.25, 0, 2.75]} />
+
+      {/* Middle-Right: Nightstand */}
+      <Interactable position={[4.0, 0, 0]} args={[1.0, 1.0, 1.0]} color="#5d4037" label="NIGHTSTAND" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false}>
+        <group>
+          <Box args={[1.0, 1.0, 1.0]} position={[0, 0.5, 0]} castShadow receiveShadow><meshStandardMaterial color="#5d4037" /></Box>
+          <Box args={[0.3, 0.5, 0.3]} position={[0, 1.25, 0]}><meshStandardMaterial color="#ffc107" emissive="#ffc107" emissiveIntensity={0.5} /></Box> {/* Lamp */}
+        </group>
+      </Interactable>
+
+      {/* Bottom-Left: Trophy Shelf (West Wall) */}
+      <Interactable position={[-4.75, 1.5, 2.5]} args={[0.2, 0.1, 2.0]} color="#ffcc00" label="TROPHY SHELF" targetState="RECORDS" currentMenuState={menuState} setMenuState={setMenuState}>
+         <group>
+            <Box args={[0.4, 0.05, 2.0]} position={[0.1, 0, 0]} castShadow><meshStandardMaterial color="#5d4037" /></Box>
+            <Box args={[0.2, 0.4, 0.2]} position={[0, 0.2, -0.6]}><meshStandardMaterial color="#ffd700" /></Box>
+            <Box args={[0.2, 0.6, 0.2]} position={[0, 0.3, 0]}><meshStandardMaterial color="#ffd700" /></Box>
+            <Box args={[0.2, 0.3, 0.2]} position={[0, 0.15, 0.6]}><meshStandardMaterial color="#ffd700" /></Box>
+         </group>
+      </Interactable>
+
+      <DogModel 
+        dogPos={dogAI.dogPos} 
+        state={dogState} 
+        rotation={dogAI.currentRotation}
+        visualOffset={leash.tugRecoil}
+        gameState={gameState} 
+      />
+      <LeashModel nodes={leash.nodes.current} tension={0} />
+    </>
+  );
+};
