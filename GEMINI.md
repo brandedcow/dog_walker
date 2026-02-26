@@ -62,12 +62,12 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
     - **North Wall:** Features a physical aperture for a large 4m x 2.5m window. A detailed Calendar is mounted to its right.
 - **Backyard (Outdoor View):** Fully enclosed backyard visible through the window, featuring a 1.2m wooden fence, fence posts, stylized trees, and a sky backdrop.
 - **Furniture & Zoning:**
-    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and Training Manual.
+    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and **Field Notes** (Training Manual). The manual is modeled as a spiral notebook with a dark cover and metallic binding.
     - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with vertical golden handles and proximity-based transparency.
     - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand with inset drawers and horizontal golden handles. Player spawns next to the bed facing the window (North).
     - **Corner (North-West):** 2.4m Standing Lamp with open shade and visible internal bulb.
 - **Hanging Leash:** A red leash hangs from a hook beneath the trophy shelf on the South wall, providing visual context for the dog being "off-leash" in the hub.
-- **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected.
+- **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected. The **Field Notes** transition uses a snappier perpendicular top-down view to create a seamless "menu" experience.
 
 ### 4.2 HUD & Metadata
 - **Lighting Model:** 
@@ -75,7 +75,7 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
     - **Independent Lamps:** The Nightstand and Standing Lamp are individually toggleable interactables, casting warm point-light shadows.
     - **Physical Occlusion:** All walls, the floor (Minecraft voxel style), and the ceiling are shadow-casters that physically block outside light.
 - **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
-- **Skill Tree:** Branching progression system at the Training Manual. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
+- **Skill Tree:** Branching progression system at the Training Manual (**Field Notes**). The UI uses a ruled notebook paper aesthetic with blue horizontal lines and a vertical red margin. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
 - **Return Home:** A functional button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
 - **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
 - **Smartwatch:** Displays real-time Minimap during walks and system Time/Date in the Hub.

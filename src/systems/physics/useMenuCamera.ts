@@ -19,7 +19,7 @@ export const useMenuCamera = () => {
     targetLookAt.set(config.lookAt[0], config.lookAt[1], config.lookAt[2]);
 
     // 1. Interpolate Position
-    camera.position.lerp(targetPos, delta * 3);
+    camera.position.lerp(targetPos, delta * 5);
 
     // 2. Interpolate Rotation (LookAt)
     const oldQuaternion = camera.quaternion.clone();
@@ -28,6 +28,6 @@ export const useMenuCamera = () => {
     
     // Restore and lerp
     camera.quaternion.copy(oldQuaternion);
-    camera.quaternion.slerp(targetQuaternion, delta * 3);
+    camera.quaternion.slerp(targetQuaternion, delta * 5);
   });
 };

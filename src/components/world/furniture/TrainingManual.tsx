@@ -64,13 +64,24 @@ export const TrainingManual = ({ position }: { position: [number, number, number
         setMenuState(isOpen ? 'IDLE' : 'TRAINING');
       }}
     >
-      {/* Physical Book Model */}
-      <Box args={[0.5, 0.1, 0.7]} castShadow receiveShadow>
-        <meshStandardMaterial color="#2e7d32" emissive={isOpen ? "#44ff44" : hovered ? "#ffffff" : "#000000"} emissiveIntensity={isOpen ? 0.5 : hovered ? 0.3 : 0} />
-      </Box>
-      <Box args={[0.4, 0.02, 0.6]} position={[0, 0.06, 0]} receiveShadow>
-        <meshStandardMaterial color="#fff" />
-      </Box>
+      {/* Physical Notebook Model */}
+      <group>
+        {/* Cover */}
+        <Box args={[0.5, 0.05, 0.7]} castShadow receiveShadow>
+          <meshStandardMaterial color="#1a1a1a" emissive={isOpen ? "#44ff44" : hovered ? "#ffffff" : "#000000"} emissiveIntensity={isOpen ? 0.2 : hovered ? 0.1 : 0} />
+        </Box>
+        {/* Pages */}
+        <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
+          <meshStandardMaterial color="#fff" />
+        </Box>
+        {/* Spiral Binding */}
+        {Array.from({ length: 12 }).map((_, i) => (
+          <mesh key={i} position={[-0.26, 0.03, -0.3 + i * 0.055]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.03, 0.005, 8, 16]} />
+            <meshStandardMaterial color="#888" metalness={0.8} roughness={0.2} />
+          </mesh>
+        ))}
+      </group>
 
       {(hovered || focused) && !isOpen && (
         <Billboard position={[0, 0.5, 0]}>
@@ -92,37 +103,42 @@ export const TrainingManual = ({ position }: { position: [number, number, number
 
       {isOpen && (
         <Html
-          position={[0, 0.1, 0]}
+          position={[0, 0.06, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           transform
           occlude
-          distanceFactor={0.5}
+          distanceFactor={0.75}
         >
           <div style={{
-            width: '800px',
-            height: '600px',
-            background: '#f4f1ea', // Aged paper color
-            backgroundImage: 'repeating-linear-gradient(#f4f1ea, #f4f1ea 24px, #e1dcd3 25px)',
-            border: '15px solid #1b4d1b',
-            borderRadius: '10px',
-            padding: '40px',
+            width: '500px',
+            height: '700px',
+            background: '#fff',
+            backgroundImage: `
+              linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+              linear-gradient(#eee .1em, transparent .1em)
+            `,
+            backgroundSize: '100% 1.2em',
+            border: '2px solid #ddd',
+            borderRadius: '5px',
+            padding: '30px 30px 30px 100px',
             color: '#2c3e50',
             fontFamily: '"Courier New", Courier, monospace',
             display: 'flex',
             flexDirection: 'column',
             boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
             pointerEvents: 'auto',
-            userSelect: 'none'
+            userSelect: 'none',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '3px double #2c3e50', paddingBottom: '10px' }}>
-              <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900' }}>TRAINING MANUAL v1.0</h1>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '12px', opacity: 0.7 }}>CURRENT GRIT</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2e7d32' }}>{playerStats.grit} G</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '20px', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>
+              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900' }}>FIELD NOTES</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ fontSize: '10px', opacity: 0.7 }}>GRIT CACHE:</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#2e7d32' }}>{playerStats.grit} G</div>
               </div>
             </div>
 
-            <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '30px', justifyContent: 'center', alignContent: 'center', padding: '20px' }}>
+            <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'flex-start', alignContent: 'flex-start' }}>
               {SKILLS.map(skill => {
                 const unlocked = unlockedSkills.includes(skill.id);
                 const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
@@ -141,16 +157,16 @@ export const TrainingManual = ({ position }: { position: [number, number, number
               })}
             </div>
 
-            <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
               <button 
                 onClick={() => setMenuState('IDLE')}
                 style={{
-                  padding: '15px 40px',
+                  padding: '10px 30px',
                   background: '#2c3e50',
                   color: 'white',
                   border: 'none',
                   borderRadius: '5px',
-                  fontSize: '18px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
                   cursor: 'pointer',
                   boxShadow: '0 4px 0 #1a252f',
@@ -159,7 +175,7 @@ export const TrainingManual = ({ position }: { position: [number, number, number
                 onMouseDown={(e) => { e.currentTarget.style.transform = 'translateY(2px)'; e.currentTarget.style.boxShadow = '0 2px 0 #1a252f'; }}
                 onMouseUp={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 0 #1a252f'; }}
               >
-                CLOSE MANUAL
+                CLOSE [ESC]
               </button>
             </div>
           </div>
