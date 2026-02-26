@@ -87,6 +87,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (gameState === 'PLAYING') {
       set({ distance: 0, tension: 0, sessionGrit: 0, hasStrained: false });
     }
+    if (gameState === 'HOME') {
+      set({ dogState: 'STANDING', menuState: 'IDLE', isMovingForward: false });
+    }
     set({ gameState });
   },
   setDogState: (dogState) => set({ dogState }),

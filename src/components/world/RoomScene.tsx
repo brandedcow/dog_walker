@@ -125,6 +125,50 @@ const Calendar = ({ position }: { position: [number, number, number] }) => (
   </group>
 );
 
+const OutdoorScene = () => (
+  <group position={[0, 0, -4.5]}>
+    {/* Grass */}
+    <Box args={[40, 0.1, 40]} position={[0, -0.5, -15]}>
+      <meshStandardMaterial color="#2e7d32" />
+    </Box>
+    
+    {/* Wooden Fence (Back) */}
+    <Box args={[40, 1.2, 0.1]} position={[0, 0.1, -10]}>
+      <meshStandardMaterial color="#5d4037" />
+    </Box>
+    {/* Wooden Fence (Sides) */}
+    <Box args={[0.1, 1.2, 20]} position={[-10, 0.1, 0]}><meshStandardMaterial color="#5d4037" /></Box>
+    <Box args={[0.1, 1.2, 20]} position={[10, 0.1, 0]}><meshStandardMaterial color="#5d4037" /></Box>
+    
+    {/* Fence Posts (Back) */}
+    {[...Array(10)].map((_, i) => (
+      <Box key={`post-b-${i}`} args={[0.15, 1.4, 0.15]} position={[(i - 5) * 4, 0.2, -9.9]}><meshStandardMaterial color="#3e2723" /></Box>
+    ))}
+    {/* Fence Posts (Sides) */}
+    {[...Array(5)].map((_, i) => (
+      <group key={`post-s-${i}`}>
+        <Box args={[0.15, 1.4, 0.15]} position={[-9.9, 0.2, -8 + i * 4]}><meshStandardMaterial color="#3e2723" /></Box>
+        <Box args={[0.15, 1.4, 0.15]} position={[9.9, 0.2, -8 + i * 4]}><meshStandardMaterial color="#3e2723" /></Box>
+      </group>
+    ))}
+
+    {/* Garden Trees (Closer) */}
+    <group position={[-3, 0, -4]}>
+      <Box args={[0.3, 2, 0.3]} position={[0, 1, 0]}><meshStandardMaterial color="#3e2723" /></Box>
+      <Box args={[1.5, 2, 1.5]} position={[0, 2.5, 0]}><meshStandardMaterial color="#1b5e20" /></Box>
+    </group>
+    <group position={[4, 0, -7]}>
+      <Box args={[0.3, 2, 0.3]} position={[0, 1, 0]}><meshStandardMaterial color="#3e2723" /></Box>
+      <Box args={[2, 2.5, 2]} position={[0, 2.5, 0]}><meshStandardMaterial color="#1b5e20" /></Box>
+    </group>
+
+    {/* Simple Sky Backdrop */}
+    <Box args={[100, 50, 0.1]} position={[0, 20, -20]}>
+      <meshStandardMaterial color="#87ceeb" emissive="#87ceeb" emissiveIntensity={0.1} />
+    </Box>
+  </group>
+);
+
 const Desk = ({ position }: { position: [number, number, number] }) => (
   <group position={position}>
     <Box args={[3.0, 0.1, 2.0]} position={[0, 0.95, 0]} castShadow receiveShadow>
@@ -174,6 +218,9 @@ const Closet = ({ position }: { position: [number, number, number] }) => {
       {/* Doors */}
       <Box args={[1.1, 3.6, 0.05]} position={[-0.6, 1.9, 0.61]}><meshStandardMaterial color="#5d4037" /></Box>
       <Box args={[1.1, 3.6, 0.05]} position={[0.6, 1.9, 0.61]}><meshStandardMaterial color="#5d4037" /></Box>
+      {/* Handles */}
+      <Box args={[0.04, 0.6, 0.05]} position={[-0.1, 1.9, 0.65]}><meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} /></Box>
+      <Box args={[0.04, 0.6, 0.05]} position={[0.1, 1.9, 0.65]}><meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} /></Box>
     </group>
   );
 };
@@ -244,6 +291,14 @@ export const RoomScene = () => {
   });
 
   useMenuCamera();
+  
+  // Reset orientation when entering HOME
+  useEffect(() => {
+    if (gameState === 'HOME') {
+      povRotation.current = { yaw: 0, pitch: 0 };
+      playerPos.current.set(1.0, 1.7, 3.5);
+    }
+  }, [gameState]);
 
   useEffect(() => {
     const handleDown = (e: any) => {
@@ -292,11 +347,24 @@ export const RoomScene = () => {
       </Box>
 
       {/* Walls */}
-      <Box args={[10, 5, 0.1]} position={[0, 2.5, -4]} receiveShadow><meshStandardMaterial color="#eee" /></Box> {/* North (Moved in) */}
+      {/* North Wall with Window Hole (centered at x:-2, y:2.75, width:4, height:2.5) */}
+      <group position={[0, 2.5, -4]}>
+        {/* Bottom part */}
+        <Box args={[10, 1.5, 0.1]} position={[0, -1.75, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box>
+        {/* Top part */}
+        <Box args={[10, 1.0, 0.1]} position={[0, 2.0, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box>
+        {/* Left of window */}
+        <Box args={[1.0, 2.5, 0.1]} position={[-4.5, 0.25, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box>
+        {/* Right of window */}
+        <Box args={[5.0, 2.5, 0.1]} position={[2.5, 0.25, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box>
+      </group>
+
       <Box args={[10, 5, 0.1]} position={[0, 2.5, 5]} receiveShadow><meshStandardMaterial color="#eee" /></Box>  {/* South */}
       <Box args={[0.1, 5, 10]} position={[-5, 2.5, 0]} receiveShadow><meshStandardMaterial color="#eee" /></Box> {/* West */}
       <Box args={[0.1, 5, 10]} position={[5, 2.5, 0]} receiveShadow><meshStandardMaterial color="#ddd" /></Box>  {/* East */}
       <Box args={[10, 0.1, 10]} position={[0, 5, 0]} receiveShadow><meshStandardMaterial color="#fff" /></Box>
+
+      <OutdoorScene />
 
       {/* North Window (Over Desk) */}
       <group position={[-2, 2.75, -3.96]}>
@@ -368,6 +436,12 @@ export const RoomScene = () => {
       <Interactable position={[4.5, 0, 2.0]} args={[1.0, 1.0, 1.0]} color="#5d4037" label="NIGHTSTAND" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} labelOffset={[-0.8, 1.8, 0]}>
         <group>
           <Box args={[1.0, 1.0, 1.0]} position={[0, 0.5, 0]} castShadow receiveShadow><meshStandardMaterial color="#5d4037" /></Box>
+          {/* Drawer Insets (on the West face) */}
+          <Box args={[0.02, 0.3, 0.8]} position={[-0.5, 0.7, 0]}><meshStandardMaterial color="#3e2723" /></Box>
+          <Box args={[0.02, 0.3, 0.8]} position={[-0.5, 0.3, 0]}><meshStandardMaterial color="#3e2723" /></Box>
+          {/* Golden Horizontal Handles */}
+          <Box args={[0.05, 0.04, 0.3]} position={[-0.52, 0.7, 0]}><meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} /></Box>
+          <Box args={[0.05, 0.04, 0.3]} position={[-0.52, 0.3, 0]}><meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} /></Box>
           <Box args={[0.3, 0.5, 0.3]} position={[0, 1.25, 0]}><meshStandardMaterial color="#ffc107" emissive="#ffc107" emissiveIntensity={0.5} /></Box> {/* Lamp */}
         </group>
       </Interactable>

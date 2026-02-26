@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 export const HUD = ({ handleGo }: { handleGo: () => void }) => {
   const { 
-    gameState, setGameState, menuState, positions, distance, hasStrained, sessionGrit 
+    gameState, setGameState, menuState, positions, distance, hasStrained, sessionGrit, finalizeWalk 
   } = useGameStore();
   const scents: any[] = []; 
 

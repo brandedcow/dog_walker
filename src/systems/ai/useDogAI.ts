@@ -42,6 +42,11 @@ export const useDogAI = () => {
       }
       const moveDir = new Vector3().subVectors(idleTarget.current, dogPos.current).normalize();
       dogPos.current.add(moveDir.multiplyScalar(0.5 * delta));
+
+      // Clamp to Room Boundaries (10x8 room)
+      dogPos.current.x = Math.max(-4.5, Math.min(4.5, dogPos.current.x));
+      dogPos.current.z = Math.max(-3.5, Math.min(4.5, dogPos.current.z));
+
       if (dogPos.current.distanceTo(new Vector3(playerPos.x, 0, playerPos.z)) < 0.8) {
         const pushDir = new Vector3().subVectors(dogPos.current, new Vector3(playerPos.x, 0, playerPos.z)).normalize();
         dogPos.current.add(pushDir.multiplyScalar(0.05));

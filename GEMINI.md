@@ -49,19 +49,20 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 ### 4.1 Spatial 3D Hub (The Room)
 - **Geometry:** 10m x 8m square layout (5m ceiling).
 - **Structural Layout:**
-    - **South Wall:** Entrance door (4m height, 80% of wall) offset to the West.
-    - **North Wall:** Large 4m x 2.5m window centered over the desk.
+    - **South Wall:** Entrance door (4m height, 80% of wall) offset to the West. Improved doorknob and panel visuals.
+    - **North Wall:** Features a physical aperture for a large 4m x 2.5m window. A detailed Calendar is mounted to its right.
+- **Backyard (Outdoor View):** Fully enclosed backyard visible through the window, featuring a 1.2m wooden fence, fence posts, stylized trees, and a sky backdrop.
 - **Furniture & Zoning:**
     - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and Training Manual.
-    - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with proximity-based transparency.
-    - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand.
+    - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with golden handles and proximity-based transparency.
+    - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand with inset drawers and golden horizontal handles. Player spawns next to the bed facing the window (North).
     - **West Wall:** Trophy Shelf mounted at 1.5m height.
 - **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected.
 
 ### 4.2 HUD & Metadata
 - **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
 - **Skill Tree:** Branching progression system at the Training Manual. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
-- **Return Home:** A button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
+- **Return Home:** A functional button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
 - **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
 - **Smartwatch:** Displays real-time Minimap during walks and system Time/Date in the Hub.
 
@@ -69,9 +70,9 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 
 ## 5. Level Design & Environments
 
-- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture.
+- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture. Dog movement is physically clamped within the room boundaries to prevent wall clipping.
 - **The Infinite Road:** Procedural environment using `InstancedMesh` for high-performance tree and foliage rendering.
-- **Win Condition:** Accumulate 150m of walking distance in a single session.
+- **Session Conclusion:** A walk concludes automatically after accumulating 150m of distance, or manually at any point via the "Return Home" button. Both trigger the Mission Success screen and Grit rewards.
 
 ---
 
