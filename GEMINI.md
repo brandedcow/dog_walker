@@ -31,7 +31,7 @@
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
 | **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `attributes.strength`, `progression`   |
-| **HUD (React)**       | Modular UI components: Profile Card and Overlays.                  | `KennelOverlay`, `RecordsOverlay`                      |
+| **HUD (React)**       | Scalable, modular UI components using a primitive-first library. | `MissionSuccessOverlay`, `barkos/PrimitiveComponents` |
 
 ---
 
@@ -90,6 +90,9 @@ The Training Manual features three distinct functional tabs:
 - **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics (GO, TUG, COME, SIT, RETURN).
 
 ### 4.3 HUD & Metadata
+- **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success) are extracted into standalone components.
+- **Responsive Logic:** Uses `useHUDLayout` hook for centralized window resizing, scale calculation, and CSS safe-area management.
+- **UI Library (BarkOS):** A foundation for reusable primitives (containers, buttons) is established in `src/components/ui/barkos/` to ensure visual consistency.
 - **Lighting Model:** Hub lighting dynamically matches system time. Hub interactables (Lamps) are individually toggleable.
 - **Interaction Feedback:** Gaze-based Billboard labels.
 - **Return Home:** Finalizes current distance into Grit and XP, returning the player to the hub summary.
@@ -109,6 +112,7 @@ The Training Manual features three distinct functional tabs:
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
+- **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
 - **UI Mapping:** The Field Notes UI uses a dynamic `distanceFactor` and transparent HTML overlays to achieve a sharp, legible mapping with the physical 3D notebook page across different screen resolutions.
 - **Camera Stability & Framing:** Implemented micro-offsets, locking thresholds, and aspect-ratio aware dynamic zoom in `useMenuCamera` to ensure 3D menus (like the Training Manual) remain perfectly framed on both mobile portrait and desktop landscape viewports.
 - **Global HUD Controls:** High-priority menu interactions (like the "X" Close button) are promoted from 3D space to the global React HUD to ensure accessibility and consistent positioning across all devices.
