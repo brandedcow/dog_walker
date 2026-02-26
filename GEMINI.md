@@ -27,7 +27,7 @@
 | **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `IDLING`, `currentRotation`  |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
-| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `gameState`, `menuState`, `dogStats`   |
+| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `attributes`, `progression`, `grit`    |
 | **HUD (React)**       | Modular UI components: Profile Card and Overlays.                  | `KennelOverlay`, `RecordsOverlay`                      |
 
 ---
@@ -62,31 +62,36 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
     - **North Wall:** Features a physical aperture for a large 4m x 2.5m window. A detailed Calendar is mounted to its right.
 - **Backyard (Outdoor View):** Fully enclosed backyard visible through the window, featuring a 1.2m wooden fence, fence posts, stylized trees, and a sky backdrop.
 - **Furniture & Zoning:**
-    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and **Field Notes** (Training Manual). The manual is modeled as a spiral notebook with a dark cover and metallic binding.
+    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and **Field Notes** (Training Manual). 
+    - **Training Manual:** Modeled as an army green spiral notebook with an animated flip-cover and brass binding. Features a 1:1 pixel-mapped UI on the first page.
+    - **Desk Lighting:** An IKEA RANARP-inspired work lamp with brass joints and an open conical shade, providing focused lighting on the manual.
     - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with vertical golden handles and proximity-based transparency.
     - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand with inset drawers and horizontal golden handles. Player spawns next to the bed facing the window (North).
     - **Corner (North-West):** 2.4m Standing Lamp with open shade and visible internal bulb.
-- **Hanging Leash:** A red leash hangs from a hook beneath the trophy shelf on the South wall, providing visual context for the dog being "off-leash" in the hub.
-- **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected. The **Field Notes** transition uses a snappier perpendicular top-down view to create a seamless "menu" experience.
+- **Cinematic Transitions:** Camera smoothly lerps to a top-down perpendicular view when selecting the Training Manual. The manual cover physically opens to reveal the UI once the camera arrives.
 
-### 4.2 HUD & Metadata
-- **Lighting Model:** 
-    - **Real-Time Sun:** Hub lighting (position, color, and intensity) dynamically matches the current system time on a 24-hour cycle. 
-    - **Independent Lamps:** The Nightstand and Standing Lamp are individually toggleable interactables, casting warm point-light shadows.
-    - **Physical Occlusion:** All walls, the floor (Minecraft voxel style), and the ceiling are shadow-casters that physically block outside light.
-- **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
-- **Skill Tree:** Branching progression system at the Training Manual (**Field Notes**). The UI uses a ruled notebook paper aesthetic with blue horizontal lines and a vertical red margin. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
-- **Return Home:** A functional button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
-- **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
+### 4.2 Tabbed Progression System (Field Notes)
+The Training Manual features three distinct functional tabs:
+- **DASHBOARD (Stats):** Tracks the player's numerical growth.
+    - **Walker Rank & XP:** Meter-to-XP conversion (10 XP/m) with level-ups granting Skill Points (SP).
+    - **Attributes:** Strength (Strain threshold), Focus (Grit multiplier/Stability), Agility (Move speed), and Bond (Recall speed).
+- **FIELD NOTES (Skills):** A branching progression tree.
+    - **Dual Currency:** Requires both Grit (banked from walks) and Skill Points (earned from Walker Rank).
+- **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics (GO, TUG, COME, SIT, RETURN).
+
+### 4.3 HUD & Metadata
+- **Lighting Model:** Hub lighting dynamically matches system time. Hub interactables (Lamps) are individually toggleable.
+- **Interaction Feedback:** Gaze-based Billboard labels.
+- **Return Home:** Finalizes current distance into Grit and XP, returning the player to the hub summary.
 - **Smartwatch:** Displays real-time Minimap during walks and system Time/Date in the Hub.
 
 ---
 
 ## 5. Level Design & Environments
 
-- **The Room:** Fully enclosed 3D environment with walls, ceiling, and interactable furniture. Dog movement is physically clamped within the room boundaries and includes collision detection for major furniture items (Desk, Closet, Bed, etc.) to prevent clipping during idle roaming.
-- **The Infinite Road:** Procedural environment using `InstancedMesh` for high-performance tree and foliage rendering.
-- **Session Conclusion:** A walk concludes automatically after accumulating 150m of distance, or manually at any point via the "Return Home" button. Both trigger the Mission Success screen and Grit rewards.
+- **The Room:** Fully enclosed 3D environment. Dog movement is physically clamped within room boundaries with furniture collision.
+- **The Infinite Road:** Procedural environment using `InstancedMesh`.
+- **Session Conclusion:** Walk concludes at 150m or via manual Return Home. Triggering Mission Success awards Grit and XP.
 
 ---
 
@@ -94,5 +99,5 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
-- **UI Responsiveness:** Dynamic scaling via `uiScale` and `edgeOffset` calculations.
-- **Mobile Safety:** Global `user-select: none` and `WebkitTouchCallout: none` to prevent UI interference.
+- **UI Mapping:** The Field Notes UI uses a fixed `distanceFactor` and transparent HTML overlays to achieve a 1:1 mapping with the physical 3D notebook page.
+- **Camera Stability:** Implemented micro-offsets and locking thresholds in `useMenuCamera` to prevent gimbal lock and precision jitter during object-focus views.
