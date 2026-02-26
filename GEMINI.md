@@ -23,11 +23,11 @@
 
 | System                | Responsibility                                                     | Key Variables                                          |
 | :-------------------- | :----------------------------------------------------------------- | :----------------------------------------------------- |
-| **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED` (7.0), `panSlowdown`, `uiScale`    |
+| **Locomotion Engine** | Manages player/dog velocity and 3rd-person camera positioning.     | `PLAYER_BASE_SPEED`, `attributes.agility/focus`        |
 | **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
-| **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `IDLING`, `currentRotation`  |
+| **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
-| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `attributes`, `progression`, `grit`    |
+| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `attributes.strength`, `progression`   |
 | **HUD (React)**       | Modular UI components: Profile Card and Overlays.                  | `KennelOverlay`, `RecordsOverlay`                      |
 
 ---
@@ -50,6 +50,13 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 - **GO / TUG:** Captures camera heading for pathing (GO) or pulls the dog 0.35m closer (TUG).
 - **COME:** High-speed recall toward the player.
 - **SIT:** Stationary anchor state.
+
+### 3.4 Attribute Scaling
+Player attributes dynamically modify physical gameplay values:
+- **Strength:** Increases the tension threshold before the leash strains (`0.78 + (strength * 0.02)`).
+- **Focus:** Multiplies final Grit earned (`1.0 + (focus * 0.05)`) and stabilizes the camera pan window (`0.3 + (focus * 0.035)`).
+- **Agility:** Increases base player movement speed on the road (`PLAYER_BASE_SPEED + (agility * 0.3)`).
+- **Bond:** Accelerates the dog's recall speed when executing the COME command (`12.0 + (bond * 1.5)`).
 
 ---
 
