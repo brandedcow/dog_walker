@@ -24,6 +24,7 @@ import { Closet } from './furniture/Closet';
 import { Bed } from './furniture/Bed';
 import { Laptop } from './furniture/Laptop';
 import { Calendar } from './furniture/Calendar';
+import { TrainingManual } from './furniture/TrainingManual';
 
 export const RoomScene = () => {
   const { gameState, setGameState, dogState, setDogState, menuState, setMenuState, isMovingForward, unlockedSkills } = useGameStore();
@@ -179,10 +180,8 @@ export const RoomScene = () => {
       <group position={[-2, 0, -3.0]}>
         <Desk position={[0, 0, 0]} />
         <Chair position={[0, 0, 1.3]} />
-        <Interactable position={[-0.6, 1.0, 0]} args={[0.6, 0.5, 0.4]} color="#333" label="THE KENNEL" targetState="KENNEL" currentMenuState={menuState} setMenuState={setMenuState}><Laptop /></Interactable>
-        <Interactable position={[0.6, 1.0, 0]} args={[0.5, 0.2, 0.7]} color="#2e7d32" label="TRAINING MANUAL" targetState="TRAINING" currentMenuState={menuState} setMenuState={setMenuState}>
-          <group><Box args={[0.5, 0.1, 0.7]} castShadow receiveShadow><meshStandardMaterial color="#2e7d32" /></Box><Box args={[0.4, 0.02, 0.6]} position={[0, 0.06, 0]} receiveShadow><meshStandardMaterial color="#fff" /></Box></group>
-        </Interactable>
+        <Laptop position={[-0.6, 1.0, 0]} />
+        <TrainingManual position={[0.6, 1.0, 0]} />
       </group>
 
       <Interactable position={[3.25, 0, -3.4]} args={[2.5, 3.8, 1.2]} color="#4e342e" label="GEAR CLOSET" targetState="GEAR" currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 4.0, 1.0]}><Closet position={[0, 0, 0]} /></Interactable>

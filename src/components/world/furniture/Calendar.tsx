@@ -10,7 +10,7 @@ export const Calendar = ({ position }: { position: [number, number, number] }) =
     </Box>
     <Text position={[0, 0.42, 0.02]} fontSize={0.08} color="white" anchorX="center" anchorY="middle">
       FEB
-      <meshStandardMaterial depthTest={false} />
+      <meshBasicMaterial depthTest={false} toneMapped={false} />
     </Text>
     {[...Array(5)].map((_, i) => (
       <Box key={`h-${i}`} args={[0.7, 0.005, 0.001]} position={[0, 0.3 - (i * 0.15), 0.011]}>

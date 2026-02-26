@@ -75,9 +75,18 @@ export const Interactable = ({
       </group>
       {(hovered || focused) && (
         <Billboard position={finalLabelOffset}>
-          <Text fontSize={0.2} color="white" anchorX="center" anchorY="bottom" renderOrder={100}>
+          <Text 
+            fontSize={0.2} 
+            color="white" 
+            anchorX="center" 
+            anchorY="bottom" 
+            renderOrder={100}
+            outlineWidth={0.015}
+            outlineColor="#222222"
+            outlineOpacity={0.8}
+          >
             {label}
-            <meshStandardMaterial depthTest={false} />
+            <meshBasicMaterial depthTest={false} toneMapped={false} />
           </Text>
         </Billboard>
       )}

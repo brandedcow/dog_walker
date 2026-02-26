@@ -28,7 +28,6 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
       {gameState === 'HOME' && (
         <>
           {menuState === 'KENNEL' && <KennelOverlay />}
-          {menuState === 'TRAINING' && <TrainingOverlay />}
           {menuState === 'RECORDS' && <RecordsOverlay />}
         </>
       )}

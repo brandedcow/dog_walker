@@ -13,8 +13,8 @@ export const FIXED_DELTA = 1 / 60 / PHYSICS_SUBSTEPS;
 
 export const CAMERA_TARGETS = {
   IDLE: { pos: [0, 2.5, 5], lookAt: [0, 1.5, 0] },
-  KENNEL: { pos: [-2.6, 1.8, -1.0], lookAt: [-2.6, 1.0, -3.0] }, // Laptop on Desk
-  TRAINING: { pos: [-1.4, 1.8, -1.0], lookAt: [-1.4, 1.0, -3.0] }, // Book on Desk
+  KENNEL: { pos: [-2.6, 1.4, -2.4], lookAt: [-2.6, 1.0, -3.2] }, // Zoomed into Laptop
+  TRAINING: { pos: [-1.4, 1.4, -2.4], lookAt: [-1.4, 1.0, -3.2] }, // Zoomed into Manual
   GEAR: { pos: [3.25, 2.2, 0], lookAt: [3.25, 1.9, -3.4] }, // Standing Closet
   RECORDS: { pos: [-0.9, 2.2, 2.5], lookAt: [-0.9, 2.2, 4.75] }, // Trophy Shelf on South Wall
 };
