@@ -115,10 +115,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setDogState: (dogState) => set({ dogState }),
   setMenuState: (menuState) => set({ menuState }),
   setTension: (tension) => {
-    const { unlockedSkills } = get();
-    let threshold = 0.8;
-    if (unlockedSkills.includes('STRENGTH_1')) threshold += 0.05;
-    if (unlockedSkills.includes('STRENGTH_2')) threshold += 0.10;
+    const { attributes } = get();
+    // Strength 1 = 0.8, Strength 10 = 0.98
+    const threshold = 0.78 + (attributes.strength * 0.02);
 
     if (tension > threshold) set({ hasStrained: true });
     set({ tension });
@@ -150,14 +149,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setHasStrained: (hasStrained) => set({ hasStrained }),
   
   finalizeWalk: () => {
-    const { distance, hasStrained, playerStats, unlockedSkills, progression } = get();
+    const { distance, hasStrained, playerStats, unlockedSkills, progression, attributes } = get();
     const baseGrit = Math.floor(distance / 10);
     const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
     let totalGrit = baseGrit + bonusGrit;
     
+    // Skill bonus
     if (unlockedSkills.includes('GRIT_FOCUS')) {
       totalGrit = Math.floor(totalGrit * 1.25);
     }
+
+    // Attribute bonus: Focus grants +5% per level
+    const focusMultiplier = 1.0 + (attributes.focus * 0.05);
+    totalGrit = Math.floor(totalGrit * focusMultiplier);
 
     // Award XP based on distance (1m = 10 XP)
     const earnedXP = Math.floor(distance * 10);

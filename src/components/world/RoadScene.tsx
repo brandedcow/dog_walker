@@ -13,7 +13,8 @@ import { LeashModel } from './LeashModel';
 export const RoadScene = () => {
   const { 
     gameState, setGameState, dogState, setDogState, isMovingForward, 
-    setTension, setDistance, setPositions, finalizeWalk, unlockedSkills 
+    setTension, setDistance, setPositions, finalizeWalk, unlockedSkills,
+    attributes 
   } = useGameStore();
   const playerPos = useRef(new Vector3(0, 1.7, 0));
   const povRotation = useRef({ yaw: 0, pitch: 0 });
@@ -111,7 +112,7 @@ export const RoadScene = () => {
 
     while (accumulator.current >= FIXED_DELTA) {
       lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
-      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills);
+      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills, attributes);
 
       if (isMovingForward && gameState === 'PLAYING') {
         let tensionSlowdown = 1.0;
@@ -121,15 +122,21 @@ export const RoadScene = () => {
           tensionSlowdown = 1.0 - (((lastLeashState.rawTension - 0.75) / 0.15) * 0.6);
         }
         
-        // Strength Bonus from Skill Tree
+        // Strength Bonus from Skill Tree (Legacy check)
         let strengthBonus = 0;
         if (unlockedSkills.includes('STRENGTH_1')) strengthBonus += 0.05;
         if (unlockedSkills.includes('STRENGTH_2')) strengthBonus += 0.10;
         tensionSlowdown = Math.min(1.0, tensionSlowdown + strengthBonus);
 
         const yawDelta = Math.abs(povRotation.current.yaw - lastYaw.current);
-        const panSlowdown = Math.max(0.3, 1.0 - (yawDelta * 10));
-        const speed = PLAYER_BASE_SPEED * tensionSlowdown * panSlowdown;
+        // Focus reduces pan slowdown: Focus 1 = base (0.3), Focus 10 = 0.65 min
+        const panBuffer = 0.3 + (attributes.focus * 0.035);
+        const panSlowdown = Math.max(panBuffer, 1.0 - (yawDelta * 10));
+        
+        // Agility adds 0.3 per level to base speed (7.0)
+        const baseSpeed = PLAYER_BASE_SPEED + (attributes.agility * 0.3);
+        const speed = baseSpeed * tensionSlowdown * panSlowdown;
+        
         playerPos.current.x += Math.sin(povRotation.current.yaw) * speed * FIXED_DELTA;
         playerPos.current.z -= Math.cos(povRotation.current.yaw) * speed * FIXED_DELTA;
       }
