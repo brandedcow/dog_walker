@@ -59,22 +59,25 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
 
   const renderPersistentUI = () => {
     if (!['HOME', 'PLAYING', 'FINISHED'].includes(gameState)) return null;
+    const isTraining = menuState === 'TRAINING';
 
     return (
       <>
         {/* Minimap (Top-Left) */}
-        <div style={{ 
-          position: 'absolute', 
-          top: `calc(${topSafe} + ${baseOffset}px)`, 
-          left: `calc(${leftSafe} + ${baseOffset}px)`, 
-          zIndex: 10, 
-          width: `${120 * uiScale}px`, 
-          height: `${120 * uiScale}px`, 
-          transform: `scale(${uiScale})`, 
-          transformOrigin: 'top left' 
-        }}>
-          <SmartwatchMinimap scents={scents} {...positions} />
-        </div>
+        {!isTraining && (
+          <div style={{ 
+            position: 'absolute', 
+            top: `calc(${topSafe} + ${baseOffset}px)`, 
+            left: `calc(${leftSafe} + ${baseOffset}px)`, 
+            zIndex: 10, 
+            width: `${120 * uiScale}px`, 
+            height: `${120 * uiScale}px`, 
+            transform: `scale(${uiScale})`, 
+            transformOrigin: 'top left' 
+          }}>
+            <SmartwatchMinimap scents={scents} {...positions} />
+          </div>
+        )}
 
         {/* Return Home Button (Top-Right) */}
         {gameState === 'PLAYING' && (
@@ -108,16 +111,18 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         )}
 
         {/* Profile Card (Bottom-Left) */}
-        <div style={{ 
-          position: 'absolute', 
-          bottom: `calc(${bottomSafe} + ${baseOffset}px)`, 
-          left: `calc(${leftSafe} + ${baseOffset}px)`, 
-          zIndex: 10, 
-          transform: `scale(${uiScale})`, 
-          transformOrigin: 'bottom left' 
-        }}>
-          <ProfileCard />
-        </div>
+        {!isTraining && (
+          <div style={{ 
+            position: 'absolute', 
+            bottom: `calc(${bottomSafe} + ${baseOffset}px)`, 
+            left: `calc(${leftSafe} + ${baseOffset}px)`, 
+            zIndex: 10, 
+            transform: `scale(${uiScale})`, 
+            transformOrigin: 'bottom left' 
+          }}>
+            <ProfileCard />
+          </div>
+        )}
 
         {/* Paw Controls (Bottom-Right) */}
         {((gameState === 'PLAYING' || gameState === 'FINISHED') || (gameState === 'HOME' && menuState === 'IDLE')) && (

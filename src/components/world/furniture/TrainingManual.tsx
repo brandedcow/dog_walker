@@ -327,8 +327,8 @@ export const TrainingManual = ({
         >
           <div
             style={{
-              width: "500px",
-              height: isPortrait ? "640px" : "680px",
+              width: "600px",
+              height: isPortrait ? "800px" : "850px",
               background: "transparent",
               border: "none",
               padding: isPortrait
