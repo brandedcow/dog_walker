@@ -6,6 +6,8 @@
 
 - **Approval Requirement:** Any large-scale changes, architectural shifts, or significant feature expansions **MUST** be proposed to the user and receive express approval before implementation.
 - **Surgical Updates:** Minor bug fixes and UI polish (within existing patterns) can be performed autonomously, but must be communicated clearly.
+- **Input Safety & NaN Protection:** All mouse/touch input handling MUST explicitly check for `undefined` or `0` before using fallbacks (e.g., `e.clientX !== undefined ? e.clientX : fallback`). Physics and camera loops MUST implement safety checks (e.g., division-by-zero guards) to prevent `NaN` propagation that causes scene blackouts.
+- **Build Integrity:** Any UI component intended for use in the HUD or central scenes MUST be explicitly exported and verified via `npm run build` or `npm run lint` before finishing a task.
 
 ---
 
@@ -26,7 +28,7 @@
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `IDLING`, `currentRotation`  |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
 | **State (Zustand)**   | Centralized event-driven state for HUD and scene sync.             | `useGameStore`: `gameState`, `menuState`, `dogStats`   |
-| **HUD (React)**       | Modular UI components: Profile Card, Overlays, and Paw Controls.   | `KennelOverlay`, `TrainingOverlay`, `RecordsOverlay`   |
+| **HUD (React)**       | Modular UI components: Profile Card and Overlays.                  | `KennelOverlay`, `RecordsOverlay`                      |
 
 ---
 
