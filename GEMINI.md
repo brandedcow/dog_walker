@@ -31,7 +31,7 @@
 | **Physics (useLeash)**| Verlet Integration + PBD. Handles collar attachment & tension.     | `LEASH_NODES` (60), `MAX_LEASH_LENGTH` (15m)           |
 | **Canine AI (useDogAI)**| Displacement-driven rotation & state transitions.                | `dogFacingYaw`, `COMING`, `attributes.bond`            |
 | **Menu (useMenuCamera)**| Cinematic camera transitions between 3D room objects.            | `CAMERA_TARGETS`, `lerp`, `slerp`                      |
-| **State (Zustand)**   | Centralized event-driven state for HUD and scene sync. Uses type-safe constant objects for finite state machines. | `useGameStore`: `GameState`, `DogState`, `MenuState` |
+| **State (Zustand)**   | Centralized event-driven state with **localStorage persistence**.  | `useGameStore`: `GameState`, `DogState`, `MenuState` |
 | **HUD (React)**       | Scalable, modular UI components using a primitive-first library. | `MissionSuccessOverlay`, `barkos/PrimitiveComponents` |
 
 ---
@@ -61,6 +61,12 @@ Player attributes dynamically modify physical gameplay values:
 - **Focus:** Multiplies final Grit earned (`1.0 + (focus * 0.05)`) and stabilizes the camera pan window (`0.3 + (focus * 0.035)`).
 - **Agility:** Increases base player movement speed on the road (`PLAYER_BASE_SPEED + (agility * 0.3)`).
 - **Bond:** Accelerates the dog's recall speed when executing the COME command (`12.0 + (bond * 1.5)`).
+
+### 3.5 Progression & Persistence
+The game utilizes Zustand's `persist` middleware to ensure long-term growth is preserved across sessions.
+- **Surgical Serialization:** Only progression-critical keys (`playerStats`, `attributes`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
+- **Lifetime Stats:** `totalDistanceWalked` tracks the cumulative distance covered across all sessions, distinct from the transient session-based `distance`.
+- **State Reset:** A secure reset mechanism is available in the Hub's Records menu to clear all persistent data and return to default values.
 
 ---
 
@@ -110,9 +116,11 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 ## 6. Technical Implementation Notes
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
-- **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`. Core states (`GameState`, `DogState`, `MenuState`) are implemented as type-safe constant objects (`as const`) to ensure compliance with `erasableSyntaxOnly` while maintaining enum-like developer experience.
+- **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`. 
+- **Persistence Architecture:** Implemented via `persist` middleware with `createJSONStorage`. Uses `partialize` to prevent transient session state (e.g., tension, positions) from being serialized, ensuring save file integrity.
 - **Testing Framework (Vitest + RTL):** A comprehensive QA suite is established covering:
     - **Unit (Logic):** `useGameStore` (Grit/XP/Skills), `useLeash` (Verlet/Tension), `useDogAI` (State/Recall).
+    - **Persistence:** `persistence.test.ts` verifies correct serialization/deserialization and exclusion of transient data.
     - **Unit (UI):** `HUD`, `TrainingOverlay`, `PawControls` (State-driven rendering & interaction).
     - **Integration:** "Golden Path" verifying the full Home -> Walk -> Reward -> Skill loop.
     - **Environment Safety:** Mocks for WebGL, ResizeObserver, and PointerEvents ensure consistent results across CI environments.

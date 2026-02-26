@@ -107,4 +107,24 @@ describe('useGameStore', () => {
     expect(finalState.playerStats.grit).toBe(40);
     expect(finalState.progression.skillPoints).toBe(4);
   });
+
+  it('resets progress back to default values', () => {
+    const store = useGameStore.getState();
+    
+    // Set non-default state
+    useGameStore.setState({ 
+      playerStats: { strength: 1, grit: 500 },
+      progression: { walkerRank: 10, xp: 9000, skillPoints: 8 },
+      unlockedSkills: ['FOUNDATION', 'SPEED_WALKER', 'GRIT_FOCUS'],
+      attributes: { strength: 5, focus: 5, agility: 5, bond: 5 }
+    });
+
+    store.resetProgress();
+    
+    const finalState = useGameStore.getState();
+    expect(finalState.playerStats.grit).toBe(0);
+    expect(finalState.progression.walkerRank).toBe(1);
+    expect(finalState.unlockedSkills).toEqual(['FOUNDATION']);
+    expect(finalState.attributes.strength).toBe(1);
+  });
 });
