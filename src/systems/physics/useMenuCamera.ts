@@ -16,6 +16,7 @@ export const useMenuCamera = () => {
   const targetQuaternion = useRef(new Quaternion());
 
   useFrame((_, delta) => {
+    const { menuState, isMenuReady, setIsMenuReady } = useGameStore.getState();
     if (menuState === MenuState.IDLE) return;
     
     const config = CAMERA_TARGETS[menuState] || CAMERA_TARGETS.IDLE;
@@ -52,7 +53,7 @@ export const useMenuCamera = () => {
     }
 
     // Notify store when stable
-    if (dist <= 0.005 && angleDist <= 0.005 && !isMenuReady) {
+    if (dist <= 0.01 && angleDist <= 0.01 && !isMenuReady) {
       setIsMenuReady(true);
     }
   });

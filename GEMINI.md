@@ -11,6 +11,7 @@
     - Always use `100dvh` (Dynamic Viewport Height) for the main application container to account for mobile browser chrome (address bars, nav controls).
     - HUD elements MUST use `env(safe-area-inset-*)` combined with base offsets via `calc()` to prevent clipping by hardware notches, home indicators, or rounded screen corners.
 - **Build Integrity:** Any UI component intended for use in the HUD or central scenes MUST be explicitly exported and verified via `npm run build` or `npm run lint` before finishing a task.
+- **Testing Requirement:** All core logic (Store, Physics, AI) MUST have corresponding unit tests in `*.test.ts`. UI components MUST be verified for state-dependent rendering and responsive layout safety. Run `npm test` to validate the quality gate.
 
 ---
 
@@ -110,6 +111,11 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`. Core states (`GameState`, `DogState`, `MenuState`) are implemented as type-safe constant objects (`as const`) to ensure compliance with `erasableSyntaxOnly` while maintaining enum-like developer experience.
+- **Testing Framework (Vitest + RTL):** A comprehensive QA suite is established covering:
+    - **Unit (Logic):** `useGameStore` (Grit/XP/Skills), `useLeash` (Verlet/Tension), `useDogAI` (State/Recall).
+    - **Unit (UI):** `HUD`, `TrainingOverlay`, `PawControls` (State-driven rendering & interaction).
+    - **Integration:** "Golden Path" verifying the full Home -> Walk -> Reward -> Skill loop.
+    - **Environment Safety:** Mocks for WebGL, ResizeObserver, and PointerEvents ensure consistent results across CI environments.
 - **Camera-UI Coordination:** Implemented a `isMenuReady` handshake between the `useMenuCamera` physics loop and the React HUD to prevent UI "pop-in" before cinematic transitions finish.
 - **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
 - **UI Mapping:** The Field Notes UI uses a full-screen overlay for accessibility, replacing the previous 3D-mapped HTML to ensure perfect legibility across all phone display ratios.
