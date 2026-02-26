@@ -60,10 +60,12 @@ export const useLeash = () => {
         const n2 = n[i + 1];
         const diff = new Vector3().subVectors(n1, n2);
         const d = diff.length();
-        const error = (d - dynamicSegmentLength) / d;
-        const correction = diff.multiplyScalar(error * 0.5);
-        if (i > 0) n1.sub(correction);
-        if (i + 1 < LEASH_NODES - 1) n2.add(correction);
+        if (d > 0.0001) {
+          const error = (d - dynamicSegmentLength) / d;
+          const correction = diff.multiplyScalar(error * 0.5);
+          if (i > 0) n1.sub(correction);
+          if (i + 1 < LEASH_NODES - 1) n2.add(correction);
+        }
       }
       // Ground collision
       for (let i = 1; i < LEASH_NODES - 1; i++) {

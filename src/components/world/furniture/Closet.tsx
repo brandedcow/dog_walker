@@ -12,8 +12,11 @@ export const Closet = ({ position }: { position: [number, number, number] }) => 
       const worldPos = new Vector3();
       meshRef.current.getWorldPosition(worldPos);
       const dist = camera.position.distanceTo(worldPos);
-      meshRef.current.material.opacity = Math.max(0.2, Math.min(1.0, (dist - 1.5) / 2.0));
-      meshRef.current.material.transparent = meshRef.current.material.opacity < 1.0;
+      const mat = meshRef.current.material as any;
+      if (mat) {
+        mat.opacity = Math.max(0.2, Math.min(1.0, (dist - 1.5) / 2.0));
+        mat.transparent = mat.opacity < 1.0;
+      }
     }
   });
 

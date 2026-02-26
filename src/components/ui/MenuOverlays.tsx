@@ -1,5 +1,4 @@
 import { useGameStore } from '../../store/useGameStore';
-import { SKILLS, Skill } from '../../config/skills';
 
 const OverlayContainer = ({ title, children, onBack }: { title: string, children: React.ReactNode, onBack: () => void }) => (
   <div style={{ 

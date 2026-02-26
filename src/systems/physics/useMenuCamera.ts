@@ -22,15 +22,12 @@ export const useMenuCamera = () => {
     camera.position.lerp(targetPos, delta * 3);
 
     // 2. Interpolate Rotation (LookAt)
-    // We create a temporary object to calculate the target rotation
-    const currentPos = camera.position.clone();
-    const tempMatrix = camera.matrix.clone();
+    const oldQuaternion = camera.quaternion.clone();
     camera.lookAt(targetLookAt);
     const targetQuaternion = camera.quaternion.clone();
     
     // Restore and lerp
-    camera.matrix.copy(tempMatrix);
-    camera.position.copy(currentPos);
+    camera.quaternion.copy(oldQuaternion);
     camera.quaternion.slerp(targetQuaternion, delta * 3);
   });
 };

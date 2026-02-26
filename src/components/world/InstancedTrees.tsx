@@ -12,6 +12,8 @@ export const InstancedTrees = ({ count = 40 }: { count?: number }) => {
   }, [count]);
 
   useEffect(() => {
+    if (!meshRef.current || !foliageRef.current) return;
+    
     const tempObject = new Object3D();
     
     treePositions.forEach((tree, i) => {
@@ -26,8 +28,8 @@ export const InstancedTrees = ({ count = 40 }: { count?: number }) => {
       foliageRef.current?.setMatrixAt(i, tempObject.matrix);
     });
 
-    meshRef.current!.instanceMatrix.needsUpdate = true;
-    foliageRef.current!.instanceMatrix.needsUpdate = true;
+    meshRef.current.instanceMatrix.needsUpdate = true;
+    foliageRef.current.instanceMatrix.needsUpdate = true;
   }, [treePositions]);
 
   return (

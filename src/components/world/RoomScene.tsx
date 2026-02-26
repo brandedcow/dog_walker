@@ -79,14 +79,14 @@ export const RoomScene = () => {
   useEffect(() => {
     const handleDown = (e: any) => {
       isDragging.current = true;
-      const x = e.clientX || (e.touches && e.touches[0].clientX);
-      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       lastMousePos.current = { x, y };
     };
     const handleMove = (e: any) => {
       if (!isDragging.current || menuState !== 'IDLE') return;
-      const x = e.clientX || (e.touches && e.touches[0].clientX);
-      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       povRotation.current.yaw += (x - lastMousePos.current.x) * 0.005;
       povRotation.current.pitch -= (y - lastMousePos.current.y) * 0.005;
       povRotation.current.pitch = Math.max(-Math.PI/4, Math.min(Math.PI/4, povRotation.current.pitch));

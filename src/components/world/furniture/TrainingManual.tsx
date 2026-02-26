@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Box, Html, Billboard, Text } from '@react-three/drei';
 import { useGameStore } from '../../../store/useGameStore';
-import { SKILLS, Skill } from '../../../config/skills';
+import { SKILLS, type Skill } from '../../../config/skills';
 
 const SkillNode = ({ skill, unlocked, available, canAfford, onPurchase }: { 
   skill: Skill, unlocked: boolean, available: boolean, canAfford: boolean, onPurchase: () => void 

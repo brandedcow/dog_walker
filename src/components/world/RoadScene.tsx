@@ -47,15 +47,15 @@ export const RoadScene = () => {
 
     const handleDown = (e: any) => {
       isDragging.current = true;
-      const x = e.clientX || (e.touches && e.touches[0].clientX);
-      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       lastMousePos.current = { x, y };
       swipeStartPos.current = { x, y };
     };
     const handleMove = (e: any) => {
       if (!isDragging.current) return;
-      const x = e.clientX || (e.touches && e.touches[0].clientX);
-      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       const deltaX = x - lastMousePos.current.x;
       const deltaY = y - lastMousePos.current.y;
       povRotation.current.yaw += deltaX * 0.005;
@@ -66,7 +66,7 @@ export const RoadScene = () => {
     const handleUp = (e: any) => {
       isDragging.current = false;
       if (swipeStartPos.current) {
-        const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0);
         const deltaY = clientY - swipeStartPos.current.y;
         if (dogState === 'SNIFFING' && deltaY > 30) handleGo();
       }

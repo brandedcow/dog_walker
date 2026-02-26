@@ -2,7 +2,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { SmartwatchMinimap } from './SmartwatchMinimap';
 import { ProfileCard } from './ProfileCard';
 import { PawControls } from './PawControls';
-import { KennelOverlay, TrainingOverlay, RecordsOverlay } from './MenuOverlays';
+import { KennelOverlay, RecordsOverlay } from './MenuOverlays';
 import { useEffect, useState } from 'react';
 
 export const HUD = ({ handleGo }: { handleGo: () => void }) => {
