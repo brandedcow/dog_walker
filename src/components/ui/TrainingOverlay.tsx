@@ -131,7 +131,7 @@ export const TrainingOverlay = () => {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <h1 style={{ margin: 0, fontSize: '42px', fontWeight: '900', letterSpacing: '-1px' }}>
-            {activeTab === 'STATS' ? 'DASHBOARD' : activeTab === 'SKILLS' ? 'FIELD NOTES' : 'COMMANDS'}
+            {activeTab}
           </h1>
           <button 
             onClick={() => setMenuState('IDLE')}
