@@ -4,7 +4,7 @@ import { DOG_MOVE_SPEED } from '../../config/constants';
 import type { DogState } from '../../store/useGameStore';
 
 export const useDogAI = () => {
-  const dogPos = useRef(new Vector3(0, 0, 1));
+  const dogPos = useRef(new Vector3(1.0, 0, 2.0));
   const dogFacingYaw = useRef(0);
   const dogDistance = useRef(0);
   const lastDogUpdatePos = useRef(new Vector3(0, 0, -1));
@@ -16,9 +16,15 @@ export const useDogAI = () => {
     delta: number, 
     playerPos: Vector3, 
     dogState: DogState, 
-    setDogState: (s: DogState) => void
+    setDogState: (s: DogState) => void,
+    unlockedSkills: string[] = []
   ) => {
     const prevDogPos = dogPos.current.clone();
+
+    // Calculate dynamic recall speed from skills
+    let recallSpeed = 12.0;
+    if (unlockedSkills.includes('RECALL_1')) recallSpeed += 1.5;
+    if (unlockedSkills.includes('RECALL_2')) recallSpeed += 3.0;
 
     // Idling logic
     if (dogState === 'STANDING') {
@@ -49,7 +55,7 @@ export const useDogAI = () => {
         setDogState('STANDING');
         stationaryTime.current = 0;
       } else {
-        dogPos.current.add(dir.normalize().multiplyScalar(12.0 * delta));
+        dogPos.current.add(dir.normalize().multiplyScalar(recallSpeed * delta));
       }
     } else if (dogState === 'WALKING') {
       const moveX = Math.sin(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;

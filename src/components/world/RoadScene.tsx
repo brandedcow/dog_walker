@@ -11,7 +11,10 @@ import { DogModel } from './DogModel';
 import { LeashModel } from './LeashModel';
 
 export const RoadScene = () => {
-  const { gameState, setGameState, dogState, setDogState, isMovingForward, setTension, setDistance, setPositions } = useGameStore();
+  const { 
+    gameState, setGameState, dogState, setDogState, isMovingForward, 
+    setTension, setDistance, setPositions, finalizeWalk, unlockedSkills 
+  } = useGameStore();
   const playerPos = useRef(new Vector3(0, 1.7, 0));
   const povRotation = useRef({ yaw: 0, pitch: 0 });
   const lastYaw = useRef(0);
@@ -108,7 +111,7 @@ export const RoadScene = () => {
 
     while (accumulator.current >= FIXED_DELTA) {
       lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
-      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState);
+      lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills);
 
       if (isMovingForward && gameState === 'PLAYING') {
         let tensionSlowdown = 1.0;
@@ -117,6 +120,13 @@ export const RoadScene = () => {
         } else if (lastLeashState.rawTension > 0.75) {
           tensionSlowdown = 1.0 - (((lastLeashState.rawTension - 0.75) / 0.15) * 0.6);
         }
+        
+        // Strength Bonus from Skill Tree
+        let strengthBonus = 0;
+        if (unlockedSkills.includes('STRENGTH_1')) strengthBonus += 0.05;
+        if (unlockedSkills.includes('STRENGTH_2')) strengthBonus += 0.10;
+        tensionSlowdown = Math.min(1.0, tensionSlowdown + strengthBonus);
+
         const yawDelta = Math.abs(povRotation.current.yaw - lastYaw.current);
         const panSlowdown = Math.max(0.3, 1.0 - (yawDelta * 10));
         const speed = PLAYER_BASE_SPEED * tensionSlowdown * panSlowdown;
@@ -136,7 +146,10 @@ export const RoadScene = () => {
         dx: dogAI.dogPos.current.x, dz: dogAI.dogPos.current.z 
       });
 
-      if (lastAIState.dogDistance > 150 && gameState === 'PLAYING') setGameState('FINISHED');
+      if (lastAIState.dogDistance > 150 && gameState === 'PLAYING') {
+        finalizeWalk();
+        setGameState('FINISHED');
+      }
     }
   });
 

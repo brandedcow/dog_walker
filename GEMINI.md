@@ -47,18 +47,22 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 ## 4. Interaction Model
 
 ### 4.1 Spatial 3D Hub (The Room)
-- **Manual Navigation:** 3rd-person exploration of the room hub using standard walk/pan controls.
-- **Interactive Objects:** Raycast-based triggers for room modules:
-    - **Wooden Door**: Transition to "Infinite Road" gameplay.
-    - **Laptop**: Opens the Kennel (Dog stats/roster).
-    - **Training Book**: Opens Upgrades (Strength/Recall).
-    - **Trophy Shelf**: Opens Records (Total distance/milestones).
+- **Geometry:** 10m x 8m square layout (5m ceiling).
+- **Structural Layout:**
+    - **South Wall:** Entrance door (4m height, 80% of wall) offset to the West.
+    - **North Wall:** Large 4m x 2.5m window centered over the desk.
+- **Furniture & Zoning:**
+    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and Training Manual.
+    - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with proximity-based transparency.
+    - **Bottom-Right (South-East):** Single Bed (4.5m x 2.2m) and Nightstand.
+    - **West Wall:** Trophy Shelf mounted at 1.5m height.
 - **Cinematic Transitions:** Camera smoothly lerps from free-look to object-focus when a module is selected.
 
 ### 4.2 HUD & Metadata
-- **Expandable Profile:** Tapping the dog card reveals full metadata (Training Level, Characteristics, Mood, Size).
-- **Contextual Overlays:** 2D React interfaces for specific room modules, using Zustand for real-time stat synchronization.
+- **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
+- **Skill Tree:** Branching progression system at the Training Manual. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
 - **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
+- **Smartwatch:** Displays real-time Minimap during walks and system Time/Date in the Hub.
 
 ---
 

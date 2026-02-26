@@ -100,6 +100,31 @@ const Interactable = ({
   );
 };
 
+const Calendar = ({ position }: { position: [number, number, number] }) => (
+  <group position={position}>
+    {/* Main slab */}
+    <Box args={[0.8, 1.0, 0.02]} castShadow receiveShadow>
+      <meshStandardMaterial color="#fff" />
+    </Box>
+    {/* Header */}
+    <Box args={[0.8, 0.15, 0.01]} position={[0, 0.42, 0.01]}>
+      <meshStandardMaterial color="#ff4444" />
+    </Box>
+    <Text position={[0, 0.42, 0.02]} fontSize={0.08} color="white" anchorX="center" anchorY="middle" depthTest={false} renderOrder={101}>FEB</Text>
+    {/* Simple grid lines for dates */}
+    {[...Array(5)].map((_, i) => (
+      <Box key={`h-${i}`} args={[0.7, 0.005, 0.001]} position={[0, 0.3 - (i * 0.15), 0.011]}>
+        <meshStandardMaterial color="#ddd" />
+      </Box>
+    ))}
+    {[...Array(7)].map((_, i) => (
+      <Box key={`v-${i}`} args={[0.005, 0.7, 0.001]} position={[-0.35 + (i * 0.116), 0, 0.011]}>
+        <meshStandardMaterial color="#ddd" />
+      </Box>
+    ))}
+  </group>
+);
+
 const Desk = ({ position }: { position: [number, number, number] }) => (
   <group position={position}>
     <Box args={[3.0, 0.1, 2.0]} position={[0, 0.95, 0]} castShadow receiveShadow>
@@ -283,6 +308,8 @@ export const RoomScene = () => {
         <Box args={[0.05, 2.5, 0.05]} position={[0, 0, 0]}><meshStandardMaterial color="#fff" /></Box> {/* Vertical Mullion */}
         <Box args={[4.0, 0.05, 0.05]} position={[0, 0, 0]}><meshStandardMaterial color="#fff" /></Box> {/* Horizontal Mullion */}
       </group>
+
+      <Calendar position={[1.0, 2.5, -3.94]} />
 
       {/* South Door (Offset West) */}
       <group position={[-3, 2.0, 4.9]}>
