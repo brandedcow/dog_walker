@@ -5,7 +5,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { CAMERA_TARGETS } from '../../config/constants';
 
 export const useMenuCamera = () => {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const menuState = useGameStore((state) => state.menuState);
 
   const targetPos = useRef(new Vector3());
@@ -16,7 +16,19 @@ export const useMenuCamera = () => {
     if (menuState === 'IDLE') return;
     
     const config = CAMERA_TARGETS[menuState] || CAMERA_TARGETS.IDLE;
-    targetPos.current.set(config.pos[0], config.pos[1], config.pos[2]);
+    const aspect = size.width / size.height;
+    
+    // Dynamic Zoom for Training Manual on mobile/narrow screens
+    let zOffset = 0;
+    if (menuState === 'TRAINING' && aspect < 1.1) {
+      // Increase camera height (Y) or distance to fit the notebook width-wise
+      // On narrow screens, the notebook width is the constraint.
+      // Base width is ~0.7m. At 0.8m height, 75 FOV, it barely fits landscape.
+      // For portrait, we need more height.
+      zOffset = (1.1 - aspect) * 0.85; 
+    }
+
+    targetPos.current.set(config.pos[0], config.pos[1] + zOffset, config.pos[2]);
     targetLookAt.current.set(config.lookAt[0], config.lookAt[1], config.lookAt[2]);
 
     // 1. Position Interpolation with Threshold

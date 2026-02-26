@@ -105,10 +105,15 @@ export const TrainingManual = ({
   const [focused, setFocused] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
   const isOpen = menuState === "TRAINING";
+
+  // Dynamic scaling based on screen width/height to keep UI sharp
+  const aspect = size.width / size.height;
+  const isPortrait = aspect < 1.0;
+  const dynamicDistanceFactor = isPortrait ? 0.35 : 0.42;
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -135,8 +140,13 @@ export const TrainingManual = ({
 
     // Synchronize UI visibility with camera and cover animation
     const target = CAMERA_TARGETS.TRAINING;
-    const targetPos = new Vector3(target.pos[0], target.pos[1], target.pos[2]);
-    const isCameraClose = camera.position.distanceTo(targetPos) < 0.1;
+    const aspect = size.width / size.height;
+    let zOffset = 0;
+    if (aspect < 1.1) {
+      zOffset = (1.1 - aspect) * 0.85;
+    }
+    const targetPos = new Vector3(target.pos[0], target.pos[1] + zOffset, target.pos[2]);
+    const isCameraClose = camera.position.distanceTo(targetPos) < 0.15;
     const isCoverOpen =
       coverRef.current && coverRef.current.rotation.z < -Math.PI * 0.8;
 
@@ -303,15 +313,15 @@ export const TrainingManual = ({
           rotation={[-Math.PI / 2, 0, 0]}
           transform
           occlude
-          distanceFactor={0.4}
+          distanceFactor={dynamicDistanceFactor}
         >
           <div
             style={{
               width: "480px",
-              height: "680px",
+              height: isPortrait ? "620px" : "680px",
               background: "transparent",
               border: "none",
-              padding: "40px 20px 20px 100px",
+              padding: isPortrait ? "30px 20px 20px 70px" : "40px 30px 20px 85px",
               color: "#2c3e50",
               fontFamily: '"Courier New", Courier, monospace',
               display: "flex",
@@ -324,20 +334,21 @@ export const TrainingManual = ({
               position: "relative"
             }}
           >
-            {/* Side Tabs (Attached to right edge) */}
-            <div style={{ position: "absolute", right: "-40px", top: "80px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            {/* Side Tabs (Attached further right to create spacing) */}
+            <div style={{ position: "absolute", right: "-60px", top: "80px", display: "flex", flexDirection: "column", gap: "12px" }}>
               {['STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
                 <div 
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab as any); }}
                   style={{
-                    width: "40px", height: "80px", background: activeTab === tab ? "#ffffff" : "#d1cdb0",
-                    border: "1px solid #bcba9a", borderLeft: "none", borderRadius: "0 10px 10px 0",
+                    width: "45px", height: "90px", background: activeTab === tab ? "#ffffff" : "#d1cdb0",
+                    border: "1px solid #bcba9a", borderLeft: "2px solid rgba(0,0,0,0.1)", borderRadius: "0 12px 12px 0",
                     writingMode: "vertical-rl", textOrientation: "mixed", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontSize: "10px", fontWeight: "900", cursor: "pointer",
-                    boxShadow: activeTab === tab ? "4px 0 10px rgba(0,0,0,0.1)" : "none",
+                    justifyContent: "center", fontSize: "11px", fontWeight: "900", cursor: "pointer",
+                    boxShadow: activeTab === tab ? "6px 0 12px rgba(0,0,0,0.15)" : "2px 0 5px rgba(0,0,0,0.05)",
                     color: activeTab === tab ? "#2c3e50" : "#6e6c56",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
+                    paddingLeft: "2px"
                   }}
                 >
                   {tab}
@@ -345,7 +356,7 @@ export const TrainingManual = ({
               ))}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "20px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "25px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative", marginRight: "10px" }}>
               <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
                 {activeTab === 'STATS' ? 'DASHBOARD' : activeTab === 'SKILLS' ? 'FIELD NOTES' : 'COMMANDS'}
               </h1>
@@ -361,33 +372,6 @@ export const TrainingManual = ({
                   </div>
                 )}
               </div>
-
-              {/* Top-Right X Close Button */}
-              <button 
-                onClick={() => setMenuState("IDLE")}
-                style={{
-                  position: "absolute",
-                  top: "-10px",
-                  right: "-10px",
-                  width: "40px",
-                  height: "40px",
-                  background: "#2c3e50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-                  transition: "all 0.1s",
-                  pointerEvents: "auto"
-                }}
-              >
-                ×
-              </button>
             </div>
 
             {activeTab === 'STATS' ? (

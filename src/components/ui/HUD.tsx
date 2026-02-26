@@ -36,6 +36,38 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         <>
           {menuState === 'KENNEL' && <KennelOverlay />}
           {menuState === 'RECORDS' && <RecordsOverlay />}
+          
+          {/* Global Close Button for Training/Sub-menus */}
+          {menuState === 'TRAINING' && (
+            <button 
+              onClick={() => useGameStore.getState().setMenuState('IDLE')}
+              style={{
+                position: 'absolute',
+                top: `calc(${topSafe} + 20px)`,
+                right: `calc(${rightSafe} + 20px)`,
+                width: '60px',
+                height: '60px',
+                background: 'rgba(0,0,0,0.8)',
+                color: 'white',
+                border: '2px solid white',
+                borderRadius: '50%',
+                fontSize: '32px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+                zIndex: 100,
+                transition: 'transform 0.1s active'
+              }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.9)')}
+              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              ×
+            </button>
+          )}
         </>
       )}
 
