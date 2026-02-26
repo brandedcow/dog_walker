@@ -38,6 +38,25 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
           <div style={{ position: 'absolute', top: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, width: `${120 * uiScale}px`, height: `${120 * uiScale}px`, transform: `scale(${uiScale})`, transformOrigin: 'top left' }}>
             <SmartwatchMinimap scents={scents} {...positions} />
           </div>
+
+          {gameState === 'PLAYING' && (
+            <div 
+              onClick={() => {
+                finalizeWalk();
+                setGameState('FINISHED');
+              }}
+              style={{ 
+                position: 'absolute', top: `${edgeOffset}px`, right: `${edgeOffset}px`, zIndex: 10, 
+                padding: `${12 * uiScale}px ${20 * uiScale}px`, background: 'rgba(0,0,0,0.8)', border: '2px solid white', 
+                borderRadius: '12px', color: 'white', fontWeight: 'bold', fontSize: `${14 * uiScale}px`, 
+                cursor: 'pointer', pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '8px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+              }}
+            >
+              <span>🏠</span> RETURN HOME
+            </div>
+          )}
+
           <div style={{ position: 'absolute', bottom: `${edgeOffset}px`, left: `${edgeOffset}px`, zIndex: 10, transform: `scale(${uiScale})`, transformOrigin: 'bottom left' }}>
             <ProfileCard />
           </div>

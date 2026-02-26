@@ -61,6 +61,7 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 ### 4.2 HUD & Metadata
 - **Interaction Feedback:** Gaze-based labels using `Billboard` components. Labels appear automatically when an object is in the center of the FOV or hovered, rendered with `depthTest: false` to prevent wall clipping.
 - **Skill Tree:** Branching progression system at the Training Manual. Nodes include Player Strength, Dog Recall, and Economy (Grit Focus).
+- **Return Home:** A button in the walking scene that allows players to end their walk early, finalizing current distance into Grit and returning to the Hub summary.
 - **Walk Meter:** Progressive header using a 0.25m displacement threshold to filter jitter.
 - **Smartwatch:** Displays real-time Minimap during walks and system Time/Date in the Hub.
 
