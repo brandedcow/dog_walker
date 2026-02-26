@@ -67,6 +67,16 @@ const SkillNode = ({
   </div>
 );
 
+// Map ResonanceType to trait keys for visualizer
+const TRAIT_MAP: Record<string, string> = {
+  'Anchor': 'strength',
+  'Whisperer': 'bond',
+  'Tactician': 'focus',
+  'Nomad': 'speed',
+  'Urbanist': 'awareness',
+  'Specialist': 'mastery'
+};
+
 const HexagramVisualizer = ({ 
   currentResonance, 
   secondaryFocus,
@@ -92,7 +102,8 @@ const HexagramVisualizer = ({
 
   const points = RESONANCE_ORDER.map((type, i) => {
     const angle = (i * 60 - 90) * (Math.PI / 180);
-    const traitVal = (rawTraits as any)[type.toLowerCase()] || 1;
+    const traitKey = TRAIT_MAP[type] || 'strength';
+    const traitVal = (rawTraits as any)[traitKey] || 1;
     const dynamicRadius = (traitVal / maxTraitVal) * maxRadius;
     
     return {
@@ -149,7 +160,7 @@ const HexagramVisualizer = ({
           {points.map((p) => {
             const isPrimary = p.type === currentResonance;
             const isSecondary = p.type === secondaryFocus;
-            const masteryLevel = Math.min(10, affinityXP[p.type] / 1000);
+            const masteryLevel = Math.min(10, (affinityXP?.[p.type] || 0) / 1000);
             
             return (
               <g key={p.type} onClick={() => canSwitch && onResonanceSelect(p.type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
@@ -292,11 +303,11 @@ export const TrainingOverlay = () => {
         <div style={{ display: 'flex', gap: '40px', marginTop: '20px', alignItems: 'flex-end' }}>
           <div>
             <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>GRIT CACHE</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#44ff44' }}>{playerStats.grit} G</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#44ff44' }}>{playerStats?.grit || 0} G</div>
           </div>
           <div>
             <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>SKILL POINTS</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#4488ff' }}>{progression.skillPoints} SP</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#4488ff' }}>{progression?.skillPoints || 0} SP</div>
           </div>
           <button
             onClick={handleRespec}
@@ -329,17 +340,17 @@ export const TrainingOverlay = () => {
                 rawTraits={rawTraits}
                 affinityXP={affinityXP}
                 onResonanceSelect={setResonanceType} 
-                canSwitch={progression.walkerRank === 1} 
+                canSwitch={(progression?.walkerRank || 1) === 1} 
               />
               
               {/* XP Progress Section */}
               <div style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid #333' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#4488ff' }}>RANK {progression.walkerRank} PROGRESS</span>
-                  <span style={{ fontSize: '14px', color: '#888' }}>{progression.xp % 1000}/1000 XP</span>
+                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#4488ff' }}>RANK {progression?.walkerRank || 1} PROGRESS</span>
+                  <span style={{ fontSize: '14px', color: '#888' }}>{(progression?.xp || 0) % 1000}/1000 XP</span>
                 </div>
                 <div style={{ width: '100%', height: '8px', background: '#222', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${(progression.xp % 1000) / 10}%`, height: '100%', background: '#4488ff' }} />
+                  <div style={{ width: `${((progression?.xp || 0) % 1000) / 10}%`, height: '100%', background: '#4488ff' }} />
                 </div>
               </div>
             </div>
@@ -359,9 +370,9 @@ export const TrainingOverlay = () => {
                 <tbody>
                   {resonancePaths.map((path) => {
                     const filter = getResonanceFilter(resonanceType, path.type);
-                    const raw = (rawTraits as any)[path.traitKey];
-                    const output = (traits as any)[path.traitKey];
-                    const mastery = (affinityXP[path.type] % 1000) / 10;
+                    const raw = (rawTraits as any)[path.traitKey] || 0;
+                    const output = (traits as any)[path.traitKey] || 0;
+                    const mastery = ((affinityXP?.[path.type] || 0) % 1000) / 10;
                     
                     const color = filter === 1 ? '#ffd700' : filter >= 0.8 ? '#c0c0c0' : filter >= 0.6 ? '#cd7f32' : '#666';
                     const status = filter === 1 ? 'PURE' : filter >= 0.8 ? 'HARMONIC' : filter >= 0.6 ? 'STABLE' : 'DISSONANT';
@@ -423,8 +434,8 @@ export const TrainingOverlay = () => {
                           skill={skill}
                           unlocked={unlockedSkills.includes(skill.id)}
                           available={!skill.dependsOn || unlockedSkills.includes(skill.dependsOn)}
-                          canAffordGrit={playerStats.grit >= skill.gritCost}
-                          canAffordSP={progression.skillPoints >= skill.spCost}
+                          canAffordGrit={playerStats?.grit >= skill.gritCost}
+                          canAffordSP={progression?.skillPoints >= skill.spCost}
                           potency={potency}
                           onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
                         />
@@ -434,6 +445,36 @@ export const TrainingOverlay = () => {
                 </div>
               );
             })}
+
+            {/* Hybrid Techniques Section */}
+            {secondaryFocus && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', padding: '20px', background: 'rgba(25, 118, 210, 0.05)', borderRadius: '15px', border: '2px solid #1976d2' }}>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#1976d2' }}>
+                  Resonant Hybridization: {resonanceType} × {secondaryFocus}
+                </h3>
+                <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
+                  {SKILLS.filter(s => s.id.startsWith('HYB')).map(skill => {
+                    const unlocked = unlockedSkills.includes(skill.id);
+                    const canAffordGrit = playerStats?.grit >= skill.gritCost;
+                    const canAffordSP = progression?.skillPoints >= skill.spCost;
+                    
+                    return (
+                      <div key={skill.id} style={{ flex: '0 0 280px' }}>
+                        <SkillNode
+                          skill={skill}
+                          unlocked={unlocked}
+                          available={true}
+                          canAffordGrit={canAffordGrit}
+                          canAffordSP={canAffordSP}
+                          potency={1.0}
+                          onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
