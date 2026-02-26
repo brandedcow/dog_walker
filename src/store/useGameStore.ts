@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { PlayerAttributes, Progression } from '../types';
 
 export type GameState = 'START' | 'HOME' | 'PLAYING' | 'FINISHED';
 export type DogState = 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING';
@@ -38,6 +39,10 @@ interface GameStore {
   sessionGrit: number;
   hasStrained: boolean;
   unlockedSkills: string[];
+  
+  // New Progression Stats
+  attributes: PlayerAttributes;
+  progression: Progression;
 
   setGameState: (state: GameState) => void;
   setDogState: (state: DogState) => void;
@@ -49,9 +54,11 @@ interface GameStore {
   setIsProfileExpanded: (isExpanded: boolean) => void;
   updatePlayerStats: (stats: Partial<PlayerStats>) => void;
   updateDogStats: (stats: Partial<DogStats>) => void;
+  updateAttributes: (attrs: Partial<PlayerAttributes>) => void;
+  addXP: (amount: number) => void;
   setHasStrained: (strained: boolean) => void;
   finalizeWalk: () => void;
-  purchaseSkill: (skillId: string, cost: number) => boolean;
+  purchaseSkill: (skillId: string, cost: number, spCost?: number) => boolean;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -82,6 +89,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   sessionGrit: 0,
   hasStrained: false,
   unlockedSkills: ['FOUNDATION'],
+  
+  // Initial Progression Values
+  attributes: {
+    strength: 1,
+    focus: 1,
+    agility: 1,
+    bond: 1,
+  },
+  progression: {
+    walkerRank: 1,
+    xp: 0,
+    skillPoints: 0,
+  },
 
   setGameState: (gameState) => {
     if (gameState === 'PLAYING') {
@@ -109,10 +129,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setIsProfileExpanded: (isExpanded: boolean) => set({ isProfileExpanded: isExpanded }),
   updatePlayerStats: (stats) => set((state) => ({ playerStats: { ...state.playerStats, ...stats } })),
   updateDogStats: (stats) => set((state) => ({ dogStats: { ...state.dogStats, ...stats } })),
+  updateAttributes: (attrs) => set((state) => ({ attributes: { ...state.attributes, ...attrs } })),
+  
+  addXP: (amount) => set((state) => {
+    const newXP = state.progression.xp + amount;
+    const xpPerLevel = 1000;
+    const newRank = Math.floor(newXP / xpPerLevel) + 1;
+    const rankGained = newRank > state.progression.walkerRank;
+    
+    return {
+      progression: {
+        ...state.progression,
+        xp: newXP,
+        walkerRank: newRank,
+        skillPoints: state.progression.skillPoints + (rankGained ? 1 : 0)
+      }
+    };
+  }),
+
   setHasStrained: (hasStrained) => set({ hasStrained }),
   
   finalizeWalk: () => {
-    const { distance, hasStrained, playerStats, unlockedSkills } = get();
+    const { distance, hasStrained, playerStats, unlockedSkills, progression } = get();
     const baseGrit = Math.floor(distance / 10);
     const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
     let totalGrit = baseGrit + bonusGrit;
@@ -120,18 +158,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (unlockedSkills.includes('GRIT_FOCUS')) {
       totalGrit = Math.floor(totalGrit * 1.25);
     }
+
+    // Award XP based on distance (1m = 10 XP)
+    const earnedXP = Math.floor(distance * 10);
+    const newXP = progression.xp + earnedXP;
+    const xpPerLevel = 1000;
+    const newRank = Math.floor(newXP / xpPerLevel) + 1;
+    const rankGained = newRank > progression.walkerRank;
     
     set({ 
       sessionGrit: totalGrit,
-      playerStats: { ...playerStats, grit: playerStats.grit + totalGrit }
+      playerStats: { ...playerStats, grit: playerStats.grit + totalGrit },
+      progression: {
+        ...progression,
+        xp: newXP,
+        walkerRank: newRank,
+        skillPoints: progression.skillPoints + (rankGained ? 1 : 0)
+      }
     });
   },
 
-  purchaseSkill: (skillId, cost) => {
-    const { playerStats, unlockedSkills } = get();
-    if (playerStats.grit >= cost && !unlockedSkills.includes(skillId)) {
+  purchaseSkill: (skillId, cost, spCost = 0) => {
+    const { playerStats, unlockedSkills, progression } = get();
+    const canAffordGrit = playerStats.grit >= cost;
+    const canAffordSP = progression.skillPoints >= spCost;
+
+    if (canAffordGrit && canAffordSP && !unlockedSkills.includes(skillId)) {
       set({
         playerStats: { ...playerStats, grit: playerStats.grit - cost },
+        progression: { ...progression, skillPoints: progression.skillPoints - spCost },
         unlockedSkills: [...unlockedSkills, skillId]
       });
       return true;

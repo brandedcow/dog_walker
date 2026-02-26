@@ -98,10 +98,13 @@ export const TrainingManual = ({
     playerStats,
     unlockedSkills,
     purchaseSkill,
+    attributes,
+    progression
   } = useGameStore();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS'>('STATS');
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
@@ -175,7 +178,7 @@ export const TrainingManual = ({
 
         {/* Pages */}
         <Box args={[0.48, 0.04, 0.68]} position={[0, 0.03, 0]} receiveShadow>
-          <meshStandardMaterial color="#fdfcf0" />
+          <meshStandardMaterial color="#fffef2" />
         </Box>
 
         {/* Top Page Physical Texture (Visible while opening) */}
@@ -198,7 +201,7 @@ export const TrainingManual = ({
                 canvas.width = 512;
                 canvas.height = 512;
                 const ctx = canvas.getContext("2d")!;
-                ctx.fillStyle = "#fdfcf0";
+                ctx.fillStyle = "#fffef2";
                 ctx.fillRect(0, 0, 512, 512);
 
                 // Ruled lines
@@ -314,29 +317,47 @@ export const TrainingManual = ({
               boxShadow: "none",
               pointerEvents: "auto",
               userSelect: "none",
-              overflow: "hidden",
+              overflow: "visible",
               boxSizing: "border-box",
+              position: "relative"
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "20px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative" }}>
-              <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
-                FIELD NOTES
-              </h1>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <div style={{ fontSize: "10px", opacity: 0.7 }}>
-                  GRIT CACHE:
-                </div>
-                <div
+            {/* Side Tabs (Attached to right edge) */}
+            <div style={{ position: "absolute", right: "-40px", top: "80px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              {['STATS', 'SKILLS'].map((tab) => (
+                <div 
+                  key={tab}
+                  onClick={(e) => { e.stopPropagation(); setActiveTab(tab as any); }}
                   style={{
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                    color: "#2e7d32",
+                    width: "40px", height: "80px", background: activeTab === tab ? "#fffef2" : "#d1cdb0",
+                    border: "1px solid #bcba9a", borderLeft: "none", borderRadius: "0 10px 10px 0",
+                    writingMode: "vertical-rl", textOrientation: "mixed", display: "flex", alignItems: "center",
+                    justifyContent: "center", fontSize: "12px", fontWeight: "900", cursor: "pointer",
+                    boxShadow: activeTab === tab ? "4px 0 10px rgba(0,0,0,0.1)" : "none",
+                    color: activeTab === tab ? "#2c3e50" : "#6e6c56",
+                    transition: "all 0.2s"
                   }}
                 >
-                  {playerStats.grit} G
+                  {tab}
                 </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "20px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative" }}>
+              <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
+                {activeTab === 'STATS' ? 'DASHBOARD' : 'FIELD NOTES'}
+              </h1>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ fontSize: "10px", opacity: 0.7 }}>GRIT CACHE:</div>
+                  <div style={{ fontSize: "18px", fontWeight: "bold", color: "#2e7d32" }}>{playerStats.grit} G</div>
+                </div>
+                {activeTab === 'SKILLS' && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ fontSize: "10px", opacity: 0.7 }}>SKILL POINTS:</div>
+                    <div style={{ fontSize: "18px", fontWeight: "bold", color: "#d32f2f" }}>{progression.skillPoints} SP</div>
+                  </div>
+                )}
               </div>
 
               {/* Top-Right X Close Button */}
@@ -362,41 +383,75 @@ export const TrainingManual = ({
                   transition: "all 0.1s",
                   pointerEvents: "auto"
                 }}
-                onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.9)"; }}
-                onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
               >
                 ×
               </button>
             </div>
 
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "15px",
-                justifyContent: "flex-start",
-                alignContent: "flex-start",
-              }}
-            >
-              {SKILLS.map((skill) => {
-                const unlocked = unlockedSkills.includes(skill.id);
-                const available =
-                  !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
-                const canAfford = playerStats.grit >= skill.cost;
+            {activeTab === 'STATS' ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "25px", flex: 1 }}>
+                {/* XP & Rank */}
+                <div style={{ background: "rgba(0,0,0,0.03)", padding: "15px", borderRadius: "10px", border: "1px dashed #2c3e50" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+                    <span style={{ fontWeight: "900", fontSize: "14px" }}>WALKER RANK {progression.walkerRank}</span>
+                    <span style={{ fontSize: "12px" }}>{progression.xp % 1000}/1000 XP</span>
+                  </div>
+                  <div style={{ width: "100%", height: "8px", background: "#e0e0e0", borderRadius: "4px", overflow: "hidden" }}>
+                    <div style={{ width: `${(progression.xp % 1000) / 10}%`, height: "100%", background: "#2c3e50" }} />
+                  </div>
+                </div>
 
-                return (
-                  <SkillNode
-                    key={skill.id}
-                    skill={skill}
-                    unlocked={unlocked}
-                    available={available}
-                    canAfford={canAfford}
-                    onPurchase={() => purchaseSkill(skill.id, skill.cost)}
-                  />
-                );
-              })}
-            </div>
+                {/* Attributes */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                  {[
+                    { label: 'STRENGTH', value: attributes.strength, color: '#d32f2f', desc: 'Strain threshold' },
+                    { label: 'FOCUS', value: attributes.focus, color: '#1976d2', desc: 'Grit & Pan stability' },
+                    { label: 'AGILITY', value: attributes.agility, color: '#388e3c', desc: 'Movement speed' },
+                    { label: 'BOND', value: attributes.bond, color: '#fbc02d', desc: 'Recall & Calmness' }
+                  ].map((attr) => (
+                    <div key={attr.label}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "3px" }}>
+                        <span style={{ fontWeight: "900" }}>{attr.label}</span>
+                        <span style={{ fontWeight: "900" }}>LVL {attr.value}</span>
+                      </div>
+                      <div style={{ width: "100%", height: "12px", background: "#e0e0e0", borderRadius: "2px", border: "1px solid #2c3e50", position: "relative" }}>
+                        <div style={{ width: `${(attr.value / 10) * 100}%`, height: "100%", background: attr.color }} />
+                      </div>
+                      <div style={{ fontSize: "9px", opacity: 0.6, marginTop: "2px" }}>{attr.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "15px",
+                  justifyContent: "flex-start",
+                  alignContent: "flex-start",
+                }}
+              >
+                {SKILLS.map((skill) => {
+                  const unlocked = unlockedSkills.includes(skill.id);
+                  const available =
+                    !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
+                  const canAfford = playerStats.grit >= skill.cost;
+
+                  return (
+                    <SkillNode
+                      key={skill.id}
+                      skill={skill}
+                      unlocked={unlocked}
+                      available={available}
+                      canAfford={canAfford}
+                      onPurchase={() => purchaseSkill(skill.id, skill.cost)}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         </Html>
       )}
