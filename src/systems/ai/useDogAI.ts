@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Vector3 } from 'three';
 import { DOG_MOVE_SPEED } from '../../config/constants';
-import type { DogState } from '../../store/useGameStore';
+import { DogState } from '../../types';
 import type { PlayerAttributes } from '../../types';
 
 export const useDogAI = () => {
@@ -47,13 +47,13 @@ export const useDogAI = () => {
     };
 
     // Idling logic
-    if (dogState === 'STANDING') {
+    if (dogState === DogState.STANDING) {
       stationaryTime.current += delta;
       if (stationaryTime.current > 5.0) {
-        setDogState('IDLING');
+        setDogState(DogState.IDLING);
         idleTarget.current = null;
       }
-    } else if (dogState === 'IDLING') {
+    } else if (dogState === DogState.IDLING) {
       if (!idleTarget.current || dogPos.current.distanceTo(idleTarget.current) < 0.1) {
         const currentAngle = Math.atan2(dogPos.current.z - playerPos.z, dogPos.current.x - playerPos.x);
         const targetAngle = currentAngle + (Math.random() - 0.5) * Math.PI;
@@ -92,17 +92,17 @@ export const useDogAI = () => {
         dogPos.current.add(pushDir.multiplyScalar(0.05));
         idleTarget.current = null;
       }
-    } else if (dogState === 'COMING') {
+    } else if (dogState === DogState.COMING) {
       const targetPos = playerPos.clone();
       targetPos.y = 0;
       const dir = new Vector3().subVectors(targetPos, dogPos.current);
       if (dir.length() < 1.2) {
-        setDogState('STANDING');
+        setDogState(DogState.STANDING);
         stationaryTime.current = 0;
       } else {
         dogPos.current.add(dir.normalize().multiplyScalar(recallSpeed * delta));
       }
-    } else if (dogState === 'WALKING') {
+    } else if (dogState === DogState.WALKING) {
       const moveX = Math.sin(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
       const moveZ = -Math.cos(dogFacingYaw.current) * DOG_MOVE_SPEED * delta;
       dogPos.current.x += moveX;
@@ -110,7 +110,7 @@ export const useDogAI = () => {
     }
 
     // Rotation logic (calculated after position update to capture displacement)
-    if (dogState === 'WALKING' || dogState === 'COMING' || dogState === 'IDLING') {
+    if (dogState === DogState.WALKING || dogState === DogState.COMING || dogState === DogState.IDLING) {
       const moveX = dogPos.current.x - prevDogPos.x;
       const moveZ = dogPos.current.z - prevDogPos.z;
       const movementLength = Math.sqrt(moveX * moveX + moveZ * moveZ);
@@ -128,7 +128,7 @@ export const useDogAI = () => {
     }
 
     // Distance tracking
-    if (dogState === 'WALKING') {
+    if (dogState === DogState.WALKING) {
       const distFromLastUpdate = new Vector3(dogPos.current.x, 0, dogPos.current.z).distanceTo(lastDogUpdatePos.current);
       if (distFromLastUpdate > 0.25) {
         dogDistance.current += distFromLastUpdate;

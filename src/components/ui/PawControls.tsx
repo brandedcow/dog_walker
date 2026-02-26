@@ -1,7 +1,8 @@
 import { useGameStore } from '../../store/useGameStore';
+import { DogState } from '../../types';
 
 export const PawControls = ({ handleGo }: { handleGo: () => void }) => {
-  const dogState = useGameStore((state) => state.dogState);
+  const dogState = useGameStore((state) => state.dogState) as DogState;
   const setDogState = useGameStore((state) => state.setDogState);
   const isMovingForward = useGameStore((state) => state.isMovingForward);
   const setIsMovingForward = useGameStore((state) => state.setIsMovingForward);
@@ -23,11 +24,11 @@ export const PawControls = ({ handleGo }: { handleGo: () => void }) => {
       </div>
       {/* 1: COME (180°) - Active if Coming */}
       <button 
-        onClick={() => setDogState('COMING')} 
+        onClick={() => setDogState(DogState.COMING)} 
         style={{ 
           position: 'absolute', left: '35px', top: '110px', width: '50px', height: '50px', borderRadius: '50%', 
-          background: dogState === 'COMING' ? '#44ff44' : 'rgba(0,0,0,0.85)', 
-          color: dogState === 'COMING' ? 'black' : 'white', border: '2px solid white', 
+          background: dogState === DogState.COMING ? '#44ff44' : 'rgba(0,0,0,0.85)', 
+          color: dogState === DogState.COMING ? 'black' : 'white', border: '2px solid white', 
           cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', 
           boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', 
@@ -38,11 +39,11 @@ export const PawControls = ({ handleGo }: { handleGo: () => void }) => {
       </button>
       {/* 2: SIT (240°) */}
       <button 
-        onClick={() => setDogState('SITTING')} 
+        onClick={() => setDogState(DogState.SITTING)} 
         style={{ 
           position: 'absolute', left: '72.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', 
-          background: dogState === 'SITTING' ? '#44ff44' : 'rgba(0,0,0,0.85)', 
-          color: dogState === 'SITTING' ? 'black' : 'white', border: '2px solid white', 
+          background: dogState === DogState.SITTING ? '#44ff44' : 'rgba(0,0,0,0.85)', 
+          color: dogState === DogState.SITTING ? 'black' : 'white', border: '2px solid white', 
           cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', 
           boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', 
@@ -57,14 +58,14 @@ export const PawControls = ({ handleGo }: { handleGo: () => void }) => {
         style={{ 
           position: 'absolute', left: '147.5px', top: '45px', width: '50px', height: '50px', borderRadius: '50%', 
           background: `linear-gradient(to top, ${tension > 0.9 ? '#ff4444' : tension > 0.75 ? '#ffff00' : '#44ff44'} ${tension * 100}%, rgba(0,0,0,0.85) ${tension * 100}%)`, 
-          color: (tension > 0.5 && dogState !== 'WALKING') ? 'black' : 'white', 
+          color: (tension > 0.5 && dogState !== DogState.WALKING) ? 'black' : 'white', 
           border: '2px solid white', cursor: 'pointer', fontWeight: 'bold', fontSize: '8px', fontFamily: 'monospace', 
           display: 'flex', alignItems: 'center', justifyContent: 'center', 
           boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.2s', 
           pointerEvents: 'auto', transform: 'translate(-50%, -50%)', overflow: 'hidden' 
         }}
       >
-        <div style={{ zIndex: 1 }}>{(dogState === 'WALKING' || dogState === 'COMING') ? 'TUG' : 'GO'}</div>
+        <div style={{ zIndex: 1 }}>{(dogState === DogState.WALKING || dogState === DogState.COMING) ? 'TUG' : 'GO'}</div>
       </button>
     </div>
   );

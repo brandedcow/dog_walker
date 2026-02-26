@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3, MathUtils } from "three";
 import { Box, Billboard, Text } from "@react-three/drei";
 import { useGameStore } from "../../../store/useGameStore";
+import { MenuState } from "../../../types";
 
 export const TrainingManual = ({
   position,
@@ -18,7 +19,7 @@ export const TrainingManual = ({
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
-  const isOpen = menuState === "TRAINING";
+  const isOpen = menuState === MenuState.TRAINING;
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -59,7 +60,7 @@ export const TrainingManual = ({
       }}
       onClick={(e) => {
         e.stopPropagation();
-        if (!isOpen) setMenuState("TRAINING");
+        if (!isOpen) setMenuState(MenuState.TRAINING);
       }}
     >
       {/* Physical Notebook Model */}

@@ -1,15 +1,12 @@
 import { create } from 'zustand';
 import type { PlayerAttributes, Progression } from '../types';
-
-export type GameState = 'START' | 'HOME' | 'PLAYING' | 'FINISHED';
-export type DogState = 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING';
-export type MenuState = 'IDLE' | 'KENNEL' | 'TRAINING' | 'GEAR' | 'RECORDS';
+import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize } from '../types';
 
 export interface DogMetadata {
   name: string;
-  trainingLevel: 'Good boy' | 'Paws-itive influence' | 'Fur-ly Competent' | 'Pawful Mess' | 'Ruff Start';
-  characteristic: 'Puller' | 'Reactive' | 'Velcro' | 'Sniffer' | 'Anxious Walker' | 'ADHD';
-  size: 'Small' | 'Medium' | 'Large';
+  trainingLevel: TrainingLevel;
+  characteristic: DogCharacteristic;
+  size: DogSize;
   mood: string;
 }
 
@@ -64,9 +61,9 @@ interface GameStore {
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  gameState: 'HOME',
-  dogState: 'STANDING',
-  menuState: 'IDLE',
+  gameState: GameState.HOME,
+  dogState: DogState.STANDING,
+  menuState: MenuState.IDLE,
   tension: 0,
   distance: 0,
   positions: { px: 0, pz: 0, dx: 0, dz: -1 },
@@ -74,9 +71,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isProfileExpanded: false,
   dogMetadata: {
     name: 'BUSTER',
-    trainingLevel: 'Fur-ly Competent',
-    characteristic: 'ADHD',
-    size: 'Small',
+    trainingLevel: TrainingLevel.COMPETENT,
+    characteristic: DogCharacteristic.ADHD,
+    size: DogSize.SMALL,
     mood: 'Curious',
   },
   playerStats: {
@@ -107,11 +104,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setGameState: (gameState) => {
-    if (gameState === 'PLAYING') {
+    if (gameState === GameState.PLAYING) {
       set({ distance: 0, tension: 0, sessionGrit: 0, hasStrained: false });
     }
-    if (gameState === 'HOME') {
-      set({ dogState: 'STANDING', menuState: 'IDLE', isMovingForward: false });
+    if (gameState === GameState.HOME) {
+      set({ dogState: DogState.STANDING, menuState: MenuState.IDLE, isMovingForward: false });
     }
     set({ gameState });
   },

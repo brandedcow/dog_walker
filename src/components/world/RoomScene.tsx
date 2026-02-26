@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Sky, Box, Sphere } from '@react-three/drei';
 import { useGameStore } from '../../store/useGameStore';
+import { GameState, MenuState } from '../../types';
 import { DogModel } from './DogModel';
 import { LeashModel } from './LeashModel';
 import { useLeash } from '../../systems/physics/useLeash';
@@ -49,7 +50,7 @@ export const RoomScene = () => {
   const dogAI = useDogAI();
 
   useFrame((_, delta) => {
-    if (menuState === 'IDLE' && isMovingForward) {
+    if (menuState === MenuState.IDLE && isMovingForward) {
       const speed = PLAYER_BASE_SPEED * 0.6;
       playerPos.current.x += Math.sin(povRotation.current.yaw) * speed * delta;
       playerPos.current.z -= Math.cos(povRotation.current.yaw) * speed * delta;
@@ -58,7 +59,7 @@ export const RoomScene = () => {
     }
     leash.update(delta, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
     dogAI.update(delta, playerPos.current, dogState, setDogState, unlockedSkills, attributes);
-    if (menuState === 'IDLE') {
+    if (menuState === MenuState.IDLE) {
       const camDistance = 3;
       const camHeight = 1.8;
       const camX = Math.max(-4.8, Math.min(4.8, playerPos.current.x - Math.sin(povRotation.current.yaw) * camDistance));
@@ -75,7 +76,7 @@ export const RoomScene = () => {
   useMenuCamera();
   
   useEffect(() => {
-    if (gameState === 'HOME') {
+    if (gameState === GameState.HOME) {
       povRotation.current = { yaw: 0, pitch: 0 };
       playerPos.current.set(1.0, 1.7, 3.5);
     }
@@ -89,7 +90,7 @@ export const RoomScene = () => {
       lastMousePos.current = { x, y };
     };
     const handleMove = (e: any) => {
-      if (!isDragging.current || menuState !== 'IDLE') return;
+      if (!isDragging.current || menuState !== MenuState.IDLE) return;
       const x = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
       const y = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       povRotation.current.yaw += (x - lastMousePos.current.x) * 0.005;
@@ -160,12 +161,12 @@ export const RoomScene = () => {
 
       <Calendar position={[1.0, 2.5, -3.94]} />
 
-      <Interactable position={[-4.5, 0, -3.5]} args={[0.6, 2.4, 0.6]} color="#333" label="LAMP" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} onClickOverride={() => { setStandingLampOn(!standingLampOn); setMenuState('IDLE'); }}>
+      <Interactable position={[-4.5, 0, -3.5]} args={[0.6, 2.4, 0.6]} color="#333" label="LAMP" targetState={MenuState.IDLE} currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} onClickOverride={() => { setStandingLampOn(!standingLampOn); setMenuState(MenuState.IDLE); }}>
         <StandingLamp position={[0, 0, 0]} isOn={standingLampOn} />
       </Interactable>
 
       <group position={[-3, 2.0, 4.9]}>
-        <Interactable position={[0, 0, 0]} args={[2.0, 4.0, 0.2]} color="#8b4513" label="GO FOR A WALK" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} onClickOverride={() => setGameState('PLAYING')} showActiveGlow={false} labelOffset={[0, 2, -0.5]}>
+        <Interactable position={[0, 0, 0]} args={[2.0, 4.0, 0.2]} color="#8b4513" label="GO FOR A WALK" targetState={MenuState.IDLE} currentMenuState={menuState} setMenuState={setMenuState} onClickOverride={() => setGameState(GameState.PLAYING)} showActiveGlow={false} labelOffset={[0, 2, -0.5]}>
           <group>
             <Box args={[2.0, 4.0, 0.2]} castShadow><meshStandardMaterial color="#8b4513" /></Box>
             <Box args={[0.6, 1.0, 0.05]} position={[-0.4, 1.1, -0.11]} castShadow receiveShadow><meshStandardMaterial color="#6d330f" /></Box>
@@ -189,14 +190,14 @@ export const RoomScene = () => {
         <TrainingManual position={[0.6, 1.0, 0]} />
         
         {/* New Desk Lamp to the top-right corner of the desk surface */}
-        <Interactable position={[1.3, 1.0, -0.6]} args={[0.3, 0.6, 0.3]} color="#333" label="DESK LAMP" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} onClickOverride={() => { setDeskLampOn(!deskLampOn); setMenuState('IDLE'); }}>
+        <Interactable position={[1.3, 1.0, -0.6]} args={[0.3, 0.6, 0.3]} color="#333" label="DESK LAMP" targetState={MenuState.IDLE} currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} onClickOverride={() => { setDeskLampOn(!deskLampOn); setMenuState(MenuState.IDLE); }}>
           <DeskLamp position={[0, 0, 0]} rotation={[0, -Math.PI / 4, 0]} isOn={deskLampOn} />
         </Interactable>
       </group>
 
-      <Interactable position={[3.25, 0, -3.4]} args={[2.5, 3.8, 1.2]} color="#4e342e" label="GEAR CLOSET" targetState="GEAR" currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 4.0, 1.0]}><Closet position={[0, 0, 0]} /></Interactable>
+      <Interactable position={[3.25, 0, -3.4]} args={[2.5, 3.8, 1.2]} color="#4e342e" label="GEAR CLOSET" targetState={MenuState.GEAR} currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 4.0, 1.0]}><Closet position={[0, 0, 0]} /></Interactable>
       <Bed position={[2.75, 0, 3.9]} />
-      <Interactable position={[4.5, 0, 2.0]} args={[1.0, 1.0, 1.0]} color="#5d4037" label="NIGHTSTAND" targetState="IDLE" currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} labelOffset={[-0.8, 1.8, 0]} onClickOverride={() => { setNightstandLampOn(!nightstandLampOn); setMenuState('IDLE'); }}>
+      <Interactable position={[4.5, 0, 2.0]} args={[1.0, 1.0, 1.0]} color="#5d4037" label="NIGHTSTAND" targetState={MenuState.IDLE} currentMenuState={menuState} setMenuState={setMenuState} showActiveGlow={false} labelOffset={[-0.8, 1.8, 0]} onClickOverride={() => { setNightstandLampOn(!nightstandLampOn); setMenuState(MenuState.IDLE); }}>
         <group>
           <Box args={[1.0, 1.0, 1.0]} position={[0, 0.5, 0]} castShadow receiveShadow><meshStandardMaterial color="#5d4037" /></Box>
           <Box args={[0.02, 0.3, 0.8]} position={[-0.5, 0.7, 0]} receiveShadow><meshStandardMaterial color="#3e2723" /></Box>
@@ -207,7 +208,7 @@ export const RoomScene = () => {
         </group>
       </Interactable>
 
-      <Interactable position={[-0.9, 2.2, 4.75]} args={[1.5, 0.1, 0.2]} color="#ffcc00" label="TROPHY SHELF" targetState="RECORDS" currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 0.5, -0.5]}>
+      <Interactable position={[-0.9, 2.2, 4.75]} args={[1.5, 0.1, 0.2]} color="#ffcc00" label="TROPHY SHELF" targetState={MenuState.RECORDS} currentMenuState={menuState} setMenuState={setMenuState} labelOffset={[0, 0.5, -0.5]}>
          <group>
             <Box args={[1.8, 0.05, 0.4]} position={[0, 0, 0.1]} castShadow receiveShadow><meshStandardMaterial color="#5d4037" /></Box>
             <Box args={[0.2, 0.4, 0.2]} position={[-0.5, 0.2, 0]} castShadow receiveShadow><meshStandardMaterial color="#ffd700" /></Box>
@@ -221,7 +222,7 @@ export const RoomScene = () => {
         <Box args={[0.05, 0.1, 0.1]} position={[0, 0, 0]} castShadow receiveShadow><meshStandardMaterial color="#333" /></Box>
         <Box args={[0.02, 1.2, 0.02]} position={[0, -0.6, 0.05]} castShadow receiveShadow><meshStandardMaterial color="#880000" /></Box>
       </group>
-      {gameState !== 'HOME' && <LeashModel nodes={leash.nodes.current} tension={0} />}
+      {gameState !== GameState.HOME && <LeashModel nodes={leash.nodes.current} tension={0} />}
     </>
   );
 };

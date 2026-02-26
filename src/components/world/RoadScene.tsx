@@ -4,6 +4,7 @@ import { Vector3 } from 'three';
 import { Sky, Plane, Box } from '@react-three/drei';
 import { PLAYER_BASE_SPEED, FIXED_DELTA } from '../../config/constants';
 import { useGameStore } from '../../store/useGameStore';
+import { GameState, DogState } from '../../types';
 import { useLeash } from '../../systems/physics/useLeash';
 import { useDogAI } from '../../systems/ai/useDogAI';
 import { InstancedTrees } from './InstancedTrees';
@@ -32,13 +33,13 @@ export const RoadScene = () => {
 
   useEffect(() => {
     const handleGo = () => {
-      if (dogState === 'WALKING' || dogState === 'SNIFFING' || dogState === 'COMING') {
+      if (dogState === DogState.WALKING || dogState === DogState.SNIFFING || dogState === DogState.COMING) {
         const dirToPlayer = new Vector3(playerPos.current.x - dogAI.dogPos.current.x, 0, playerPos.current.z - dogAI.dogPos.current.z).normalize();
         dogAI.dogPos.current.add(dirToPlayer.multiplyScalar(0.35)); 
         leash.applyTug();
-        if (dogState === 'WALKING' || dogState === 'COMING') setDogState('STANDING');
+        if (dogState === DogState.WALKING || dogState === DogState.COMING) setDogState(DogState.STANDING);
       } else {
-        setDogState('WALKING');
+        setDogState(DogState.WALKING);
         dogAI.startWalking(povRotation.current.yaw);
       }
     };
@@ -69,7 +70,7 @@ export const RoadScene = () => {
       if (swipeStartPos.current) {
         const clientY = e.clientY !== undefined ? e.clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0);
         const deltaY = clientY - swipeStartPos.current.y;
-        if (dogState === 'SNIFFING' && deltaY > 30) handleGo();
+        if (dogState === DogState.SNIFFING && deltaY > 30) handleGo();
       }
       swipeStartPos.current = null;
     };
@@ -103,7 +104,7 @@ export const RoadScene = () => {
       playerPos.current.z - Math.cos(povRotation.current.yaw) * lookAheadDist
     );
 
-    if (gameState !== 'PLAYING' && gameState !== 'FINISHED') return;
+    if (gameState !== GameState.PLAYING && gameState !== GameState.FINISHED) return;
 
     accumulator.current += Math.min(delta, 0.1);
 
@@ -114,7 +115,7 @@ export const RoadScene = () => {
       lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
       lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills, attributes);
 
-      if (isMovingForward && gameState === 'PLAYING') {
+      if (isMovingForward && gameState === GameState.PLAYING) {
         let tensionSlowdown = 1.0;
         if (lastLeashState.rawTension > 0.9) {
           tensionSlowdown = 0.4 - (((lastLeashState.rawTension - 0.9) / 0.1) * 0.3);
@@ -153,9 +154,9 @@ export const RoadScene = () => {
         dx: dogAI.dogPos.current.x, dz: dogAI.dogPos.current.z 
       });
 
-      if (lastAIState.dogDistance > 150 && gameState === 'PLAYING') {
+      if (lastAIState.dogDistance > 150 && gameState === GameState.PLAYING) {
         finalizeWalk();
-        setGameState('FINISHED');
+        setGameState(GameState.FINISHED);
       }
     }
   });

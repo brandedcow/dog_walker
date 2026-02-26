@@ -1,4 +1,5 @@
 import { useGameStore } from '../../store/useGameStore';
+import { GameState } from '../../types';
 
 export const MissionSuccessOverlay = () => {
   const { setGameState, distance, hasStrained, sessionGrit } = useGameStore();
@@ -50,7 +51,7 @@ export const MissionSuccessOverlay = () => {
       </div>
 
       <button 
-        onClick={() => setGameState('HOME')} 
+        onClick={() => setGameState(GameState.HOME)} 
         style={{ 
           marginTop: '40px', padding: '20px 60px', fontSize: '24px', background: '#44ff44', 
           border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '15px', 

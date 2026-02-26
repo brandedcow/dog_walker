@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Box, Billboard, Text } from '@react-three/drei';
 import { useGameStore } from '../../../store/useGameStore';
+import { MenuState } from '../../../types';
 
 export const Laptop = ({ position }: { position: [number, number, number] }) => {
   const { menuState, setMenuState } = useGameStore();
@@ -10,7 +11,7 @@ export const Laptop = ({ position }: { position: [number, number, number] }) => 
   const [focused, setFocused] = useState(false);
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
-  const isOpen = menuState === 'KENNEL';
+  const isOpen = menuState === MenuState.KENNEL;
 
   useFrame(() => {
     if (!groupRef.current || isOpen) return;
@@ -33,7 +34,7 @@ export const Laptop = ({ position }: { position: [number, number, number] }) => 
       onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
       onClick={(e) => {
         e.stopPropagation();
-        setMenuState(isOpen ? 'IDLE' : 'KENNEL');
+        setMenuState(isOpen ? MenuState.IDLE : MenuState.KENNEL);
       }}
     >
       <Box args={[0.6, 0.04, 0.4]} position={[0, 0.02, 0]} castShadow receiveShadow>

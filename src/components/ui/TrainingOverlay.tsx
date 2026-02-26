@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { SKILLS, type Skill } from '../../config/skills';
+import { MenuState } from '../../types';
 
 const SkillNode = ({
   skill,
@@ -134,7 +135,7 @@ export const TrainingOverlay = () => {
             {activeTab}
           </h1>
           <button 
-            onClick={() => setMenuState('IDLE')}
+            onClick={() => setMenuState(MenuState.IDLE)}
             style={{
               width: '60px',
               height: '60px',

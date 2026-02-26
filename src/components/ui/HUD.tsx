@@ -1,4 +1,5 @@
 import { useGameStore } from '../../store/useGameStore';
+import { GameState, MenuState } from '../../types';
 import { SmartwatchMinimap } from './SmartwatchMinimap';
 import { ProfileCard } from './ProfileCard';
 import { PawControls } from './PawControls';
@@ -16,20 +17,20 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
   const scents: any[] = []; 
 
   const renderHomeOverlays = () => {
-    if (gameState !== 'HOME' || !isMenuReady) return null;
+    if (gameState !== GameState.HOME || !isMenuReady) return null;
     
     return (
       <>
-        {menuState === 'KENNEL' && <KennelOverlay />}
-        {menuState === 'RECORDS' && <RecordsOverlay />}
-        {menuState === 'TRAINING' && <TrainingOverlay />}
+        {menuState === MenuState.KENNEL && <KennelOverlay />}
+        {menuState === MenuState.RECORDS && <RecordsOverlay />}
+        {menuState === MenuState.TRAINING && <TrainingOverlay />}
       </>
     );
   };
 
   const renderPersistentUI = () => {
-    if (!['HOME', 'PLAYING', 'FINISHED'].includes(gameState)) return null;
-    const isTraining = menuState === 'TRAINING';
+    if (!([GameState.HOME, GameState.PLAYING, GameState.FINISHED] as any[]).includes(gameState)) return null;
+    const isTraining = menuState === MenuState.TRAINING;
 
     return (
       <>
@@ -50,11 +51,11 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         )}
 
         {/* Return Home Button (Top-Right) */}
-        {gameState === 'PLAYING' && (
+        {gameState === GameState.PLAYING && (
           <div 
             onClick={() => {
               finalizeWalk();
-              setGameState('FINISHED');
+              setGameState(GameState.FINISHED);
             }}
             style={{ 
               position: 'absolute', 
@@ -95,7 +96,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         )}
 
         {/* Paw Controls (Bottom-Right) */}
-        {((gameState === 'PLAYING' || gameState === 'FINISHED') || (gameState === 'HOME' && menuState === 'IDLE')) && (
+        {((gameState === GameState.PLAYING || gameState === GameState.FINISHED) || (gameState === GameState.HOME && menuState === MenuState.IDLE)) && (
           <div style={{ 
             position: 'absolute', 
             bottom: `calc(${bottomSafe} + ${baseOffset}px)`, 
@@ -118,7 +119,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
     }}>
       {renderHomeOverlays()}
       {renderPersistentUI()}
-      {gameState === 'FINISHED' && <MissionSuccessOverlay />}
+      {gameState === GameState.FINISHED && <MissionSuccessOverlay />}
     </div>
   );
 };

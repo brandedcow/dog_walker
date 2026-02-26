@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3, Quaternion } from 'three';
 import { useGameStore } from '../../store/useGameStore';
+import { MenuState } from '../../types';
 import { CAMERA_TARGETS } from '../../config/constants';
 
 export const useMenuCamera = () => {
@@ -15,14 +16,14 @@ export const useMenuCamera = () => {
   const targetQuaternion = useRef(new Quaternion());
 
   useFrame((_, delta) => {
-    if (menuState === 'IDLE') return;
+    if (menuState === MenuState.IDLE) return;
     
     const config = CAMERA_TARGETS[menuState] || CAMERA_TARGETS.IDLE;
     const aspect = size.width / size.height;
     
     // Dynamic Zoom for Training Manual on mobile/narrow screens
     let zOffset = 0;
-    if (menuState === 'TRAINING' && aspect < 1.1) {
+    if (menuState === MenuState.TRAINING && aspect < 1.1) {
       zOffset = (1.1 - aspect) * 0.85; 
     }
 

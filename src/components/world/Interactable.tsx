@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Box, Text, Billboard } from '@react-three/drei';
-import type { MenuState } from '../../store/useGameStore';
+import { MenuState } from '../../types';
 
 export const Interactable = ({ 
   position, args, color, label, targetState, currentMenuState, setMenuState, onClickOverride, showActiveGlow = true, children, labelOffset
@@ -48,7 +48,7 @@ export const Interactable = ({
         onClick={(e) => {
           e.stopPropagation();
           if (onClickOverride) onClickOverride();
-          else setMenuState(currentMenuState === targetState ? 'IDLE' : targetState);
+          else setMenuState(currentMenuState === targetState ? MenuState.IDLE : targetState);
         }}
       >
         {children ? (

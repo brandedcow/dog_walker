@@ -2,15 +2,16 @@ import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Box, Text } from '@react-three/drei';
+import { GameState, DogState } from '../../types';
 
 export const DogModel = ({ 
   dogPos, state, rotation = 0, visualOffset = 0, gameState 
 }: { 
   dogPos: Vector3 | React.MutableRefObject<Vector3>, 
-  state: 'WALKING' | 'SNIFFING' | 'STANDING' | 'SITTING' | 'IDLING' | 'COMING', 
+  state: DogState, 
   rotation?: number | React.MutableRefObject<number>,
   visualOffset?: number | React.MutableRefObject<number>, 
-  gameState: string 
+  gameState: GameState 
 }) => {
   const groupRef = useRef<any>(null);
   const headRef = useRef<any>(null);
@@ -18,9 +19,9 @@ export const DogModel = ({
   
   useFrame(({ clock }) => {
     if (groupRef.current) {
-      const isPlaying = gameState === 'PLAYING';
+      const isPlaying = gameState === GameState.PLAYING;
       const time = clock.getElapsedTime();
-      const isMoving = state === 'WALKING' || state === 'COMING' || state === 'IDLING';
+      const isMoving = state === DogState.WALKING || state === DogState.COMING || state === DogState.IDLING;
       
       // Handle potential ref or direct value
       const actualPos = (dogPos as any).current || dogPos;
@@ -29,7 +30,7 @@ export const DogModel = ({
 
       const bob = (isPlaying && isMoving) ? Math.abs(Math.sin(time * 15)) * 0.02 : 0;
       
-      const yPos = state === 'SITTING' ? -0.2 : 0;
+      const yPos = state === DogState.SITTING ? -0.2 : 0;
       groupRef.current.position.set(actualPos.x, actualPos.y + bob + yPos, actualPos.z);
       // The physical yank effect (recoil) is applied separately to the visual mesh if desired, 
       // but here we use visualOffset for the head tilt/body displacement
@@ -39,7 +40,7 @@ export const DogModel = ({
       groupRef.current.rotation.z = (isPlaying && isMoving) ? Math.sin(time * 15) * 0.02 : 0;
       
       if (headRef.current) {
-        const sittingTilt = state === 'SITTING' ? -0.4 : 0;
+        const sittingTilt = state === DogState.SITTING ? -0.4 : 0;
         headRef.current.rotation.x = (actualVisualOffset * -1.5) + sittingTilt;
       }
       if (earsRef.current[0] && earsRef.current[1]) {

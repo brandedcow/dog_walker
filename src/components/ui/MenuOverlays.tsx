@@ -1,4 +1,5 @@
 import { useGameStore } from '../../store/useGameStore';
+import { MenuState } from '../../types';
 
 const OverlayContainer = ({ title, children, onBack }: { title: string, children: React.ReactNode, onBack: () => void }) => (
   <div style={{ 
@@ -24,7 +25,7 @@ const OverlayContainer = ({ title, children, onBack }: { title: string, children
 export const KennelOverlay = () => {
   const { dogMetadata, dogStats, setMenuState } = useGameStore();
   return (
-    <OverlayContainer title="THE KENNEL" onBack={() => setMenuState('IDLE')}>
+    <OverlayContainer title="THE KENNEL" onBack={() => setMenuState(MenuState.IDLE)}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '10px' }}>
           <h3 style={{ margin: '0 0 10px 0' }}>{dogMetadata.name}</h3>
@@ -41,7 +42,7 @@ export const KennelOverlay = () => {
 export const RecordsOverlay = () => {
   const { distance, setMenuState } = useGameStore();
   return (
-    <OverlayContainer title="RECORDS" onBack={() => setMenuState('IDLE')}>
+    <OverlayContainer title="RECORDS" onBack={() => setMenuState(MenuState.IDLE)}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', textAlign: 'center' }}>
         <div>
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#4488ff' }}>{Math.floor(distance)}m</div>
