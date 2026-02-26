@@ -16,5 +16,5 @@ export const CAMERA_TARGETS = {
   KENNEL: { pos: [-2.6, 1.8, -1.0], lookAt: [-2.6, 1.0, -3.0] }, // Laptop on Desk
   TRAINING: { pos: [-1.4, 1.8, -1.0], lookAt: [-1.4, 1.0, -3.0] }, // Book on Desk
   GEAR: { pos: [3.25, 2.2, 0], lookAt: [3.25, 1.9, -3.4] }, // Standing Closet
-  RECORDS: { pos: [-3, 1.8, 2.5], lookAt: [-4.75, 1.5, 2.5] }, // Trophy Shelf on West Wall
+  RECORDS: { pos: [-0.9, 2.2, 2.5], lookAt: [-0.9, 2.2, 4.75] }, // Trophy Shelf on South Wall
 };
