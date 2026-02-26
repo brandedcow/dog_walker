@@ -14,7 +14,7 @@ export const useLeash = () => {
     dogPos: Vector3, 
     dogRotation: number,
     onStrain: (tension: number) => void,
-    traits: ResonanceTraits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 }
+    traits: ResonanceTraits = { strength: 1, bond: 1, focus: 1, awareness: 1, speed: 1, mastery: 1 }
   ) => {
     if (tugRecoil.current > 0) {
       tugRecoil.current *= 0.85;

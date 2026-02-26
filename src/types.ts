@@ -5,11 +5,12 @@ export interface Scent {
 }
 
 export interface ResonanceTraits {
-  strength: number;  // Kinetic Force / Physical Control
-  bond: number;      // Psychological Connection / Non-verbal cues
-  awareness: number; // Detection radius for triggers
-  speed: number;     // Optimization of gait / stamina
-  mastery: number;   // Specialized heuristics / edge cases
+  strength: number;  // Kinetic Force / Physical Control (Anchor)
+  bond: number;      // Psychological Connection / Non-verbal cues (Whisperer)
+  focus: number;     // Detection Radius for triggers (Tactician)
+  speed: number;     // Optimization of gait / stamina (Nomad)
+  awareness: number; // Environmental mastery / shortcuts (Urbanist)
+  mastery: number;   // Specialized heuristics / edge cases (Specialist)
 }
 
 export interface Progression {
@@ -72,20 +73,20 @@ export const DogSize = {
 export type DogSize = typeof DogSize[keyof typeof DogSize];
 
 export const ResonanceType = {
-  ANCHOR: 'Anchor',       // Enhancer: Strength
-  WHISPERER: 'Whisperer', // Emitter: Bond
-  TACTICIAN: 'Tactician', // Manipulator: Awareness
-  NOMAD: 'Nomad',         // Transmuter: Speed
-  URBANIST: 'Urbanist',   // Conjurer: Awareness
-  SPECIALIST: 'Specialist' // Specialist: Mastery
+  ANCHOR: 'Anchor',       // Strength
+  WHISPERER: 'Whisperer', // Bond
+  TACTICIAN: 'Tactician', // Focus
+  NOMAD: 'Nomad',         // Speed
+  URBANIST: 'Urbanist',   // Awareness
+  SPECIALIST: 'Specialist' // Mastery
 } as const;
 export type ResonanceType = typeof ResonanceType[keyof typeof ResonanceType];
 
 export const RESONANCE_STATS: Record<ResonanceType, ResonanceTraits> = {
-  [ResonanceType.ANCHOR]: { strength: 4, bond: 2, awareness: 2, speed: 1, mastery: 1 },
-  [ResonanceType.WHISPERER]: { strength: 2, bond: 4, awareness: 2, speed: 2, mastery: 1 },
-  [ResonanceType.TACTICIAN]: { strength: 1, bond: 2, awareness: 4, speed: 2, mastery: 2 },
-  [ResonanceType.NOMAD]: { strength: 1, bond: 1, awareness: 2, speed: 4, mastery: 3 },
-  [ResonanceType.URBANIST]: { strength: 2, bond: 1, awareness: 4, speed: 1, mastery: 3 },
-  [ResonanceType.SPECIALIST]: { strength: 2, bond: 2, awareness: 2, speed: 2, mastery: 4 },
+  [ResonanceType.ANCHOR]: { strength: 4, bond: 2, focus: 2, speed: 1, awareness: 1, mastery: 1 },
+  [ResonanceType.WHISPERER]: { strength: 2, bond: 4, focus: 2, speed: 2, awareness: 1, mastery: 1 },
+  [ResonanceType.TACTICIAN]: { strength: 1, bond: 2, focus: 4, speed: 2, awareness: 2, mastery: 2 },
+  [ResonanceType.NOMAD]: { strength: 1, bond: 1, focus: 2, speed: 4, awareness: 3, mastery: 3 },
+  [ResonanceType.URBANIST]: { strength: 2, bond: 1, focus: 3, speed: 1, awareness: 4, mastery: 3 },
+  [ResonanceType.SPECIALIST]: { strength: 2, bond: 2, focus: 2, speed: 2, awareness: 2, mastery: 4 },
 };

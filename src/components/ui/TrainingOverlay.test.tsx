@@ -13,7 +13,7 @@ describe('TrainingOverlay Component', () => {
       progression: { walkerRank: 1, xp: 0, skillPoints: 5 },
       unlockedSkills: ['FOUNDATION'],
       resonanceType: ResonanceType.ANCHOR,
-      traits: { strength: 4, bond: 2, awareness: 2, speed: 1, mastery: 1 }
+      traits: { strength: 4, bond: 2, focus: 2, awareness: 2, speed: 1, mastery: 1 }
     });
   });
 

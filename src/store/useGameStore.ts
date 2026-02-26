@@ -70,8 +70,10 @@ interface GameStore {
   
   // Refined Progression
   resonanceType: PlayerResonance;
+  secondaryFocus: PlayerResonance | null;
   traits: ResonanceTraits;
   progression: Progression;
+  affinityXP: Record<ResonanceType, number>;
 
   setGameState: (state: GameState) => void;
   setDogState: (state: DogState) => void;
@@ -84,7 +86,7 @@ interface GameStore {
   setIsProfileExpanded: (isExpanded: boolean) => void;
   updatePlayerStats: (stats: Partial<PlayerStats>) => void;
   updateDogStats: (stats: Partial<DogStats>) => void;
-  addXP: (amount: number) => void;
+  addXP: (amount: number, category?: ResonanceType) => void;
   setHasStrained: (strained: boolean) => void;
   finalizeWalk: () => void;
   purchaseSkill: (skillId: string, gritCost: number, spCost?: number) => boolean;
@@ -95,6 +97,7 @@ interface GameStore {
 
 const DEFAULT_PROG_STATE = {
   resonanceType: ResonanceType.ANCHOR,
+  secondaryFocus: null,
   dogMetadata: {
     name: 'BUSTER',
     trainingLevel: TrainingLevel.COMPETENT,
@@ -117,6 +120,14 @@ const DEFAULT_PROG_STATE = {
     walkerRank: 1,
     xp: 0,
     skillPoints: 0,
+  },
+  affinityXP: {
+    [ResonanceType.ANCHOR]: 0,
+    [ResonanceType.WHISPERER]: 0,
+    [ResonanceType.TACTICIAN]: 0,
+    [ResonanceType.NOMAD]: 0,
+    [ResonanceType.URBANIST]: 0,
+    [ResonanceType.SPECIALIST]: 0,
   },
   totalDistanceWalked: 0,
 };
@@ -168,39 +179,73 @@ export const useGameStore = create<GameStore>()(
       updatePlayerStats: (stats) => set((state) => ({ playerStats: { ...state.playerStats, ...stats } })),
       updateDogStats: (stats) => set((state) => ({ dogStats: { ...state.dogStats, ...stats } })),
       
-      addXP: (amount) => set((state) => {
-        const newXP = state.progression.xp + amount;
+      addXP: (amount, category) => set((state) => {
+        const newTotalXP = state.progression.xp + amount;
         const xpPerLevel = 1000;
-        const newRank = Math.floor(newXP / xpPerLevel) + 1;
+        const newRank = Math.floor(newTotalXP / xpPerLevel) + 1;
         const rankGained = newRank > state.progression.walkerRank;
         
+        const newAffinityXP = { ...state.affinityXP };
+        if (category) {
+          newAffinityXP[category] += amount;
+        }
+
+        // Determine Secondary Focus (second highest XP, excluding primary)
+        const entries = Object.entries(newAffinityXP) as [ResonanceType, number][];
+        const sorted = entries
+          .filter(([type]) => type !== state.resonanceType)
+          .sort((a, b) => b[1] - a[1]);
+        
+        const secondaryFocus = sorted[0][1] > 0 ? sorted[0][0] : null;
+
         return {
           progression: {
             ...state.progression,
-            xp: newXP,
+            xp: newTotalXP,
             walkerRank: newRank,
-            skillPoints: state.progression.skillPoints + (rankGained ? 2 : 0) // 2 SP per rank
-          }
+            skillPoints: state.progression.skillPoints + (rankGained ? 2 : 0)
+          },
+          affinityXP: newAffinityXP,
+          secondaryFocus
         };
       }),
 
       setHasStrained: (hasStrained) => set({ hasStrained }),
       
       finalizeWalk: () => {
-        const { distance, hasStrained, playerStats, progression, traits = { awareness: 1 }, totalDistanceWalked } = get();
+        const { distance, hasStrained, playerStats, progression, traits = { awareness: 1, focus: 1 }, totalDistanceWalked, dogMetadata, affinityXP, resonanceType } = get();
         const baseGrit = Math.floor(distance / 10);
         const bonusGrit = hasStrained ? 0 : Math.floor(baseGrit * 0.5);
         let totalGrit = baseGrit + bonusGrit;
         
-        // Dynamic trait bonus: Awareness grants +5% per level
+        // Dynamic trait bonus: Focus (Tactician) grants detection but Awareness (Urbanist) multiplies Grit
         const awarenessMultiplier = 1.0 + (traits.awareness * 0.05);
         totalGrit = Math.floor(totalGrit * awarenessMultiplier);
 
         const earnedXP = Math.floor(distance * 10);
-        const newXP = progression.xp + earnedXP;
+        
+        // Breed-based leveling: map dog to resonance category
+        let category: ResonanceType = ResonanceType.URBANIST; // Default to Adapters
+        if (dogMetadata.size === DogSize.LARGE) category = ResonanceType.ANCHOR; // Titans
+        else if (dogMetadata.characteristic === DogCharacteristic.VELCRO) category = ResonanceType.WHISPERER; // Spirits
+        else if (dogMetadata.characteristic === DogCharacteristic.ADHD || dogMetadata.characteristic === DogCharacteristic.PULLER) category = ResonanceType.TACTICIAN; // High-Strung
+        else if (dogMetadata.characteristic === DogCharacteristic.SNIFFER) category = ResonanceType.NOMAD; // Sprinters (approx)
+        else if (dogMetadata.characteristic === DogCharacteristic.REACTIVE) category = ResonanceType.SPECIALIST; // Enigmas
+
+        const newTotalXP = progression.xp + earnedXP;
         const xpPerLevel = 1000;
-        const newRank = Math.floor(newXP / xpPerLevel) + 1;
+        const newRank = Math.floor(newTotalXP / xpPerLevel) + 1;
         const rankGained = newRank > progression.walkerRank;
+
+        const newAffinityXP = { ...affinityXP };
+        newAffinityXP[category] += earnedXP;
+
+        // Recalculate secondary focus
+        const entries = Object.entries(newAffinityXP) as [ResonanceType, number][];
+        const sorted = entries
+          .filter(([type]) => type !== resonanceType)
+          .sort((a, b) => b[1] - a[1]);
+        const secondaryFocus = sorted[0][1] > 0 ? sorted[0][0] : null;
         
         set({ 
           sessionGrit: totalGrit,
@@ -208,10 +253,12 @@ export const useGameStore = create<GameStore>()(
           playerStats: { ...playerStats, grit: playerStats.grit + totalGrit },
           progression: {
             ...progression,
-            xp: newXP,
+            xp: newTotalXP,
             walkerRank: newRank,
-            skillPoints: progression.skillPoints + (rankGained ? 2 : 0) // 2 SP per rank
-          }
+            skillPoints: progression.skillPoints + (rankGained ? 2 : 0)
+          },
+          affinityXP: newAffinityXP,
+          secondaryFocus
         });
       },
 
@@ -234,8 +281,9 @@ export const useGameStore = create<GameStore>()(
               
               totalTraits.strength += (skill.augments.strength || 0) * filterPotency;
               totalTraits.bond += (skill.augments.bond || 0) * filterPotency;
-              totalTraits.awareness += (skill.augments.awareness || 0) * filterPotency;
+              totalTraits.focus += (skill.augments.focus || 0) * filterPotency;
               totalTraits.speed += (skill.augments.speed || 0) * filterPotency;
+              totalTraits.awareness += (skill.augments.awareness || 0) * filterPotency;
               totalTraits.mastery += (skill.augments.mastery || 0) * filterPotency;
             }
           });
@@ -281,12 +329,14 @@ export const useGameStore = create<GameStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         resonanceType: state.resonanceType,
+        secondaryFocus: state.secondaryFocus,
         dogMetadata: state.dogMetadata,
         playerStats: state.playerStats,
         dogStats: state.dogStats,
         unlockedSkills: state.unlockedSkills,
         traits: state.traits,
         progression: state.progression,
+        affinityXP: state.affinityXP,
         totalDistanceWalked: state.totalDistanceWalked,
       }),
     }

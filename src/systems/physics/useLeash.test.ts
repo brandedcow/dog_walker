@@ -105,7 +105,7 @@ describe('useLeash', () => {
 
     act(() => {
       // Base strength 1: threshold 0.8
-      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 });
+      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 1, bond: 1, awareness: 1, focus: 1, speed: 1, mastery: 1 });
     });
     expect(onStrain).toHaveBeenCalled();
 
@@ -113,7 +113,7 @@ describe('useLeash', () => {
 
     act(() => {
       // High strength 100 (for testing): threshold very high
-      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 100, bond: 1, awareness: 1, speed: 1, mastery: 1 });
+      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 100, bond: 1, awareness: 1, focus: 1, speed: 1, mastery: 1 });
     });
     expect(onStrain).not.toHaveBeenCalled();
   });

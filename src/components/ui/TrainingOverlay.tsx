@@ -173,9 +173,10 @@ export const TrainingOverlay = () => {
     unlockedSkills,
     purchaseSkill,
     respecSkills,
-    traits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 },
+    traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     progression,
     resonanceType = ResonanceType.ANCHOR,
+    secondaryFocus,
     setResonanceType
   } = useGameStore();
 
@@ -332,6 +333,11 @@ export const TrainingOverlay = () => {
                 <div>
                   <div style={{ fontSize: '12px', opacity: 0.7 }}>PRIMARY AFFINITY:</div>
                   <div style={{ fontSize: '24px', fontWeight: '900', color: '#2c3e50' }}>{resonanceType.toUpperCase()}</div>
+                  {secondaryFocus && (
+                    <div style={{ fontSize: '14px', fontWeight: '900', color: '#1976d2', marginTop: '4px' }}>
+                      SECONDARY FOCUS: {secondaryFocus.toUpperCase()}
+                    </div>
+                  )}
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '12px', opacity: 0.7 }}>WALKER RANK:</div>
@@ -362,9 +368,10 @@ export const TrainingOverlay = () => {
               {[
                 { label: 'STRENGTH', value: traits.strength, color: '#d32f2f', desc: 'Resist kinetic force & maintain control' },
                 { label: 'BOND', value: traits.bond, color: '#fbc02d', desc: 'Psychological connection & non-verbal cues' },
-                { label: 'AWARENESS', value: traits.awareness, color: '#1976d2', desc: 'Detection radius for environmental triggers' },
+                { label: 'FOCUS', value: traits.focus, color: '#1976d2', desc: 'Detection radius for environmental triggers' },
                 { label: 'SPEED', value: traits.speed, color: '#388e3c', desc: 'Optimization of gait & stamina efficiency' },
-                { label: 'MASTERY', value: traits.mastery, color: '#8e24aa', desc: 'Specialized heuristics for chaotic cases' },
+                { label: 'AWARENESS', value: traits.awareness, color: '#8e24aa', desc: 'Environmental mastery & shortcuts' },
+                { label: 'MASTERY', value: traits.mastery, color: '#ff9800', desc: 'Specialized heuristics for chaotic cases' },
               ].map((trait) => (
                 <div key={trait.label}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', marginBottom: '8px', fontWeight: '900' }}>
@@ -383,6 +390,7 @@ export const TrainingOverlay = () => {
 
         {activeTab === 'SKILLS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            {/* Resonance Paths */}
             {resonancePaths.map((path) => {
               const potency = getResonanceFilter(resonanceType, path.type);
               return (
@@ -416,6 +424,38 @@ export const TrainingOverlay = () => {
                 </div>
               );
             })}
+
+            {/* Hybrid Techniques Section */}
+            {secondaryFocus && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', padding: '20px', background: 'rgba(25, 118, 210, 0.05)', borderRadius: '15px', border: '2px solid #1976d2' }}>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#1976d2' }}>
+                  Resonant Hybridization: {resonanceType} × {secondaryFocus}
+                </h3>
+                <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
+                  {SKILLS.filter(s => s.id.startsWith('HYB')).map(skill => {
+                    // Simple logic for MVP: show all hybrids but check if they match primary/secondary
+                    // In a full implementation, we'd filter strictly by the specific primary/secondary pair
+                    const unlocked = unlockedSkills.includes(skill.id);
+                    const canAffordGrit = playerStats.grit >= skill.gritCost;
+                    const canAffordSP = progression.skillPoints >= skill.spCost;
+                    
+                    return (
+                      <div key={skill.id} style={{ flex: '0 0 280px' }}>
+                        <SkillNode
+                          skill={skill}
+                          unlocked={unlocked}
+                          available={true}
+                          canAffordGrit={canAffordGrit}
+                          canAffordSP={canAffordSP}
+                          potency={1.0}
+                          onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

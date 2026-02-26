@@ -1,18 +1,21 @@
 # The Resonance System: Canine Affinity Hexagram
 
-## This document outlines **The Resonance System**, a player-profile framework modeled after the _Hunter x Hunter_ Nen structure. It defines how a player's **Resonance**—the synchronized frequency between walker and dog—determines their effectiveness across different breeds and environments.
+This document outlines **The Resonance System**, a player-profile framework modeled after the _Hunter x Hunter_ Nen structure. It defines how a player's **Resonance**—the synchronized frequency between walker and dog—determines their effectiveness across different breeds and environments.
+
+---
 
 ## 1. Core Resonance Traits
 
-Every player profile is built upon five fundamental **Traits**. These represent the raw variables of your Resonance and grow organically based on the specific "vibrations" of the breeds you handle.
+Every player profile is built upon six fundamental **Traits**. These represent the raw variables of your Resonance and grow organically based on the specific "vibrations" of the breeds you handle.
 
-| Trait         | Description                                                                            |
-| :------------ | :------------------------------------------------------------------------------------- |
-| **Strength**  | Capacity to resist kinetic force and maintain physical control of high-weight breeds.  |
-| **Bond**      | The depth of the psychological connection; dictates responsiveness to non-verbal cues. |
-| **Awareness** | The detection radius for environmental triggers (squirrels, trash, aggressive dogs).   |
-| **Speed**     | Optimization of gait to maximize distance and efficiency of stamina-burn for the dog.  |
-| **Mastery**   | The utilization of specialized heuristics to solve "unwalkable" or chaotic edge cases. |
+| Trait         | Description                                                                            | Primary Affinity |
+| :------------ | :------------------------------------------------------------------------------------- | :--------------- |
+| **Strength**  | Capacity to resist kinetic force and maintain physical control of high-weight breeds.  | **Anchor**       |
+| **Bond**      | The depth of the psychological connection; dictates responsiveness to non-verbal cues. | **Whisperer**    |
+| **Focus**     | The "Detection Radius" for environmental triggers like squirrels or aggressive dogs.   | **Tactician**    |
+| **Speed**     | Optimization of gait to maximize distance and efficiency of stamina-burn for the dog.  | **Nomad**        |
+| **Awareness** | Environmental mastery; ability to find shortcuts and predict neighborhood "flow".      | **Urbanist**     |
+| **Mastery**   | The utilization of specialized heuristics to solve "unwalkable" or chaotic edge cases. | **Specialist**   |
 
 ---
 
@@ -23,37 +26,37 @@ A player’s **Primary Affinity** is their natural "Tuning." This categorization
 ### [Top] The Anchor (Enhancer)
 
 - **Persona**: Simple, determined, and protective.
-- **Primary Trait**: Strength.
+- **Primary Trait**: **Strength**.
 - **The Conflict**: **Nomad (Speed)**.
 
 ### [Top Right] The Whisperer (Emitter)
 
 - **Persona**: Emotional, reactive, and intuitive.
-- **Primary Trait**: Bond.
+- **Primary Trait**: **Bond**.
 - **The Conflict**: **Urbanist (Awareness)**.
 
 ### [Bottom Right] The Tactician (Manipulator)
 
 - **Persona**: Logical, argumentative, and protective.
-- **Primary Trait**: Awareness.
+- **Primary Trait**: **Focus**.
 - **The Conflict**: **Specialist (Mastery)**.
 
 ### [Bottom] The Nomad (Transmuter)
 
 - **Persona**: Whimsical, fickle, and high-energy.
-- **Primary Trait**: Speed.
+- **Primary Trait**: **Speed**.
 - **The Conflict**: **Anchor (Strength)**.
 
 ### [Bottom Left] The Urbanist (Conjurer)
 
 - **Persona**: High-strung, observant, and cautious.
-- **Primary Trait**: Awareness.
+- **Primary Trait**: **Awareness**.
 - **The Conflict**: **Whisperer (Bond)**.
 
 ### [Top Left] The Specialist (Specialist)
 
 - **Persona**: Independent, charismatic, and eccentric.
-- **Primary Trait**: Mastery.
+- **Primary Trait**: **Mastery**.
 - **The Conflict**: **Tactician (Focus)**.
 
 ---
@@ -63,7 +66,7 @@ A player’s **Primary Affinity** is their natural "Tuning." This categorization
 Your **Secondary Focus** is a dynamic sub-class assigned to the Affinity in which you currently hold the **second-highest accumulated XP**.
 
 - **Organic Specialization**: This focus shifts based on your recent contract history as your "frequency" adapts.
-- **Hybrid Techniques**: Possessing a Secondary Focus unlocks specialized skills that blend two playstyles.
+- **Resonant Hybridization**: Possessing a Secondary Focus unlocks specialized skills that blend two playstyles.
 - **Synergy Multiplier**: If your Secondary Focus is **Adjacent** to your Primary, XP requirements for hybrid skills are reduced by 20% due to harmonic alignment.
 
 ---
@@ -75,7 +78,7 @@ Unlocked at **Mastery Level 5** of your Secondary Focus. These represent a harmo
 | Primary Affinity | Secondary Focus | Technique Name       | Effect Description                                                      |
 | :--------------- | :-------------- | :------------------- | :---------------------------------------------------------------------- |
 | **Anchor**       | **Whisperer**   | **Weightless Lead**  | Reduces stamina drain of "Titan" breeds by 40% via emotional synchrony. |
-| **Whisperer**    | **Tactician**   | **Pre-emptive Calm** | Triggers a calming pulse when hazards enter Awareness radius.           |
+| **Whisperer**    | **Tactician**   | **Pre-emptive Calm** | Triggers a calming pulse when hazards enter Focus radius.               |
 | **Tactician**    | **Nomad**       | **Slipstream**       | Navigate narrow gaps at high speed without loss of Focus.               |
 | **Nomad**        | **Urbanist**    | **Flow State**       | Highlights high-speed "Green Zones" through dense crowds.               |
 | **Urbanist**     | **Specialist**  | **Habitat Mimicry**  | Uses environment to instantly zero out a Specialist dog's stress.       |
@@ -102,10 +105,10 @@ Resonance is not gained through generic points. Instead, **walking specific bree
 
 Your **Primary Affinity** acts as a tuning fork. You can learn anything, but you can only fully "Resonate" with what aligns with your nature.
 
-- **Primary Type Skills**: **100% Resonance.** (Full power, lowest stamina cost).
-- **Adjacent Type Skills**: **80% Resonance.** (Strong synergy, moderate cost).
-- **Secondary Type Skills**: **60% Resonance.** (Diminished returns, high cost).
-- **Opposite Type Skills**: **40% Resonance.** (The "Hard Cap"; unstable and exhausting).
+- **Primary Type Skills**: **100% Resonance**.
+- **Adjacent Type Skills**: **80% Resonance**.
+- **Secondary Type Skills**: **60% Resonance**.
+- **Opposite Type Skills**: **40% Resonance**.
 
 ---
 
@@ -113,9 +116,9 @@ Your **Primary Affinity** acts as a tuning fork. You can learn anything, but you
 
 Upon reaching **Mastery Level 10** in a category, a player unlocks a signature ability governed by the Resonance Filter.
 
-1.  **Anchor - _Event Horizon_**: The leash becomes an immovable physical constant.
-2.  **Whisperer - _Pack Pulse_**: A wave of calm that resets the aggression meter of nearby dogs.
-3.  **Tactician - _Perfect Pathing_**: Highlights the "Golden Route" to bypass all triggers.
-4.  **Nomad - _Kinetic Recharge_**: Converts movement velocity directly into stamina recovery.
-5.  **Urbanist - _Urban Phasing_**: Allows the player and dog to ignore crowd collision.
-6.  **Specialist - _Formless Style_**: Temporarily adopts the primary affinity of any other type.
+1. **Anchor - _Event Horizon_**: The leash becomes an immovable physical constant.
+2. **Whisperer - _Pack Pulse_**: A wave of calm that resets the aggression meter of nearby dogs.
+3. **Tactician - _Perfect Pathing_**: Highlights the "Golden Route" to bypass all triggers.
+4. **Nomad - _Kinetic Recharge_**: Converts movement velocity directly into stamina recovery.
+5. **Urbanist - _Urban Phasing_**: Allows the player and dog to ignore crowd collision.
+6. **Specialist - _Formless Style_**: Temporarily adopts the primary affinity of any other type.

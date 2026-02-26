@@ -19,7 +19,7 @@ export const useDogAI = () => {
     dogState: DogState, 
     setDogState: (s: DogState) => void,
     unlockedSkills: string[] = [],
-    traits: ResonanceTraits = { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 }
+    traits: ResonanceTraits = { strength: 1, bond: 1, focus: 1, awareness: 1, speed: 1, mastery: 1 }
   ) => {
     const prevDogPos = dogPos.current.clone();
 

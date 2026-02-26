@@ -34,9 +34,9 @@ describe('useGameStore', () => {
     // Base Grit = distance / 10 = 10
     // Bonus Grit = 10 * 0.5 = 5 (No strain)
     // Total Grit (before awareness) = 15
-    // Awareness 2 multiplier (Anchor base) = 1.0 + (2 * 0.05) = 1.1
-    // Total Grit = floor(15 * 1.1) = 16
-    expect(updatedState.playerStats.grit).toBe(16);
+    // Awareness 1 multiplier (Anchor base) = 1.0 + (1 * 0.05) = 1.05
+    // Total Grit = floor(15 * 1.05) = 15
+    expect(updatedState.playerStats.grit).toBe(15);
     
     // XP = distance * 10 = 100 * 10 = 1000
     // Rank should level up (Initial 0 + 1000 = 1000, floor(1000/1000) + 1 = 2)
@@ -53,7 +53,7 @@ describe('useGameStore', () => {
     useGameStore.setState({ 
       distance: 100, 
       hasStrained: false,
-      traits: { strength: 4, bond: 2, awareness: 10, speed: 1, mastery: 1 }
+      traits: { strength: 4, bond: 2, focus: 2, awareness: 10, speed: 1, mastery: 1 }
     });
     
     store.finalizeWalk();
@@ -77,7 +77,7 @@ describe('useGameStore', () => {
     expect(useGameStore.getState().hasStrained).toBe(true);
 
     // Reset and increase Strength
-    useGameStore.setState({ hasStrained: false, traits: { strength: 8, bond: 2, awareness: 2, speed: 1, mastery: 1 } });
+    useGameStore.setState({ hasStrained: false, traits: { strength: 8, bond: 2, focus: 2, awareness: 2, speed: 1, mastery: 1 } });
     
     // Strength 8: threshold = 0.78 + (8 * 0.02) = 0.94
     store.setTension(0.93);
@@ -128,7 +128,7 @@ describe('useGameStore', () => {
       playerStats: { strength: 1, grit: 500 },
       progression: { walkerRank: 10, xp: 9000, skillPoints: 8 },
       unlockedSkills: ['FOUNDATION', 'STR_1', 'SPD_1'],
-      traits: { strength: 5, bond: 5, awareness: 5, speed: 5, mastery: 5 }
+      traits: { strength: 5, bond: 5, focus: 5, awareness: 5, speed: 5, mastery: 5 }
     });
 
     store.resetProgress();

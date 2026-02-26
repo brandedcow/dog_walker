@@ -49,9 +49,9 @@ describe('Golden Path Integration', () => {
     expect(finalState.gameState).toBe(GameState.HOME);
     
     // Base Grit (100/10=10) + Bonus (5) = 15. 
-    // Anchor Awareness is 2. Multiplier = 1.0 + (2 * 0.05) = 1.1
-    // Total Grit = floor(15 * 1.1) = 16
-    expect(finalState.playerStats.grit).toBe(16);
+    // Anchor Awareness is 1. Multiplier = 1.0 + (1 * 0.05) = 1.05
+    // Total Grit = floor(15 * 1.05) = 15
+    expect(finalState.playerStats.grit).toBe(15);
     
     // XP (100 * 10 = 1000). Rank should be 2.
     expect(finalState.progression.xp).toBe(1000);
@@ -61,7 +61,7 @@ describe('Golden Path Integration', () => {
     // 6. Purchase a Skill
     act(() => {
       // STR_1 costs 50 Grit and 1 SP
-      // Wait, we only have 16 Grit! Need to give more grit to test purchase.
+      // Wait, we only have 15 Grit! Need to give more grit to test purchase.
       useGameStore.setState({ playerStats: { strength: 1, grit: 100 } });
     });
 

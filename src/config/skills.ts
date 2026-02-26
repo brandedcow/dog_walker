@@ -43,5 +43,13 @@ export const SKILLS: Skill[] = [
   // THE SPECIALIST (Mastery / Specialist)
   { id: 'SPC_1', name: 'Exotic Handler', desc: '+1 Mastery', gritCost: 100, spCost: 1, resonance: 'Specialist', dependsOn: 'FOUNDATION', augments: { mastery: 1 } },
   { id: 'SPC_2', name: 'Chaos Management', desc: '+2 Mastery', gritCost: 400, spCost: 2, resonance: 'Specialist', dependsOn: 'SPC_1', augments: { mastery: 2 } },
-  { id: 'SPC_3', name: 'Formless Style', desc: 'HATSU: Temporarily adopts the primary affinity of any other type.', gritCost: 1000, spCost: 3, resonance: 'Specialist', dependsOn: 'SPC_2', isHatsu: true, augments: { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 } },
+  { id: 'SPC_3', name: 'Formless Style', desc: 'HATSU: Temporarily adopts the primary affinity of any other type.', gritCost: 1000, spCost: 3, resonance: 'Specialist', dependsOn: 'SPC_2', isHatsu: true, augments: { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 } },
+
+  // HYBRID TECHNIQUES (Unlocked at level 5 of secondary focus)
+  { id: 'HYB_AW', name: 'Weightless Lead', desc: 'HYBRID: Reduces stamina drain of Titans by 40%.', gritCost: 600, spCost: 2, resonance: 'Anchor' },
+  { id: 'HYB_WT', name: 'Pre-emptive Calm', desc: 'HYBRID: Calming pulse triggered by hazard detection.', gritCost: 600, spCost: 2, resonance: 'Whisperer' },
+  { id: 'HYB_TN', name: 'Slipstream', desc: 'HYBRID: Navigate gaps at high speed without Focus loss.', gritCost: 600, spCost: 2, resonance: 'Tactician' },
+  { id: 'HYB_NU', name: 'Flow State', desc: 'HYBRID: Highlights high-speed Green Zones in crowds.', gritCost: 600, spCost: 2, resonance: 'Nomad' },
+  { id: 'HYB_US', name: 'Habitat Mimicry', desc: 'HYBRID: Zero out Specialist dog stress via environment.', gritCost: 600, spCost: 2, resonance: 'Urbanist' },
+  { id: 'HYB_SA', name: 'Bastion Grip', desc: 'HYBRID: Redirect aggressive breeds via raw power.', gritCost: 600, spCost: 2, resonance: 'Specialist' },
 ];

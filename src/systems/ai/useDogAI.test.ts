@@ -39,7 +39,7 @@ describe('useDogAI', () => {
     const initialPos = result.current.dogPos.current.clone();
     
     act(() => {
-      result.current.update(delta, playerPos, DogState.COMING, setDogState, [], { strength: 1, bond: 1, awareness: 1, speed: 1, mastery: 1 });
+      result.current.update(delta, playerPos, DogState.COMING, setDogState, [], { strength: 1, bond: 1, awareness: 1, focus: 1, speed: 1, mastery: 1 });
     });
     
     const moveDist1 = initialPos.distanceTo(result.current.dogPos.current);
@@ -47,7 +47,7 @@ describe('useDogAI', () => {
     // Reset and try with BOND 10
     result.current.dogPos.current.copy(initialPos);
     act(() => {
-      result.current.update(delta, playerPos, DogState.COMING, setDogState, [], { strength: 1, bond: 10, awareness: 1, speed: 1, mastery: 1 });
+      result.current.update(delta, playerPos, DogState.COMING, setDogState, [], { strength: 1, bond: 10, awareness: 1, focus: 1, speed: 1, mastery: 1 });
     });
     
     const moveDist10 = initialPos.distanceTo(result.current.dogPos.current);

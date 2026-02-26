@@ -13,7 +13,7 @@ describe('useGameStore Persistence', () => {
     useGameStore.setState({ 
       playerStats: { strength: 1, grit: 123 },
       unlockedSkills: ['FOUNDATION', 'TEST_SKILL'],
-      traits: { strength: 3, bond: 1, awareness: 1, speed: 1, mastery: 1 }
+      traits: { strength: 3, bond: 1, focus: 1, awareness: 1, speed: 1, mastery: 1 }
     });
 
     // Zustand persistence is usually async-ish or triggered on changes
