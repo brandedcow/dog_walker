@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useMenuCamera } from './useMenuCamera';
-import { Vector3, Quaternion, PerspectiveCamera } from 'three';
+import { PerspectiveCamera } from 'three';
 import { useGameStore } from '../../store/useGameStore';
 import { MenuState } from '../../types';
 

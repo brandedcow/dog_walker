@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { HUD } from './HUD';
 import { useGameStore } from '../../store/useGameStore';
 import { GameState, MenuState } from '../../types';
@@ -68,8 +68,6 @@ describe('HUD Component', () => {
   });
 
   it('renders TrainingOverlay only when menuState is TRAINING and isMenuReady is true', () => {
-    const { act } = require('@testing-library/react');
-    
     act(() => {
       useGameStore.setState({ 
         gameState: GameState.HOME,

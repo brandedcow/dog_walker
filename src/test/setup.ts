@@ -2,11 +2,13 @@ import '@testing-library/jest-dom';
 import { vi, beforeEach } from 'vitest';
 
 // Mock WebGL and ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+if (typeof window !== 'undefined') {
+  (window as any).ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
+}
 
 // Mock PointerEvents (used by R3F and HUD)
 if (typeof window !== 'undefined') {

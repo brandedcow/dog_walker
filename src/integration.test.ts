@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { act } from '@testing-library/react';
 import { useGameStore } from './store/useGameStore';
-import { GameState, DogState } from './types';
+import { GameState } from './types';
 
 describe('Golden Path Integration', () => {
   beforeEach(() => {

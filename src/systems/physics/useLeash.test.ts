@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLeash } from './useLeash';
 import { Vector3 } from 'three';
@@ -34,24 +34,24 @@ describe('useLeash', () => {
     const { result } = renderHook(() => useLeash());
     
     // Very close: tension should be 0
-    let tensionData;
+    let tensionData: any;
     act(() => {
       tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, 1), dogRotation);
     });
-    expect(tensionData.rawTension).toBe(0);
+    expect(tensionData?.rawTension).toBe(0);
 
     // At 50% max distance
     act(() => {
       tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH / 2), dogRotation);
     });
-    expect(tensionData.rawTension).toBeGreaterThan(0);
-    expect(tensionData.rawTension).toBeLessThan(1);
+    expect(tensionData?.rawTension).toBeGreaterThan(0);
+    expect(tensionData?.rawTension).toBeLessThan(1);
 
     // At max distance
     act(() => {
       tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation);
     });
-    expect(tensionData.rawTension).toBe(1);
+    expect(tensionData?.rawTension).toBe(1);
   });
 
   it('enforces MAX_LEASH_LENGTH on dog position', () => {

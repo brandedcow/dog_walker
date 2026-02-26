@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from './useGameStore';
 
 describe('useGameStore Persistence', () => {
@@ -9,8 +9,6 @@ describe('useGameStore Persistence', () => {
   });
 
   it('serializes progression data to localStorage', () => {
-    const store = useGameStore.getState();
-    
     // Modify long-term progression data
     useGameStore.setState({ 
       playerStats: { strength: 1, grit: 123 },
@@ -28,8 +26,6 @@ describe('useGameStore Persistence', () => {
   });
 
   it('excludes transient session data from localStorage', () => {
-    const store = useGameStore.getState();
-    
     // Modify transient data
     useGameStore.setState({ 
       distance: 500,

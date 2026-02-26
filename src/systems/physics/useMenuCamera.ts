@@ -7,9 +7,6 @@ import { CAMERA_TARGETS } from '../../config/constants';
 
 export const useMenuCamera = () => {
   const { camera, size } = useThree();
-  const menuState = useGameStore((state) => state.menuState);
-  const setIsMenuReady = useGameStore((state) => state.setIsMenuReady);
-  const isMenuReady = useGameStore((state) => state.isMenuReady);
 
   const targetPos = useRef(new Vector3());
   const targetLookAt = useRef(new Vector3());
