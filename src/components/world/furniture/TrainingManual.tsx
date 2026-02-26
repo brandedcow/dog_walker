@@ -104,7 +104,7 @@ export const TrainingManual = ({
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS'>('STATS');
+  const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
@@ -326,7 +326,7 @@ export const TrainingManual = ({
           >
             {/* Side Tabs (Attached to right edge) */}
             <div style={{ position: "absolute", right: "-40px", top: "80px", display: "flex", flexDirection: "column", gap: "10px" }}>
-              {['STATS', 'SKILLS'].map((tab) => (
+              {['STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
                 <div 
                   key={tab}
                   onClick={(e) => { e.stopPropagation(); setActiveTab(tab as any); }}
@@ -334,7 +334,7 @@ export const TrainingManual = ({
                     width: "40px", height: "80px", background: activeTab === tab ? "#ffffff" : "#d1cdb0",
                     border: "1px solid #bcba9a", borderLeft: "none", borderRadius: "0 10px 10px 0",
                     writingMode: "vertical-rl", textOrientation: "mixed", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontSize: "12px", fontWeight: "900", cursor: "pointer",
+                    justifyContent: "center", fontSize: "10px", fontWeight: "900", cursor: "pointer",
                     boxShadow: activeTab === tab ? "4px 0 10px rgba(0,0,0,0.1)" : "none",
                     color: activeTab === tab ? "#2c3e50" : "#6e6c56",
                     transition: "all 0.2s"
@@ -347,7 +347,7 @@ export const TrainingManual = ({
 
             <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "20px", borderBottom: "2px solid #2c3e50", paddingBottom: "10px", position: "relative" }}>
               <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
-                {activeTab === 'STATS' ? 'DASHBOARD' : 'FIELD NOTES'}
+                {activeTab === 'STATS' ? 'DASHBOARD' : activeTab === 'SKILLS' ? 'FIELD NOTES' : 'COMMANDS'}
               </h1>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -424,7 +424,7 @@ export const TrainingManual = ({
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : activeTab === 'SKILLS' ? (
               <div
                 style={{
                   flex: 1,
@@ -452,6 +452,24 @@ export const TrainingManual = ({
                     />
                   );
                 })}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px", flex: 1 }}>
+                {[
+                  { cmd: '🐾 GO', desc: 'Click the "🐾" paw or look ahead to start walking. Buster follows your gaze.' },
+                  { cmd: '🪢 TUG', desc: 'When Buster stops or pulls, click the paw to gently reel him in (0.35m recall).' },
+                  { cmd: '🐕 COME', desc: 'A focused recall. Brings Buster back to your side at high speed. (Unlocks via Skills)' },
+                  { cmd: '🛑 SIT', desc: 'Command Buster to sit and wait. Useful for managing tension or taking a break.' },
+                  { cmd: '🏠 RETURN', desc: 'End the walk early from the HUD to bank your current Grit and XP.' }
+                ].map((item) => (
+                  <div key={item.cmd} style={{ borderBottom: "1px solid rgba(0,0,0,0.1)", paddingBottom: "10px" }}>
+                    <div style={{ fontWeight: "900", fontSize: "16px", color: "#2c3e50", marginBottom: "5px" }}>{item.cmd}</div>
+                    <div style={{ fontSize: "12px", opacity: 0.8, lineHeight: "1.4" }}>{item.desc}</div>
+                  </div>
+                ))}
+                <div style={{ marginTop: "auto", fontSize: "10px", fontStyle: "italic", opacity: 0.5, textAlign: "center" }}>
+                  * Commands are more effective as BOND and WALKER RANK increase.
+                </div>
               </div>
             )}
           </div>
