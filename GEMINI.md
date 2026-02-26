@@ -57,17 +57,20 @@ The leash is a chain of 60 nodes using Verlet Integration and fixed-timestep sub
 - **SIT:** Stationary anchor state.
 
 ### 3.4 Attribute Scaling
-Player attributes dynamically modify physical gameplay values:
-- **Strength:** Increases the tension threshold before the leash strains (`0.78 + (strength * 0.02)`).
-- **Focus:** Multiplies final Grit earned (`1.0 + (focus * 0.05)`) and stabilizes the camera pan window (`0.3 + (focus * 0.035)`).
-- **Agility:** Increases base player movement speed on the road (`PLAYER_BASE_SPEED + (agility * 0.3)`).
-- **Bond:** Accelerates the dog's recall speed when executing the COME command (`12.0 + (bond * 1.5)`).
+Player attributes are dynamically calculated from a base **Race (Dwarf, Elf, Human)** foundation plus active **Skill Tree Augments**. These values directly modify physical gameplay:
+- **Strength:** Increases the tension threshold before the leash strains (`0.78 + (total_strength * 0.02)`).
+- **Focus:** Multiplies final Grit earned (`1.0 + (total_focus * 0.05)`) and stabilizes camera pan speed.
+- **Agility:** Increases base player movement speed on the road (`7.0 + (total_agility * 0.3)`).
+- **Bond:** Accelerates the dog's recall speed when executing commands (`12.0 + (total_bond * 1.5)`).
 
 ### 3.5 Progression & Persistence
 The game utilizes Zustand's `persist` middleware to ensure long-term growth is preserved across sessions.
-- **Surgical Serialization:** Only progression-critical keys (`playerStats`, `attributes`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
-- **Lifetime Stats:** `totalDistanceWalked` tracks the cumulative distance covered across all sessions, distinct from the transient session-based `distance`.
-- **State Reset:** A secure reset mechanism is available in the Hub's Records menu to clear all persistent data and return to default values.
+- **Race Archetypes:** Permanent base stat distributions (Dwarf, Elf, Human) that define starting potential.
+- **Skill Tree Augments:** A column-based specialization tree (Handler, Athlete, Analyst, Whisperer) where nodes provide flat attribute bonuses and unique mechanical traits.
+- **Economy:** Players earn 2 Skill Points (SP) per Rank up. Skills require both SP and Grit to unlock.
+- **Respec Mechanism:** Players can reset their skill allocation in the Hub for a Grit cost, allowing for build experimentation.
+- **Surgical Serialization:** Only progression-critical keys (`race`, `playerStats`, `attributes`, `unlockedSkills`, `progression`, `dogMetadata`, `dogStats`, `totalDistanceWalked`) are saved to `localStorage`.
+- **Lifetime Stats:** `totalDistanceWalked` tracks cumulative progress across all walks.
 
 ### 3.6 Audio Engine & Dynamic Feedback
 The game features a state-driven audio system powered by `THREE.Audio`.

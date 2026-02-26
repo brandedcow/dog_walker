@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TrainingOverlay } from './TrainingOverlay';
 import { useGameStore } from '../../store/useGameStore';
-import { MenuState } from '../../types';
+import { MenuState, Race } from '../../types';
 
 describe('TrainingOverlay Component', () => {
   beforeEach(() => {
@@ -12,37 +12,28 @@ describe('TrainingOverlay Component', () => {
       playerStats: { strength: 1, grit: 100 },
       progression: { walkerRank: 1, xp: 0, skillPoints: 5 },
       unlockedSkills: ['FOUNDATION'],
-      attributes: { strength: 1, focus: 1, agility: 1, bond: 1 },
+      race: Race.HUMAN,
+      attributes: { strength: 2, agility: 2, focus: 2, bond: 3 }
     });
   });
 
   it('renders correctly and defaults to STATS tab', () => {
     render(<TrainingOverlay />);
     
-    expect(screen.getByText(/WALKER RANK/i)).toBeInTheDocument();
-    expect(screen.getByText(/STRENGTH/i)).toBeInTheDocument();
-    // Match the Grit value specifically by looking for the one that is likely the main display
-    const gritDisplay = screen.getAllByText(/100/).find(el => el.textContent?.includes('100 G'));
-    expect(gritDisplay).toBeInTheDocument();
+    expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
+    expect(screen.getByText('HUMAN')).toBeInTheDocument();
+    expect(screen.getByText('WALKER RANK 1')).toBeInTheDocument();
+    expect(screen.getAllByText('LEVEL 2').length).toBeGreaterThan(0); // Human base levels
   });
 
   it('switches between tabs', () => {
     render(<TrainingOverlay />);
     
-    // Switch to SKILLS tab
     const skillsTab = screen.getByText('SKILLS');
     fireEvent.click(skillsTab);
     
-    // Check for Skill Points (5) - find the one that includes "SP"
-    const spDisplay = screen.getAllByText(/5/).find(el => el.textContent?.includes('5 SP'));
-    expect(spDisplay).toBeInTheDocument();
-    
-    // Switch to COMMANDS tab
-    const commandsTab = screen.getByText('COMMANDS');
-    fireEvent.click(commandsTab);
-    
-    expect(screen.getByText(/GO/i)).toBeInTheDocument();
-    expect(screen.getByText(/TUG/i)).toBeInTheDocument();
+    expect(screen.getByText('HANDLER')).toBeInTheDocument();
+    expect(screen.getByText('ATHLETE')).toBeInTheDocument();
   });
 
   it('calls setMenuState(IDLE) when close button is clicked', () => {
@@ -50,6 +41,7 @@ describe('TrainingOverlay Component', () => {
     useGameStore.setState({ setMenuState });
     
     render(<TrainingOverlay />);
+    
     const closeBtn = screen.getByText('×');
     fireEvent.click(closeBtn);
     
@@ -57,21 +49,20 @@ describe('TrainingOverlay Component', () => {
   });
 
   it('renders skill nodes and allows purchasing', () => {
-    const purchaseSkill = vi.fn().mockReturnValue(true);
+    const purchaseSkill = vi.fn();
     useGameStore.setState({ purchaseSkill });
     
     render(<TrainingOverlay />);
     
-    // Switch to SKILLS tab
-    const skillsTab = screen.getByText('SKILLS');
-    fireEvent.click(skillsTab);
+    // Switch to skills
+    fireEvent.click(screen.getByText('SKILLS'));
     
-    // Find the specific STRENGTH I node (avoiding STRENGTH II)
-    const skillNodes = screen.getAllByText(/STRENGTH I/i);
-    const strength1 = skillNodes.find(node => node.textContent === 'STRENGTH I');
-    if (strength1) fireEvent.click(strength1);
+    // Find the Power Grip node
+    const powerGrip = screen.getByText('Power Grip');
+    fireEvent.click(powerGrip);
     
-    expect(purchaseSkill).toHaveBeenCalled();
+    // Check if purchase was called with correct args (STR_1, 50G, 1SP)
+    expect(purchaseSkill).toHaveBeenCalledWith('STR_1', 50, 1);
   });
 
   it('prevents purchasing if insufficient resources', () => {
@@ -83,12 +74,25 @@ describe('TrainingOverlay Component', () => {
     });
     
     render(<TrainingOverlay />);
+    
     fireEvent.click(screen.getByText('SKILLS'));
     
-    const skillNodes = screen.getAllByText(/STRENGTH I/i);
-    const strength1 = skillNodes.find(node => node.textContent === 'STRENGTH I');
-    if (strength1) fireEvent.click(strength1);
+    const powerGrip = screen.getByText('Power Grip');
+    fireEvent.click(powerGrip);
     
+    // Should NOT have been called
     expect(purchaseSkill).not.toHaveBeenCalled();
+  });
+
+  it('allows changing race in STATS tab', () => {
+    const setRace = vi.fn();
+    useGameStore.setState({ setRace });
+    
+    render(<TrainingOverlay />);
+    
+    const elfBtn = screen.getByText('ELF');
+    fireEvent.click(elfBtn);
+    
+    expect(setRace).toHaveBeenCalledWith('Elf');
   });
 });

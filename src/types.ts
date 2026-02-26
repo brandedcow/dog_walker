@@ -69,3 +69,16 @@ export const DogSize = {
   LARGE: 'Large'
 } as const;
 export type DogSize = typeof DogSize[keyof typeof DogSize];
+
+export const Race = {
+  HUMAN: 'Human',
+  ELF: 'Elf',
+  DWARF: 'Dwarf'
+} as const;
+export type Race = typeof Race[keyof typeof Race];
+
+export const RACE_STATS: Record<Race, PlayerAttributes> = {
+  [Race.HUMAN]: { strength: 2, agility: 2, focus: 2, bond: 3 },
+  [Race.ELF]: { strength: 1, agility: 4, focus: 2, bond: 2 },
+  [Race.DWARF]: { strength: 4, agility: 1, focus: 2, bond: 2 },
+};

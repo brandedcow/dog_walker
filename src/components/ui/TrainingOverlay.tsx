@@ -7,53 +7,52 @@ const SkillNode = ({
   skill,
   unlocked,
   available,
-  canAfford,
+  canAffordGrit,
+  canAffordSP,
   onPurchase,
 }: {
   skill: Skill;
   unlocked: boolean;
   available: boolean;
-  canAfford: boolean;
+  canAffordGrit: boolean;
+  canAffordSP: boolean;
   onPurchase: () => void;
 }) => (
   <div
     onClick={(e) => {
       e.stopPropagation();
-      if (available && !unlocked && canAfford) onPurchase();
+      if (available && !unlocked && canAffordGrit && canAffordSP) onPurchase();
     }}
     style={{
-      flex: '1 1 calc(50% - 20px)',
-      minHeight: '180px',
-      background: unlocked ? '#44ff44' : available ? '#2c3e50' : '#1a1a1a',
-      border: `4px solid ${unlocked ? "#fff" : available ? (canAfford ? "#44ff44" : "#ff4444") : "#333"}`,
-      borderRadius: "24px",
+      width: '100%',
+      minHeight: '120px',
+      background: unlocked ? '#2c3e50' : available ? '#ffffff' : '#e0e0e0',
+      border: `2px solid ${unlocked ? "#2c3e50" : available ? (canAffordGrit && canAffordSP ? "#2e7d32" : "#d32f2f") : "#bdbdbd"}`,
+      borderRadius: "12px",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center",
-      padding: "20px",
-      cursor: available && !unlocked && canAfford ? "pointer" : "default",
-      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-      opacity: available ? 1 : 0.4,
-      position: "relative",
-      color: unlocked ? "black" : "white",
-      boxShadow: unlocked ? "0 0 30px rgba(68, 255, 68, 0.3)" : "none",
+      padding: "15px",
+      cursor: available && !unlocked && canAffordGrit && canAffordSP ? "pointer" : "default",
+      transition: "all 0.2s",
+      opacity: available ? 1 : 0.6,
+      color: unlocked ? "white" : "#2c3e50",
+      boxShadow: unlocked ? "0 4px 10px rgba(0,0,0,0.1)" : "none",
       boxSizing: 'border-box'
     }}
   >
-    <div style={{ fontSize: "18px", fontWeight: "900", letterSpacing: "1px", marginBottom: '8px' }}>
+    <div style={{ fontSize: "16px", fontWeight: "900", marginBottom: '4px' }}>
       {skill.name}
     </div>
-    <div style={{ fontSize: "13px", opacity: 0.9, lineHeight: "1.3" }}>
+    <div style={{ fontSize: "12px", opacity: 0.8, lineHeight: "1.2", flex: 1 }}>
       {skill.desc}
     </div>
     {!unlocked && available && (
-      <div style={{ fontSize: "16px", fontWeight: "900", marginTop: "15px", color: canAfford ? "#44ff44" : "#ff4444" }}>
-        {skill.cost}G
+      <div style={{ display: 'flex', gap: '10px', marginTop: '10px', fontSize: '14px', fontWeight: '900' }}>
+        <span style={{ color: canAffordGrit ? "#2e7d32" : "#d32f2f" }}>{skill.gritCost}G</span>
+        <span style={{ color: canAffordSP ? "#1976d2" : "#d32f2f" }}>{skill.spCost}SP</span>
       </div>
     )}
-    {unlocked && <div style={{ position: "absolute", top: "10px", right: "15px", fontSize: "16px", fontWeight: 'bold' }}>✓</div>}
+    {unlocked && <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 'bold', color: '#44ff44' }}>UNLOCKED ✓</div>}
   </div>
 );
 
@@ -63,11 +62,32 @@ export const TrainingOverlay = () => {
     playerStats,
     unlockedSkills,
     purchaseSkill,
+    respecSkills,
     attributes,
     progression,
+    race,
+    setRace,
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
+
+  const [confirmRespec, setConfirmRespec] = useState(false);
+
+  const handleRespec = () => {
+    if (confirmRespec) {
+      respecSkills(250);
+      setConfirmRespec(false);
+    } else {
+      setConfirmRespec(true);
+    }
+  };
+
+  const skillPaths = [
+    { label: 'HANDLER', skills: SKILLS.filter(s => s.id.startsWith('STR')) },
+    { label: 'ATHLETE', skills: SKILLS.filter(s => s.id.startsWith('AGI')) },
+    { label: 'ANALYST', skills: SKILLS.filter(s => s.id.startsWith('FOC')) },
+    { label: 'WHISPERER', skills: SKILLS.filter(s => s.id.startsWith('BND')) },
+  ];
 
   return (
     <div style={{
@@ -76,7 +96,7 @@ export const TrainingOverlay = () => {
       left: 0,
       width: '100%',
       height: '100dvh',
-      background: '#f4f1ea', // Paper-like background
+      background: '#f4f1ea',
       zIndex: 100,
       display: 'flex',
       flexDirection: 'column',
@@ -85,7 +105,7 @@ export const TrainingOverlay = () => {
       pointerEvents: 'auto',
       overflow: 'hidden'
     }}>
-      {/* Sidebar Tabs (Right Edge) */}
+      {/* Sidebar Tabs */}
       <div style={{
         position: 'absolute',
         right: 0,
@@ -157,16 +177,33 @@ export const TrainingOverlay = () => {
             <span style={{ fontSize: '14px', opacity: 0.7 }}>GRIT CACHE:</span>
             <div style={{ fontSize: '28px', fontWeight: '900', color: '#2e7d32' }}>{playerStats.grit} G</div>
           </div>
+          <div>
+            <span style={{ fontSize: '14px', opacity: 0.7 }}>SKILL POINTS:</span>
+            <div style={{ fontSize: '28px', fontWeight: '900', color: '#1976d2' }}>{progression.skillPoints} SP</div>
+          </div>
           {activeTab === 'SKILLS' && (
-            <div>
-              <span style={{ fontSize: '14px', opacity: 0.7 }}>SKILL POINTS:</span>
-              <div style={{ fontSize: '28px', fontWeight: '900', color: '#d32f2f' }}>{progression.skillPoints} SP</div>
-            </div>
+            <button
+              onClick={handleRespec}
+              style={{
+                background: confirmRespec ? '#d32f2f' : '#2c3e50',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                alignSelf: 'flex-end',
+                marginBottom: '5px'
+              }}
+            >
+              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
+            </button>
           )}
         </div>
       </div>
 
-      {/* Scrollable Content Area */}
+      {/* Content Area */}
       <div style={{
         flex: 1,
         overflowY: 'auto',
@@ -178,6 +215,31 @@ export const TrainingOverlay = () => {
       }}>
         {activeTab === 'STATS' && (
           <>
+            {/* Race Selection */}
+            <div style={{ display: 'flex', gap: '20px' }}>
+              {['Human', 'Elf', 'Dwarf'].map((r) => (
+                <div
+                  key={r}
+                  onClick={() => setRace(r as any)}
+                  style={{
+                    flex: 1,
+                    padding: '15px',
+                    background: race === r ? '#2c3e50' : '#ffffff',
+                    color: race === r ? 'white' : '#2c3e50',
+                    border: '3px solid #2c3e50',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    fontWeight: '900',
+                    fontSize: '18px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {r.toUpperCase()}
+                </div>
+              ))}
+            </div>
+
             {/* XP & Rank */}
             <div style={{ background: 'rgba(0,0,0,0.05)', padding: '25px', borderRadius: '20px', border: '3px dashed #2c3e50' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -192,18 +254,18 @@ export const TrainingOverlay = () => {
             {/* Attributes */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
               {[
-                { label: 'STRENGTH', value: attributes.strength, color: '#d32f2f', desc: 'Strain threshold before leash snaps' },
-                { label: 'FOCUS', value: attributes.focus, color: '#1976d2', desc: 'Grit multiplier & Pan stability' },
-                { label: 'AGILITY', value: attributes.agility, color: '#388e3c', desc: 'Player movement speed' },
-                { label: 'BOND', value: attributes.bond, color: '#fbc02d', desc: 'Recall speed & Dog calmness' },
+                { label: 'STRENGTH', value: attributes.strength, color: '#d32f2f', desc: 'Strain threshold & Tug power' },
+                { label: 'AGILITY', value: attributes.agility, color: '#388e3c', desc: 'Player movement speed & Pan stability' },
+                { label: 'FOCUS', value: attributes.focus, color: '#1976d2', desc: 'Grit multiplier & Camera stabilization' },
+                { label: 'BOND', value: attributes.bond, color: '#fbc02d', desc: 'Recall speed & Canine calmness' },
               ].map((attr) => (
                 <div key={attr.label}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '20px', marginBottom: '8px', fontWeight: '900' }}>
                     <span>{attr.label}</span>
-                    <span>LVL {attr.value}</span>
+                    <span>LEVEL {attr.value}</span>
                   </div>
                   <div style={{ width: '100%', height: '24px', background: '#d1cdb0', borderRadius: '12px', border: '2px solid #2c3e50', overflow: 'hidden' }}>
-                    <div style={{ width: `${(attr.value / 10) * 100}%`, height: '100%', background: attr.color }} />
+                    <div style={{ width: `${Math.min(100, (attr.value / 10) * 100)}%`, height: '100%', background: attr.color }} />
                   </div>
                   <div style={{ fontSize: '14px', opacity: 0.7, marginTop: '6px' }}>{attr.desc}</div>
                 </div>
@@ -213,22 +275,29 @@ export const TrainingOverlay = () => {
         )}
 
         {activeTab === 'SKILLS' && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-            {SKILLS.map((skill) => {
-              const unlocked = unlockedSkills.includes(skill.id);
-              const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
-              const canAfford = playerStats.grit >= skill.cost;
-              return (
-                <SkillNode
-                  key={skill.id}
-                  skill={skill}
-                  unlocked={unlocked}
-                  available={available}
-                  canAfford={canAfford}
-                  onPurchase={() => purchaseSkill(skill.id, skill.cost)}
-                />
-              );
-            })}
+          <div style={{ display: 'flex', gap: '20px', height: '100%' }}>
+            {skillPaths.map((path) => (
+              <div key={path.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', fontWeight: '900', textAlign: 'center', borderBottom: '2px solid #2c3e50' }}>{path.label}</h3>
+                {path.skills.map((skill) => {
+                  const unlocked = unlockedSkills.includes(skill.id);
+                  const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
+                  const canAffordGrit = playerStats.grit >= skill.gritCost;
+                  const canAffordSP = progression.skillPoints >= skill.spCost;
+                  return (
+                    <SkillNode
+                      key={skill.id}
+                      skill={skill}
+                      unlocked={unlocked}
+                      available={available}
+                      canAffordGrit={canAffordGrit}
+                      canAffordSP={canAffordSP}
+                      onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         )}
 
@@ -236,8 +305,8 @@ export const TrainingOverlay = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
             {[
               { cmd: "🐾 GO", desc: 'Click the "🐾" paw or look ahead to start walking. Buster follows your gaze.' },
-              { cmd: "🪢 TUG", desc: "When Buster stops or pulls, click the paw to gently reel him in (0.35m recall)." },
-              { cmd: "🐕 COME", desc: "A focused recall. Brings Buster back to your side at high speed. (Unlocks via Skills)" },
+              { cmd: "🪢 TUG", desc: "When Buster stops or pulls, click the paw to gently reel him in. Enhanced by STRENGTH." },
+              { cmd: "🐕 COME", desc: "A focused recall. Brings Buster back to your side at high speed. Enhanced by BOND." },
               { cmd: "🛑 SIT", desc: "Command Buster to sit and wait. Useful for managing tension or taking a break." },
               { cmd: "🏠 RETURN", desc: "End the walk early from the HUD to bank your current Grit and XP." },
             ].map((item) => (
@@ -247,7 +316,7 @@ export const TrainingOverlay = () => {
               </div>
             ))}
             <div style={{ marginTop: '20px', fontSize: '16px', fontStyle: 'italic', opacity: 0.6, textAlign: 'center' }}>
-              * Commands are more effective as BOND and WALKER RANK increase.
+              * Commands are more effective as attributes and skill augments increase.
             </div>
           </div>
         )}
