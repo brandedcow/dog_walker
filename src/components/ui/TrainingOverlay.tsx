@@ -275,27 +275,32 @@ export const TrainingOverlay = () => {
         )}
 
         {activeTab === 'SKILLS' && (
-          <div style={{ display: 'flex', gap: '20px', height: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
             {skillPaths.map((path) => (
-              <div key={path.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', fontWeight: '900', textAlign: 'center', borderBottom: '2px solid #2c3e50' }}>{path.label}</h3>
-                {path.skills.map((skill) => {
-                  const unlocked = unlockedSkills.includes(skill.id);
-                  const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
-                  const canAffordGrit = playerStats.grit >= skill.gritCost;
-                  const canAffordSP = progression.skillPoints >= skill.spCost;
-                  return (
-                    <SkillNode
-                      key={skill.id}
-                      skill={skill}
-                      unlocked={unlocked}
-                      available={available}
-                      canAffordGrit={canAffordGrit}
-                      canAffordSP={canAffordSP}
-                      onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
-                    />
-                  );
-                })}
+              <div key={path.label} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '5px' }}>
+                  {path.label} Specialization
+                </h3>
+                <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px', WebkitOverflowScrolling: 'touch' }}>
+                  {path.skills.map((skill) => {
+                    const unlocked = unlockedSkills.includes(skill.id);
+                    const available = !skill.dependsOn || unlockedSkills.includes(skill.dependsOn);
+                    const canAffordGrit = playerStats.grit >= skill.gritCost;
+                    const canAffordSP = progression.skillPoints >= skill.spCost;
+                    return (
+                      <div key={skill.id} style={{ flex: '0 0 280px' }}>
+                        <SkillNode
+                          skill={skill}
+                          unlocked={unlocked}
+                          available={available}
+                          canAffordGrit={canAffordGrit}
+                          canAffordSP={canAffordSP}
+                          onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>

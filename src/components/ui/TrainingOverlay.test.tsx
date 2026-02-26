@@ -32,8 +32,8 @@ describe('TrainingOverlay Component', () => {
     const skillsTab = screen.getByText('SKILLS');
     fireEvent.click(skillsTab);
     
-    expect(screen.getByText('HANDLER')).toBeInTheDocument();
-    expect(screen.getByText('ATHLETE')).toBeInTheDocument();
+    expect(screen.getByText(/HANDLER/i)).toBeInTheDocument();
+    expect(screen.getByText(/ATHLETE/i)).toBeInTheDocument();
   });
 
   it('calls setMenuState(IDLE) when close button is clicked', () => {
