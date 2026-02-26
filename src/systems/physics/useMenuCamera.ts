@@ -1,5 +1,6 @@
+import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3 } from 'three';
+import { Vector3, Quaternion } from 'three';
 import { useGameStore } from '../../store/useGameStore';
 import { CAMERA_TARGETS } from '../../config/constants';
 
@@ -7,27 +8,37 @@ export const useMenuCamera = () => {
   const { camera } = useThree();
   const menuState = useGameStore((state) => state.menuState);
 
-  const targetPos = new Vector3();
-  const targetLookAt = new Vector3();
+  const targetPos = useRef(new Vector3());
+  const targetLookAt = useRef(new Vector3());
+  const targetQuaternion = useRef(new Quaternion());
 
   useFrame((_, delta) => {
     if (menuState === 'IDLE') return;
     
     const config = CAMERA_TARGETS[menuState] || CAMERA_TARGETS.IDLE;
-    
-    targetPos.set(config.pos[0], config.pos[1], config.pos[2]);
-    targetLookAt.set(config.lookAt[0], config.lookAt[1], config.lookAt[2]);
+    targetPos.current.set(config.pos[0], config.pos[1], config.pos[2]);
+    targetLookAt.current.set(config.lookAt[0], config.lookAt[1], config.lookAt[2]);
 
-    // 1. Interpolate Position
-    camera.position.lerp(targetPos, delta * 5);
+    // 1. Position Interpolation with Threshold
+    const dist = camera.position.distanceTo(targetPos.current);
+    if (dist > 0.001) {
+      camera.position.lerp(targetPos.current, delta * 6);
+    } else {
+      camera.position.copy(targetPos.current);
+    }
 
-    // 2. Interpolate Rotation (LookAt)
+    // 2. Rotation Interpolation with Threshold
+    // Calculate target quaternion by temporarily looking at target
     const oldQuaternion = camera.quaternion.clone();
-    camera.lookAt(targetLookAt);
-    const targetQuaternion = camera.quaternion.clone();
-    
-    // Restore and lerp
+    camera.lookAt(targetLookAt.current);
+    targetQuaternion.current.copy(camera.quaternion);
     camera.quaternion.copy(oldQuaternion);
-    camera.quaternion.slerp(targetQuaternion, delta * 5);
+
+    const angleDist = camera.quaternion.angleTo(targetQuaternion.current);
+    if (angleDist > 0.001) {
+      camera.quaternion.slerp(targetQuaternion.current, delta * 6);
+    } else {
+      camera.quaternion.copy(targetQuaternion.current);
+    }
   });
 };

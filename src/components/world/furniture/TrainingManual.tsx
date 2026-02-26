@@ -4,6 +4,7 @@ import { Vector3, MathUtils } from 'three';
 import { Box, Html, Billboard, Text } from '@react-three/drei';
 import { useGameStore } from '../../../store/useGameStore';
 import { SKILLS, type Skill } from '../../../config/skills';
+import { CAMERA_TARGETS } from '../../../config/constants';
 
 const SkillNode = ({ skill, unlocked, available, canAfford, onPurchase }: { 
   skill: Skill, unlocked: boolean, available: boolean, canAfford: boolean, onPurchase: () => void 
@@ -36,6 +37,7 @@ export const TrainingManual = ({ position }: { position: [number, number, number
   const { menuState, setMenuState, playerStats, unlockedSkills, purchaseSkill } = useGameStore();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [uiVisible, setUiVisible] = useState(false);
   const { camera } = useThree();
   const groupRef = useRef<any>(null);
   const coverRef = useRef<any>(null);
@@ -58,6 +60,18 @@ export const TrainingManual = ({ position }: { position: [number, number, number
     if (coverRef.current) {
       const targetRotation = isOpen ? -Math.PI * 0.9 : 0;
       coverRef.current.rotation.z = MathUtils.lerp(coverRef.current.rotation.z, targetRotation, delta * 10);
+    }
+
+    // Synchronize UI visibility with camera and cover animation
+    const target = CAMERA_TARGETS.TRAINING;
+    const targetPos = new Vector3(target.pos[0], target.pos[1], target.pos[2]);
+    const isCameraClose = camera.position.distanceTo(targetPos) < 0.1;
+    const isCoverOpen = coverRef.current && coverRef.current.rotation.z < -Math.PI * 0.8;
+
+    if (isOpen && isCameraClose && isCoverOpen) {
+      if (!uiVisible) setUiVisible(true);
+    } else if (!isOpen) {
+      if (uiVisible) setUiVisible(false);
     }
   });
 
@@ -139,34 +153,34 @@ export const TrainingManual = ({ position }: { position: [number, number, number
         </Billboard>
       )}
 
-      {isOpen && (
+      {uiVisible && (
         <Html
-          position={[0, 0.06, 0]}
+          position={[0, 0.051, 0]}
           rotation={[-Math.PI / 2, 0, 0]}
           transform
           occlude
-          distanceFactor={0.75}
+          scale={0.001}
         >
           <div style={{
-            width: '500px',
-            height: '700px',
+            width: '480px',
+            height: '680px',
             background: '#fff',
             backgroundImage: `
               linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
               linear-gradient(#eee .1em, transparent .1em)
             `,
             backgroundSize: '100% 1.2em',
-            border: '2px solid #ddd',
-            borderRadius: '5px',
-            padding: '30px 30px 30px 100px',
+            border: 'none',
+            padding: '40px 20px 20px 100px',
             color: '#2c3e50',
             fontFamily: '"Courier New", Courier, monospace',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            boxShadow: 'none',
             pointerEvents: 'auto',
             userSelect: 'none',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            boxSizing: 'border-box'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '20px', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>
               <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900' }}>FIELD NOTES</h1>
