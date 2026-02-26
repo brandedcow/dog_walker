@@ -80,17 +80,15 @@ Player attributes dynamically modify physical gameplay values:
     - **Corner (North-West):** 2.4m Standing Lamp with open shade and visible internal bulb.
 - **Cinematic Transitions:** Camera smoothly lerps to a top-down perpendicular view when selecting the Training Manual. The manual cover physically opens to reveal the UI once the camera arrives.
 
-### 4.2 Tabbed Progression System (Field Notes)
-The Training Manual features three distinct functional tabs:
+### 4.2 Tabbed Progression System (Training Overlay)
+The Training Manual is implemented as a full-screen 2D React overlay (`TrainingOverlay.tsx`) for maximum legibility on mobile devices.
+- **Coordination:** The overlay only renders after the 3D camera transition completes, signaled by the `isMenuReady` state in the `useGameStore`.
 - **DASHBOARD (Stats):** Tracks the player's numerical growth.
-    - **Walker Rank & XP:** Meter-to-XP conversion (10 XP/m) with level-ups granting Skill Points (SP).
-    - **Attributes:** Strength (Strain threshold), Focus (Grit multiplier/Stability), Agility (Move speed), and Bond (Recall speed).
 - **FIELD NOTES (Skills):** A branching progression tree.
-    - **Dual Currency:** Requires both Grit (banked from walks) and Skill Points (earned from Walker Rank).
-- **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics (GO, TUG, COME, SIT, RETURN).
+- **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics.
 
 ### 4.3 HUD & Metadata
-- **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success) are extracted into standalone components.
+- **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success, Training) are extracted into standalone components.
 - **Responsive Logic:** Uses `useHUDLayout` hook for centralized window resizing, scale calculation, and CSS safe-area management.
 - **UI Library (BarkOS):** A foundation for reusable primitives (containers, buttons) is established in `src/components/ui/barkos/` to ensure visual consistency.
 - **Lighting Model:** Hub lighting dynamically matches system time. Hub interactables (Lamps) are individually toggleable.
@@ -112,7 +110,8 @@ The Training Manual features three distinct functional tabs:
 
 - **Performance:** 60fps physics via `useRef` and `InstancedMesh` optimization.
 - **State Management:** Decoupled HUD and 3D scenes via Zustand `useGameStore`.
+- **Camera-UI Coordination:** Implemented a `isMenuReady` handshake between the `useMenuCamera` physics loop and the React HUD to prevent UI "pop-in" before cinematic transitions finish.
 - **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
-- **UI Mapping:** The Field Notes UI uses a dynamic `distanceFactor` and transparent HTML overlays to achieve a sharp, legible mapping with the physical 3D notebook page across different screen resolutions.
+- **UI Mapping:** The Field Notes UI uses a full-screen overlay for accessibility, replacing the previous 3D-mapped HTML to ensure perfect legibility across all phone display ratios.
 - **Camera Stability & Framing:** Implemented micro-offsets, locking thresholds, and aspect-ratio aware dynamic zoom in `useMenuCamera` to ensure 3D menus (like the Training Manual) remain perfectly framed on both mobile portrait and desktop landscape viewports.
 - **Global HUD Controls:** High-priority menu interactions (like the "X" Close button) are promoted from 3D space to the global React HUD to ensure accessibility and consistent positioning across all devices.
