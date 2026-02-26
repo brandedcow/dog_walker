@@ -25,17 +25,17 @@ const SkillNode = ({
       if (available && !unlocked && canAfford) onPurchase();
     }}
     style={{
-      width: "120px",
-      height: "120px",
+      width: "160px",
+      height: "160px",
       background: unlocked ? "#44ff44" : available ? "#4b5320" : "#0a0a0a",
-      border: `3px solid ${unlocked ? "#fff" : available ? (canAfford ? "#44ff44" : "#ff4444") : "#222"}`,
-      borderRadius: "20px",
+      border: `4px solid ${unlocked ? "#fff" : available ? (canAfford ? "#44ff44" : "#ff4444") : "#222"}`,
+      borderRadius: "25px",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
-      padding: "15px",
+      padding: "20px",
       cursor: available && !unlocked && canAfford ? "pointer" : "default",
       transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       opacity: available ? 1 : 0.3,
@@ -47,14 +47,14 @@ const SkillNode = ({
         available && !unlocked && canAfford ? "scale(1)" : "scale(0.95)",
     }}
   >
-    <div style={{ fontSize: "12px", fontWeight: "900", letterSpacing: "1px" }}>
+    <div style={{ fontSize: "16px", fontWeight: "900", letterSpacing: "1px" }}>
       {skill.name}
     </div>
     <div
       style={{
-        fontSize: "9px",
+        fontSize: "12px",
         opacity: 0.8,
-        marginTop: "8px",
+        marginTop: "10px",
         lineHeight: "1.2",
       }}
     >
@@ -63,9 +63,9 @@ const SkillNode = ({
     {!unlocked && available && (
       <div
         style={{
-          fontSize: "11px",
+          fontSize: "14px",
           fontWeight: "900",
-          marginTop: "10px",
+          marginTop: "12px",
           color: canAfford ? "#44ff44" : "#ff4444",
         }}
       >
@@ -115,7 +115,7 @@ export const TrainingManual = ({
   // Dynamic scaling based on screen width/height to keep UI sharp
   const aspect = size.width / size.height;
   const isPortrait = aspect < 1.0;
-  const dynamicDistanceFactor = isPortrait ? 0.35 : 0.42;
+  const dynamicDistanceFactor = isPortrait ? 0.32 : 0.38;
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -327,13 +327,13 @@ export const TrainingManual = ({
         >
           <div
             style={{
-              width: "600px",
-              height: isPortrait ? "800px" : "850px",
+              width: "850px",
+              height: isPortrait ? "1050px" : "1150px",
               background: "transparent",
               border: "none",
               padding: isPortrait
-                ? "30px 20px 20px 80px"
-                : "40px 30px 20px 95px",
+                ? "40px 30px 30px 105px"
+                : "55px 45px 30px 130px",
               color: "#2c3e50",
               fontFamily: '"Courier New", Courier, monospace',
               display: "flex",
@@ -364,18 +364,18 @@ export const TrainingManual = ({
                     setActiveTab(tab as any);
                   }}
                   style={{
-                    width: "45px",
-                    height: "90px",
+                    width: "60px",
+                    height: "110px",
                     background: activeTab === tab ? "#ffffff" : "#d1cdb0",
                     border: "1px solid #bcba9a",
                     borderLeft: "1px solid rgba(0,0,0,0.1)",
-                    borderRadius: "0 12px 12px 0",
+                    borderRadius: "0 15px 15px 0",
                     writingMode: "vertical-rl",
                     textOrientation: "mixed",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "11px",
+                    fontSize: "14px",
                     fontWeight: "900",
                     cursor: "pointer",
                     boxShadow:
@@ -384,7 +384,7 @@ export const TrainingManual = ({
                         : "2px 1px 4px rgba(0,0,0,0.08)",
                     color: activeTab === tab ? "#2c3e50" : "#6e6c56",
                     transition: "all 0.2s",
-                    paddingLeft: "2px",
+                    paddingLeft: "3px",
                   }}
                 >
                   {tab}
@@ -396,15 +396,15 @@ export const TrainingManual = ({
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "5px",
-                marginBottom: "25px",
-                borderBottom: "2px solid #2c3e50",
-                paddingBottom: "10px",
+                gap: "8px",
+                marginBottom: "35px",
+                borderBottom: "3px solid #2c3e50",
+                paddingBottom: "15px",
                 position: "relative",
                 marginRight: "10px",
               }}
             >
-              <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "900" }}>
+              <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "900" }}>
                 {activeTab === "STATS"
                   ? "DASHBOARD"
                   : activeTab === "SKILLS"
@@ -419,14 +419,14 @@ export const TrainingManual = ({
                 }}
               >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
                 >
-                  <div style={{ fontSize: "10px", opacity: 0.7 }}>
+                  <div style={{ fontSize: "14px", opacity: 0.7 }}>
                     GRIT CACHE:
                   </div>
                   <div
                     style={{
-                      fontSize: "18px",
+                      fontSize: "24px",
                       fontWeight: "bold",
                       color: "#2e7d32",
                     }}
@@ -439,15 +439,15 @@ export const TrainingManual = ({
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "10px",
+                      gap: "12px",
                     }}
                   >
-                    <div style={{ fontSize: "10px", opacity: 0.7 }}>
+                    <div style={{ fontSize: "14px", opacity: 0.7 }}>
                       SKILL POINTS:
                     </div>
                     <div
                       style={{
-                        fontSize: "18px",
+                        fontSize: "24px",
                         fontWeight: "bold",
                         color: "#d32f2f",
                       }}
@@ -472,31 +472,31 @@ export const TrainingManual = ({
                 <div
                   style={{
                     background: "rgba(0,0,0,0.03)",
-                    padding: "15px",
-                    borderRadius: "10px",
-                    border: "1px dashed #2c3e50",
+                    padding: "20px",
+                    borderRadius: "15px",
+                    border: "2px dashed #2c3e50",
                   }}
                 >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      marginBottom: "5px",
+                      marginBottom: "8px",
                     }}
                   >
-                    <span style={{ fontWeight: "900", fontSize: "14px" }}>
+                    <span style={{ fontWeight: "900", fontSize: "18px" }}>
                       WALKER RANK {progression.walkerRank}
                     </span>
-                    <span style={{ fontSize: "12px" }}>
+                    <span style={{ fontSize: "14px" }}>
                       {progression.xp % 1000}/1000 XP
                     </span>
                   </div>
                   <div
                     style={{
                       width: "100%",
-                      height: "8px",
+                      height: "12px",
                       background: "#e0e0e0",
-                      borderRadius: "4px",
+                      borderRadius: "6px",
                       overflow: "hidden",
                     }}
                   >
@@ -515,7 +515,7 @@ export const TrainingManual = ({
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "15px",
+                    gap: "20px",
                   }}
                 >
                   {[
@@ -549,8 +549,8 @@ export const TrainingManual = ({
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
-                          fontSize: "12px",
-                          marginBottom: "3px",
+                          fontSize: "16px",
+                          marginBottom: "5px",
                         }}
                       >
                         <span style={{ fontWeight: "900" }}>{attr.label}</span>
@@ -561,10 +561,10 @@ export const TrainingManual = ({
                       <div
                         style={{
                           width: "100%",
-                          height: "12px",
+                          height: "16px",
                           background: "#e0e0e0",
-                          borderRadius: "2px",
-                          border: "1px solid #2c3e50",
+                          borderRadius: "4px",
+                          border: "1.5px solid #2c3e50",
                           position: "relative",
                         }}
                       >
@@ -578,9 +578,9 @@ export const TrainingManual = ({
                       </div>
                       <div
                         style={{
-                          fontSize: "9px",
+                          fontSize: "12px",
                           opacity: 0.6,
-                          marginTop: "2px",
+                          marginTop: "4px",
                         }}
                       >
                         {attr.desc}
@@ -624,7 +624,7 @@ export const TrainingManual = ({
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "20px",
+                  gap: "25px",
                   flex: 1,
                 }}
               >
@@ -653,23 +653,23 @@ export const TrainingManual = ({
                   <div
                     key={item.cmd}
                     style={{
-                      borderBottom: "1px solid rgba(0,0,0,0.1)",
-                      paddingBottom: "10px",
+                      borderBottom: "2px solid rgba(0,0,0,0.1)",
+                      paddingBottom: "15px",
                     }}
                   >
                     <div
                       style={{
                         fontWeight: "900",
-                        fontSize: "16px",
+                        fontSize: "22px",
                         color: "#2c3e50",
-                        marginBottom: "5px",
+                        marginBottom: "8px",
                       }}
                     >
                       {item.cmd}
                     </div>
                     <div
                       style={{
-                        fontSize: "12px",
+                        fontSize: "16px",
                         opacity: 0.8,
                         lineHeight: "1.4",
                       }}
@@ -681,7 +681,7 @@ export const TrainingManual = ({
                 <div
                   style={{
                     marginTop: "auto",
-                    fontSize: "10px",
+                    fontSize: "14px",
                     fontStyle: "italic",
                     opacity: 0.5,
                     textAlign: "center",
