@@ -287,10 +287,11 @@ export const TrainingOverlay = () => {
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 70px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         {activeTab === 'PROFILE' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
-            {/* Overview Section */}
             <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
               <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>OVERVIEW</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              
+              {/* Metadata Sub-section */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '25px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
                   <span style={{ fontWeight: '900', color: '#6e6c56' }}>RACE</span>
                   <span style={{ fontWeight: '900' }}>{race}</span>
@@ -299,7 +300,7 @@ export const TrainingOverlay = () => {
                   <span style={{ fontWeight: '900', color: '#6e6c56' }}>TOTAL LEVEL</span>
                   <span style={{ fontWeight: '900', color: '#1976d2' }}>{totalLevel}</span>
                 </div>
-                <div style={{ marginTop: '10px' }}>
+                <div style={{ marginTop: '5px' }}>
                   <span style={{ fontWeight: '900', color: '#6e6c56', fontSize: '12px', display: 'block', marginBottom: '8px' }}>RESONANCE AFFINITY</span>
                   <div style={{ display: 'flex', gap: '15px' }}>
                     <div style={{ flex: 1, background: '#2c3e50', color: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
@@ -313,11 +314,9 @@ export const TrainingOverlay = () => {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Traits Section */}
-            <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>TRAITS</h2>
+              {/* Traits Sub-section */}
+              <h3 style={{ margin: '20px 0 15px 0', fontSize: '14px', fontWeight: '900', color: '#2c3e50', letterSpacing: '1px', borderTop: '1px solid #eee', paddingTop: '15px' }}>TRAIT BREAKDOWN</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {resonancePaths.map(path => {
                   const base = (RESONANCE_STATS[resonanceType] as any)[path.traitKey];
