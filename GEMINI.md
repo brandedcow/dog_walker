@@ -136,9 +136,10 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
     - **Unit (Logic):** `useGameStore` (Grit/XP/Skills), `useLeash` (Verlet/Tension), `useDogAI` (State/Recall).
     - **Unit (Audio):** `useAudioEngine.test.ts` (Listener registration and state-driven triggers).
     - **Persistence:** `persistence.test.ts` verifies correct serialization/deserialization and exclusion of transient data.
-    - **Unit (UI):** `HUD`, `TrainingOverlay`, `PawControls` (State-driven rendering & interaction).
+    - **Unit (UI):** `HUD`, `TrainingOverlay`, `MenuOverlays`, `PawControls` (State-driven rendering & interaction).
     - **Integration:** "Golden Path" verifying the full Home -> Walk -> Reward -> Skill loop.
     - **Environment Safety:** Mocks for WebGL, ResizeObserver, and PointerEvents ensure consistent results across CI environments.
+- **Coverage Standards:** The project maintains a high-quality gate with >80% line coverage across core systems (Physics, AI, Store, and UI).
 - **Camera-UI Coordination:** Implemented a `isMenuReady` handshake between the `useMenuCamera` physics loop and the React HUD to prevent UI "pop-in" before cinematic transitions finish.
 - **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
 - **UI Mapping:** The Field Notes UI uses a full-screen overlay for accessibility, replacing the previous 3D-mapped HTML to ensure perfect legibility across all phone display ratios.
