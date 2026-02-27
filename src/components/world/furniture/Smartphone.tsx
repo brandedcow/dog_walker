@@ -38,14 +38,17 @@ export const Smartphone = ({ position }: { position: [number, number, number] })
         setMenuState(isOpen ? MenuState.IDLE : MenuState.KENNEL);
       }}
     >
-      {/* Smartphone Body (Slightly tilted up for visibility) */}
+      {/* Invisible larger hit area for easier interaction on mobile */}
+      <Box args={[0.3, 0.1, 0.4]} position={[0, 0.05, 0]} visible={false} />
+
+      {/* Smartphone Body (Slightly tilted up for visibility) - Scaled up 1.5x from original */}
       <group rotation={[0.1, 0, 0]}>
         {/* Case */}
-        <Box args={[0.08, 0.01, 0.16]} position={[0, 0.005, 0]} castShadow receiveShadow>
+        <Box args={[0.12, 0.015, 0.24]} position={[0, 0.0075, 0]} castShadow receiveShadow>
           <meshStandardMaterial color="#222" roughness={0.3} metalness={0.8} />
         </Box>
         {/* Screen */}
-        <Box args={[0.072, 0.002, 0.152]} position={[0, 0.011, 0]}>
+        <Box args={[0.11, 0.002, 0.23]} position={[0, 0.016, 0]}>
           <meshStandardMaterial 
             color={isOpen ? "#44ff44" : "#111"} 
             emissive={isOpen ? "#44ff44" : "#00ccff"} 
