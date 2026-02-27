@@ -235,7 +235,6 @@ export const TrainingOverlay = () => {
     { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
-  // Calculate total level
   const totalLevel = Math.floor(Object.values(rawTraits).reduce((a, b) => a + b, 0));
 
   return (
@@ -268,7 +267,7 @@ export const TrainingOverlay = () => {
         ))}
       </div>
 
-      {/* Header */}
+      {/* Header - Only houses the title */}
       <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
@@ -286,6 +285,18 @@ export const TrainingOverlay = () => {
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 70px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         {activeTab === 'PROFILE' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
+            {/* Resources (Moved to Profile tab content) */}
+            <div style={{ display: 'flex', gap: '20px', background: 'white', padding: '20px', borderRadius: '15px', border: '2px solid #2c3e50' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>GRIT CACHE</div>
+                <div style={{ fontSize: '24px', fontWeight: '900', color: '#2e7d32' }}>{playerStats?.grit || 0} G</div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
+                <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
+              </div>
+            </div>
+
             {/* Overview Section */}
             <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
               <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>OVERVIEW</h2>
