@@ -21,6 +21,31 @@ export const useAudioEngine = () => {
     tension, dogState, gameState, menuState, sessionGrit 
   } = useGameStore();
 
+  const playSound = (id: string, volume: number = 0.5) => {
+    const buffer = buffers.current[id];
+    if (!buffer || !listener.current) return;
+
+    const sound = new THREE.Audio(listener.current);
+    sound.setBuffer(buffer);
+    sound.setVolume(volume);
+    sound.play();
+  };
+
+  const fade = (audio: THREE.Audio | null, targetVol: number, delta: number) => {
+    if (!audio) return;
+    if (targetVol > 0 && !audio.isPlaying) audio.play();
+    
+    const currentVol = audio.getVolume();
+    if (Math.abs(currentVol - targetVol) < 0.01) {
+      audio.setVolume(targetVol);
+      if (targetVol === 0 && audio.isPlaying) audio.stop();
+      return;
+    }
+    
+    const nextVol = THREE.MathUtils.lerp(currentVol, targetVol, delta * 2);
+    audio.setVolume(nextVol);
+  };
+
   // 1. Initialize Listener and Load Assets
   useEffect(() => {
     listener.current = new THREE.AudioListener();
@@ -133,31 +158,6 @@ export const useAudioEngine = () => {
       fade(roadAmbience.current, 0, delta);
     }
   });
-
-  const playSound = (id: string, volume: number = 0.5) => {
-    const buffer = buffers.current[id];
-    if (!buffer || !listener.current) return;
-
-    const sound = new THREE.Audio(listener.current);
-    sound.setBuffer(buffer);
-    sound.setVolume(volume);
-    sound.play();
-  };
-
-  const fade = (audio: THREE.Audio | null, targetVol: number, delta: number) => {
-    if (!audio) return;
-    if (targetVol > 0 && !audio.isPlaying) audio.play();
-    
-    const currentVol = audio.getVolume();
-    if (Math.abs(currentVol - targetVol) < 0.01) {
-      audio.setVolume(targetVol);
-      if (targetVol === 0 && audio.isPlaying) audio.stop();
-      return;
-    }
-    
-    const nextVol = THREE.MathUtils.lerp(currentVol, targetVol, delta * 2);
-    audio.setVolume(nextVol);
-  };
 
   return { playSound };
 };

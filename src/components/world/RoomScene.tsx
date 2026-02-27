@@ -23,7 +23,7 @@ import { Chair } from './furniture/Chair';
 import { StandingLamp } from './furniture/StandingLamp';
 import { Closet } from './furniture/Closet';
 import { Bed } from './furniture/Bed';
-import { Laptop } from './furniture/Laptop';
+import { Smartphone } from './furniture/Smartphone';
 import { Calendar } from './furniture/Calendar';
 import { TrainingManual } from './furniture/TrainingManual';
 import { DeskLamp } from './furniture/DeskLamp';
@@ -186,7 +186,7 @@ export const RoomScene = () => {
       <group position={[-2, 0, -3.0]}>
         <Desk position={[0, 0, 0]} />
         <Chair position={[0, 0, 1.3]} />
-        <Laptop position={[-0.6, 1.0, 0]} />
+        <Smartphone position={[-0.6, 1.0, 0]} />
         <TrainingManual position={[0.6, 1.0, 0]} />
         
         {/* New Desk Lamp to the top-right corner of the desk surface */}

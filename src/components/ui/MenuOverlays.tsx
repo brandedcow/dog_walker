@@ -26,17 +26,92 @@ const OverlayContainer = ({ title, children, onBack }: { title: string, children
 export const KennelOverlay = () => {
   const { dogMetadata, dogStats, setMenuState } = useGameStore();
   return (
-    <OverlayContainer title="THE KENNEL" onBack={() => setMenuState(MenuState.IDLE)}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '10px' }}>
-          <h3 style={{ margin: '0 0 10px 0' }}>{dogMetadata.name}</h3>
-          <p style={{ margin: '5px 0', fontSize: '14px', opacity: 0.8 }}>Training Level: {dogMetadata.trainingLevel}</p>
-          <p style={{ margin: '5px 0', fontSize: '14px', opacity: 0.8 }}>Characteristic: {dogMetadata.characteristic}</p>
-          <p style={{ margin: '5px 0', fontSize: '14px', opacity: 0.8 }}>Trust: {dogStats.trust} 🐾</p>
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+      width: '320px', height: '580px', background: '#111', border: '8px solid #333',
+      borderRadius: '40px', padding: '20px', pointerEvents: 'auto', color: 'white',
+      display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 0 50px rgba(0,0,0,0.8)',
+      overflow: 'hidden', borderBottomWidth: '15px'
+    }}>
+      {/* Smartphone Status Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', opacity: 0.6, padding: '0 10px' }}>
+        <span>9:41</span>
+        <div style={{ display: 'flex', gap: '5px' }}>
+          <span>📶</span>
+          <span>🔋</span>
         </div>
-        <p style={{ fontSize: '12px', textAlign: 'center', opacity: 0.5 }}>More dogs coming soon...</p>
       </div>
-    </OverlayContainer>
+
+      <h2 style={{ margin: '10px 0 0 0', textAlign: 'center', color: '#44ff44', fontSize: '18px', letterSpacing: '1px' }}>THE KENNEL</h2>
+      
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div style={{ 
+          background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px',
+          border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '10px' }}>🐕</div>
+          <h3 style={{ margin: '0 0 5px 0', fontSize: '20px' }}>{dogMetadata.name}</h3>
+          <div style={{ fontSize: '12px', color: '#44ff44', fontWeight: 'bold', marginBottom: '15px' }}>
+            LVL {dogStats.trainingLevel} {dogMetadata.trainingLevel}
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', textAlign: 'left' }}>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '10px', opacity: 0.5 }}>SIZE</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.size}</div>
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '10px', opacity: 0.5 }}>MOOD</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.mood}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '20px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>TRAITS</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span>Trust</span>
+              <span style={{ color: '#ffcc00' }}>{dogStats.trust} 🐾</span>
+            </div>
+            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+              <div style={{ width: `${Math.min(100, (dogStats.trust / 100) * 100)}%`, height: '100%', background: '#ffcc00' }} />
+            </div>
+            
+            <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.7, fontStyle: 'italic' }}>
+              "{dogMetadata.characteristic}"
+            </p>
+          </div>
+        </div>
+
+        <button 
+          style={{ 
+            marginTop: 'auto', padding: '15px', background: '#333', color: 'white',
+            border: 'none', borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer',
+            opacity: 0.5
+          }}
+          disabled
+        >
+          CHANGE DOG (SOON)
+        </button>
+      </div>
+
+      <button 
+        onClick={() => setMenuState(MenuState.IDLE)}
+        style={{ 
+          padding: '12px', background: 'white', color: 'black', border: 'none', 
+          borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px'
+        }}
+      >
+        CLOSE APP
+      </button>
+
+      {/* Home Indicator */}
+      <div style={{ 
+        width: '100px', height: '4px', background: 'rgba(255,255,255,0.2)', 
+        borderRadius: '2px', margin: '10px auto 0 auto' 
+      }} />
+    </div>
   );
 };
 

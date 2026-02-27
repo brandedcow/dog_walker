@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore, getResonanceFilter, RESONANCE_ORDER } from '../../store/useGameStore';
 import { SKILLS, type Skill } from '../../config/skills';
-import { MenuState, ResonanceType, RESONANCE_STATS } from '../../types';
+import { MenuState, ResonanceType, RESONANCE_STATS, type ResonanceTraits } from '../../types';
 
 const SkillNode = ({
   skill,
@@ -95,7 +95,7 @@ const HexagramVisualizer = ({
 }: { 
   currentResonance: ResonanceType, 
   secondaryFocus: ResonanceType | null,
-  rawTraits: any,
+  rawTraits: ResonanceTraits,
   affinityXP: Record<ResonanceType, number>,
   onResonanceSelect: (type: ResonanceType) => void,
   canSwitch: boolean
@@ -108,8 +108,8 @@ const HexagramVisualizer = ({
 
   const points = RESONANCE_ORDER.map((type, i) => {
     const angle = (i * 60 - 90) * (Math.PI / 180);
-    const traitKey = TRAIT_MAP[type] || 'strength';
-    const traitVal = (rawTraits as any)[traitKey] || 1;
+    const traitKey = TRAIT_MAP[type] as keyof ResonanceTraits;
+    const traitVal = (rawTraits as ResonanceTraits)[traitKey] || 1;
     const dynamicRadius = (traitVal / maxTraitVal) * maxRadius;
     
     return {
@@ -216,6 +216,7 @@ export const TrainingOverlay = () => {
     race = 'Human',
     unlockedSkills = ['FOUNDATION'],
     purchaseSkill,
+    playerStats = { strength: 1, grit: 0 },
     traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     rawTraits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     progression = { walkerRank: 1, xp: 0, skillPoints: 0 },
@@ -323,8 +324,8 @@ export const TrainingOverlay = () => {
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {resonancePaths.map(path => {
-                  const base = (RESONANCE_STATS[resonanceType] as any)[path.traitKey];
-                  const raw = (rawTraits as any)[path.traitKey] || 0;
+                  const base = (RESONANCE_STATS[resonanceType])[path.traitKey as keyof ResonanceTraits];
+                  const raw = (rawTraits)[path.traitKey as keyof ResonanceTraits] || 0;
                   const bonus = Math.max(0, raw - base);
                   const isSelected = selectedTrait === path.label;
                   
@@ -429,8 +430,8 @@ export const TrainingOverlay = () => {
                   <tbody>
                     {resonancePaths.map((path) => {
                       const filter = getResonanceFilter(resonanceType, path.type);
-                      const raw = (rawTraits as any)[path.traitKey] || 0;
-                      const output = (traits as any)[path.traitKey] || 0;
+                      const raw = (rawTraits)[path.traitKey as keyof ResonanceTraits] || 0;
+                      const output = (traits)[path.traitKey as keyof ResonanceTraits] || 0;
                       const mastery = ((affinityXP?.[path.type] || 0) % 1000) / 10;
                       
                       const color = filter === 1 ? '#2e7d32' : filter >= 0.8 ? '#1976d2' : filter >= 0.6 ? '#fbc02d' : '#d32f2f';

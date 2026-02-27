@@ -90,7 +90,8 @@ The game features a state-driven audio system powered by `THREE.Audio`.
     - **North Wall:** Features a physical aperture for a large 4m x 2.5m window. A detailed Calendar is mounted to its right.
 - **Backyard (Outdoor View):** Fully enclosed backyard visible through the window, featuring a 1.2m wooden fence, fence posts, stylized trees, and a sky backdrop.
 - **Furniture & Zoning:**
-    - **Top-Left (North-West):** Desk (0.95m height) with Chair, Laptop (Kennel), and **Field Notes** (Training Manual). 
+    - **Top-Left (North-West):** Desk (0.95m height) with Chair, **Smartphone** (Kennel), and **Field Notes** (Training Manual). 
+    - **Kennel (Smartphone):** Modeled as a thin black smartphone lying on the desk. Features a mobile-styled UI for dog management.
     - **Training Manual:** Modeled as an army green spiral notebook with an animated flip-cover and brass binding. Features a 1:1 pixel-mapped UI on the first page.
     - **Desk Lighting:** An IKEA RANARP-inspired work lamp with brass joints and an open conical shade, providing focused lighting on the manual.
     - **Top-Right (North-East):** Slim Gear Closet (3.8m height, 1.2m depth) with vertical golden handles and proximity-based transparency.

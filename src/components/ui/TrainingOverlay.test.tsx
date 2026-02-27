@@ -23,9 +23,8 @@ describe('TrainingOverlay Component', () => {
     render(<TrainingOverlay />);
     
     expect(screen.getAllByText('PROFILE')[0]).toBeInTheDocument();
-    expect(screen.getByText('OVERVIEW')).toBeInTheDocument();
     expect(screen.getByText('TEST WALKER')).toBeInTheDocument();
-    expect(screen.getByText('TRAIT BREAKDOWN')).toBeInTheDocument();
+    expect(screen.getByText('TRAITS')).toBeInTheDocument();
   });
 
   it('switches to STATS tab and shows progress', () => {
