@@ -288,40 +288,39 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Header */}
-      <div style={{ padding: '40px 80px 20px 40px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
+      <div style={{ padding: '20px 60px 20px 20px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '4px', color: '#4488ff' }}>{activeTab}</h1>
-            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>RESONANCE PROTOCOL v2.0</div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px', color: '#4488ff' }}>{activeTab}</h1>
+            <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>RESONANCE PROTOCOL v2.0</div>
           </div>
           <button 
             onClick={() => setMenuState(MenuState.IDLE)}
-            style={{ width: '50px', height: '50px', background: '#222', color: '#eee', border: '1px solid #444', borderRadius: '50%', fontSize: '24px', cursor: 'pointer' }}
+            style={{ width: '40px', height: '40px', background: '#222', color: '#eee', border: '1px solid #444', borderRadius: '50%', fontSize: '20px', cursor: 'pointer' }}
           > × </button>
         </div>
         
-        <div style={{ display: 'flex', gap: '40px', marginTop: '20px', alignItems: 'flex-end' }}>
-          <div>
-            <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>GRIT CACHE</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#44ff44' }}>{playerStats?.grit || 0} G</div>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 0 auto' }}>
+            <div style={{ fontSize: '9px', color: '#666', letterSpacing: '1px' }}>GRIT CACHE</div>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: '#44ff44' }}>{playerStats?.grit || 0} G</div>
           </div>
-          <div>
-            <div style={{ fontSize: '10px', color: '#666', letterSpacing: '1px' }}>SKILL POINTS</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#4488ff' }}>{progression?.skillPoints || 0} SP</div>
+          <div style={{ flex: '1 0 auto' }}>
+            <div style={{ fontSize: '9px', color: '#666', letterSpacing: '1px' }}>SKILL POINTS</div>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: '#4488ff' }}>{progression?.skillPoints || 0} SP</div>
           </div>
           <button
             onClick={handleRespec}
             style={{
-              marginLeft: 'auto',
               background: confirmRespec ? '#d32f2f' : '#222',
               color: '#eee',
               border: `1px solid ${confirmRespec ? '#d32f2f' : '#444'}`,
-              padding: '10px 20px',
+              padding: '8px 15px',
               borderRadius: '8px',
-              fontSize: '12px',
+              fontSize: '10px',
               fontWeight: '900',
               cursor: 'pointer',
-              marginBottom: '2px'
+              marginTop: '5px'
             }}
           >
             {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC FREQUENCY'}
@@ -330,10 +329,10 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Content Area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '30px 80px 40px 40px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         {activeTab === 'STATS' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'start' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', alignItems: 'center', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
               <HexagramVisualizer 
                 currentResonance={resonanceType} 
                 secondaryFocus={secondaryFocus}
@@ -344,7 +343,7 @@ export const TrainingOverlay = () => {
               />
               
               {/* XP Progress Section */}
-              <div style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid #333' }}>
+              <div style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid #333', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <span style={{ fontWeight: '900', fontSize: '14px', color: '#4488ff' }}>RANK {progression?.walkerRank || 1} PROGRESS</span>
                   <span style={{ fontSize: '14px', color: '#888' }}>{(progression?.xp || 0) % 1000}/1000 XP</span>
@@ -355,58 +354,60 @@ export const TrainingOverlay = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px' }}>VECTOR & MODIFIER READOUT</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
-                    <th style={{ padding: '10px 5px' }}>TRAIT</th>
-                    <th style={{ padding: '10px 5px' }}>RAW</th>
-                    <th style={{ padding: '10px 5px' }}>FILTER</th>
-                    <th style={{ padding: '10px 5px' }}>OUTPUT</th>
-                    <th style={{ padding: '10px 5px' }}>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {resonancePaths.map((path) => {
-                    const filter = getResonanceFilter(resonanceType, path.type);
-                    const raw = (rawTraits as any)[path.traitKey] || 0;
-                    const output = (traits as any)[path.traitKey] || 0;
-                    const mastery = ((affinityXP?.[path.type] || 0) % 1000) / 10;
-                    
-                    const color = filter === 1 ? '#ffd700' : filter >= 0.8 ? '#c0c0c0' : filter >= 0.6 ? '#cd7f32' : '#666';
-                    const status = filter === 1 ? 'PURE' : filter >= 0.8 ? 'HARMONIC' : filter >= 0.6 ? 'STABLE' : 'DISSONANT';
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px', textAlign: 'center' }}>VECTOR & MODIFIER READOUT</h3>
+              <div style={{ overflowX: 'auto', width: '100%' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', minWidth: '300px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
+                      <th style={{ padding: '10px 5px' }}>TRAIT</th>
+                      <th style={{ padding: '10px 5px' }}>RAW</th>
+                      <th style={{ padding: '10px 5px' }}>FILTER</th>
+                      <th style={{ padding: '10px 5px' }}>OUTPUT</th>
+                      <th style={{ padding: '10px 5px' }}>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resonancePaths.map((path) => {
+                      const filter = getResonanceFilter(resonanceType, path.type);
+                      const raw = (rawTraits as any)[path.traitKey] || 0;
+                      const output = (traits as any)[path.traitKey] || 0;
+                      const mastery = ((affinityXP?.[path.type] || 0) % 1000) / 10;
+                      
+                      const color = filter === 1 ? '#ffd700' : filter >= 0.8 ? '#c0c0c0' : filter >= 0.6 ? '#cd7f32' : '#666';
+                      const status = filter === 1 ? 'PURE' : filter >= 0.8 ? 'HARMONIC' : filter >= 0.6 ? 'STABLE' : 'DISSONANT';
 
-                    return (
-                      <tr key={path.label} style={{ borderBottom: '1px solid #111' }}>
-                        <td style={{ padding: '12px 5px', fontWeight: '900', color: '#eee' }}>{path.label}</td>
-                        <td style={{ padding: '12px 5px', color: '#888' }}>{raw}</td>
-                        <td style={{ padding: '12px 5px', color: color }}>x{filter.toFixed(1)}</td>
-                        <td style={{ padding: '12px 5px', fontWeight: '900', color: color }}>{output.toFixed(1)}</td>
-                        <td style={{ padding: '12px 5px', fontSize: '10px', color: color }}>
-                          <div style={{ marginBottom: '4px' }}>{status}</div>
-                          <div style={{ width: '40px', height: '3px', background: '#222', borderRadius: '2px' }}>
-                            <div style={{ width: `${mastery}%`, height: '100%', background: '#44ff44' }} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      return (
+                        <tr key={path.label} style={{ borderBottom: '1px solid #111' }}>
+                          <td style={{ padding: '12px 5px', fontWeight: '900', color: '#eee' }}>{path.label}</td>
+                          <td style={{ padding: '12px 5px', color: '#888' }}>{raw}</td>
+                          <td style={{ padding: '12px 5px', color: color }}>x{filter.toFixed(1)}</td>
+                          <td style={{ padding: '12px 5px', fontWeight: '900', color: color }}>{output.toFixed(1)}</td>
+                          <td style={{ padding: '12px 5px', fontSize: '9px', color: color }}>
+                            <div style={{ marginBottom: '4px' }}>{status}</div>
+                            <div style={{ width: '100%', height: '3px', background: '#222', borderRadius: '2px' }}>
+                              <div style={{ width: `${mastery}%`, height: '100%', background: '#44ff44' }} />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
               {/* Hatsu & Hybrid Section */}
               <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px' }}>APEX & HYBRID SLOTTING</h3>
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                  <div style={{ width: '80px', height: '80px', border: '2px solid #ffd700', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,215,0,0.05)', position: 'relative' }}>
-                    <div style={{ fontSize: '10px', position: 'absolute', top: '-8px', background: '#ffd700', color: '#000', padding: '2px 6px', fontWeight: '900' }}>APEX</div>
-                    <div style={{ fontSize: '32px' }}>⚡</div>
+                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px', textAlign: 'center' }}>APEX & HYBRID SLOTTING</h3>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '70px', height: '70px', border: '2px solid #ffd700', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,215,0,0.05)', position: 'relative' }}>
+                    <div style={{ fontSize: '9px', position: 'absolute', top: '-8px', background: '#ffd700', color: '#000', padding: '2px 6px', fontWeight: '900' }}>APEX</div>
+                    <div style={{ fontSize: '28px' }}>⚡</div>
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     {[1, 2].map(i => (
-                      <div key={i} style={{ width: '60px', height: '60px', border: '1px dashed #444', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
-                        <div style={{ fontSize: '20px', opacity: 0.2 }}>🔒</div>
+                      <div key={i} style={{ width: '55px', height: '55px', border: '1px dashed #444', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
+                        <div style={{ fontSize: '18px', opacity: 0.2 }}>🔒</div>
                       </div>
                     ))}
                   </div>
