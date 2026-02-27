@@ -271,7 +271,9 @@ export const TrainingOverlay = () => {
       <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>{activeTab}</h1>
+            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>
+              {activeTab === 'PROFILE' ? playerName : activeTab}
+            </h1>
             <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '2px' }}>FIELD NOTES v2.0</div>
           </div>
           <button 
@@ -289,10 +291,6 @@ export const TrainingOverlay = () => {
             <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
               <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>OVERVIEW</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
-                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>NAME</span>
-                  <span style={{ fontWeight: '900' }}>{playerName}</span>
-                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
                   <span style={{ fontWeight: '900', color: '#6e6c56' }}>RACE</span>
                   <span style={{ fontWeight: '900' }}>{race}</span>
