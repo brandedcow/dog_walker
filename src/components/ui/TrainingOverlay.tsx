@@ -288,7 +288,7 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Header */}
-      <div style={{ padding: '20px 60px 20px 20px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
+      <div style={{ padding: '20px 70px 20px 20px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px', color: '#4488ff' }}>{activeTab}</h1>
@@ -329,7 +329,7 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Content Area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 70px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         {activeTab === 'STATS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', alignItems: 'center', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
