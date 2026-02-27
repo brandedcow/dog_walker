@@ -233,7 +233,7 @@ export const TrainingOverlay = () => {
     setResonanceType
   } = useGameStore();
 
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'STATS' | 'SKILLS' | 'COMMANDS'>('PROFILE');
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'COMMANDS' | 'STATS' | 'SKILLS'>('PROFILE');
   const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
 
   const resonancePaths = [
@@ -256,7 +256,7 @@ export const TrainingOverlay = () => {
     }}>
       {/* Sidebar Tabs */}
       <div style={{ position: 'absolute', right: 0, top: '100px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 10 }}>
-        {['PROFILE', 'STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
+        {['PROFILE', 'COMMANDS', 'STATS', 'SKILLS'].map((tab) => (
           <div
             key={tab}
             onClick={() => setActiveTab(tab as any)}

@@ -147,7 +147,8 @@ export const KennelOverlay = () => {
       {/* Navigation Bar (Back, Home, App Switcher) */}
       <div style={{ 
         display: 'flex', justifyContent: 'space-around', alignItems: 'center', 
-        padding: '10px 0 20px 0', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(5px)'
+        padding: '5px 0 15px 0', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         {/* Back Button */}
         <div 
@@ -155,32 +156,37 @@ export const KennelOverlay = () => {
             if (activeApp !== 'HOME') setActiveApp('HOME');
             else setMenuState(MenuState.IDLE);
           }}
-          style={{ cursor: 'pointer', padding: '10px 30px', fontSize: '20px', opacity: 0.8 }}
+          style={{ 
+            width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
+          }}
         >
           ◁
         </div>
-        {/* Home Button */}
+        {/* Home Button (House Icon) */}
         <div 
           onClick={() => {
             if (activeApp === 'HOME') setMenuState(MenuState.IDLE);
             else setActiveApp('HOME');
           }}
           style={{ 
-            width: '18px', height: '18px', border: '2px solid white', 
-            borderRadius: '4px', cursor: 'pointer', opacity: 0.8 
+            width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
           }}
-        />
+        >
+          🏠
+        </div>
         {/* App Switcher Button */}
         <div 
           onClick={() => {
-            // Placeholder: Show recent apps logic or just a subtle visual feedback
+            // Placeholder feedback
           }}
           style={{ 
-            width: '18px', height: '18px', border: '2px solid white', 
-            borderRadius: '2px', cursor: 'pointer', opacity: 0.8 
+            width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
           }}
         >
-          <div style={{ width: '100%', height: '100%', border: '1px solid black', boxSizing: 'border-box' }} />
+          ▢
         </div>
       </div>
     </div>
