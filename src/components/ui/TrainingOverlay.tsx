@@ -273,7 +273,14 @@ export const TrainingOverlay = () => {
           <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>
             {activeTab === 'PROFILE' ? playerName : activeTab}
           </h1>
-          <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '2px' }}>FIELD NOTES v2.0</div>
+          {activeTab === 'PROFILE' && (
+            <div style={{ fontSize: '12px', fontWeight: '900', color: '#6e6c56', marginTop: '2px', display: 'flex', gap: '10px' }}>
+              <span>{race.toUpperCase()}</span>
+              <span style={{ opacity: 0.3 }}>|</span>
+              <span>LEVEL {totalLevel}</span>
+            </div>
+          )}
+          <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '4px', opacity: 0.6 }}>FIELD NOTES v2.0</div>
         </div>
         <button 
           onClick={() => setMenuState(MenuState.IDLE)}
@@ -307,14 +314,6 @@ export const TrainingOverlay = () => {
               
               {/* Metadata Sub-section */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '25px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
-                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>RACE</span>
-                  <span style={{ fontWeight: '900' }}>{race}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
-                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>TOTAL LEVEL</span>
-                  <span style={{ fontWeight: '900', color: '#1976d2' }}>{totalLevel}</span>
-                </div>
                 <div style={{ marginTop: '5px' }}>
                   <span style={{ fontWeight: '900', color: '#6e6c56', fontSize: '12px', display: 'block', marginBottom: '8px' }}>RESONANCE AFFINITY</span>
                   <div style={{ display: 'flex', gap: '15px' }}>
