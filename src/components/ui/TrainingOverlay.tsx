@@ -292,19 +292,24 @@ export const TrainingOverlay = () => {
           > × </button>
         </div>
         
-        <div style={{ display: 'flex', gap: '30px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 0 auto' }}>
-            <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>GRIT CACHE</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#2e7d32' }}>{playerStats?.grit || 0} G</div>
-          </div>
-          <div style={{ flex: '1 0 auto' }}>
-            <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
-            <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
-          </div>
+        <div style={{ display: 'flex', gap: '30px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap', minHeight: '65px' }}>
+          {activeTab !== 'PROFILE' && (
+            <>
+              <div style={{ flex: '1 0 auto' }}>
+                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>GRIT CACHE</div>
+                <div style={{ fontSize: '24px', fontWeight: '900', color: '#2e7d32' }}>{playerStats?.grit || 0} G</div>
+              </div>
+              <div style={{ flex: '1 0 auto' }}>
+                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
+                <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
+              </div>
+            </>
+          )}
           {(activeTab === 'SKILLS' || activeTab === 'STATS') && (
             <button
               onClick={handleRespec}
               style={{
+                marginLeft: 'auto',
                 background: confirmRespec ? '#d32f2f' : '#2c3e50',
                 color: 'white',
                 border: 'none',
