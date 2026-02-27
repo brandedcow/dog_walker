@@ -147,7 +147,7 @@ export const KennelOverlay = () => {
       {/* Navigation Bar (Back, Home, App Switcher) */}
       <div style={{ 
         display: 'flex', justifyContent: 'space-around', alignItems: 'center', 
-        padding: '5px 0 15px 0', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)',
+        padding: '5px 0 15px 0', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(15px)',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         {/* Back Button */}
@@ -158,12 +158,14 @@ export const KennelOverlay = () => {
           }}
           style={{ 
             width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
-            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
+            justifyContent: 'center', cursor: 'pointer', opacity: 0.8 
           }}
         >
-          ◁
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </div>
-        {/* Home Button (House Icon) */}
+        {/* Home Button (House Icon with outline) */}
         <div 
           onClick={() => {
             if (activeApp === 'HOME') setMenuState(MenuState.IDLE);
@@ -171,10 +173,13 @@ export const KennelOverlay = () => {
           }}
           style={{ 
             width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
-            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
+            justifyContent: 'center', cursor: 'pointer', opacity: 0.8 
           }}
         >
-          🏠
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
         </div>
         {/* App Switcher Button */}
         <div 
@@ -183,10 +188,12 @@ export const KennelOverlay = () => {
           }}
           style={{ 
             width: '60px', height: '44px', display: 'flex', alignItems: 'center', 
-            justifyContent: 'center', cursor: 'pointer', fontSize: '24px', opacity: 0.8 
+            justifyContent: 'center', cursor: 'pointer', opacity: 0.8 
           }}
         >
-          ▢
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          </svg>
         </div>
       </div>
     </div>
