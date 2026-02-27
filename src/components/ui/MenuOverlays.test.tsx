@@ -26,9 +26,23 @@ describe('MenuOverlays', () => {
   });
 
   describe('KennelOverlay', () => {
-    it('renders dog metadata correctly', () => {
+    it('renders homescreen with app icons correctly', () => {
       render(<KennelOverlay />);
       
+      expect(screen.getByText('9:41')).toBeInTheDocument();
+      expect(screen.getByText('Kennel')).toBeInTheDocument();
+      expect(screen.getByText('Maps')).toBeInTheDocument();
+      expect(screen.getByText('Wallet')).toBeInTheDocument();
+      expect(screen.getByText('Chat')).toBeInTheDocument();
+    });
+
+    it('navigates to Kennel app and renders metadata', () => {
+      render(<KennelOverlay />);
+      
+      // Click Kennel icon
+      const kennelIcon = screen.getByText('Kennel');
+      fireEvent.click(kennelIcon);
+
       expect(screen.getByText('THE KENNEL')).toBeInTheDocument();
       expect(screen.getByText('BUSTER')).toBeInTheDocument();
       expect(screen.getByText(/LVL 1/)).toBeInTheDocument();
@@ -38,14 +52,15 @@ describe('MenuOverlays', () => {
       expect(screen.getByText(/"ADHD"/)).toBeInTheDocument();
     });
 
-    it('calls setMenuState(IDLE) when CLOSE APP is clicked', () => {
+    it('calls setMenuState(IDLE) when home indicator is clicked', () => {
       const setMenuState = vi.fn();
       useGameStore.setState({ setMenuState });
       
-      render(<KennelOverlay />);
+      const { container } = render(<KennelOverlay />);
       
-      const closeBtn = screen.getByText('CLOSE APP');
-      fireEvent.click(closeBtn);
+      // Home indicator is the div with specific style at the bottom
+      const homeIndicator = container.lastElementChild?.lastElementChild;
+      if (homeIndicator) fireEvent.click(homeIndicator);
       
       expect(setMenuState).toHaveBeenCalledWith(MenuState.IDLE);
     });

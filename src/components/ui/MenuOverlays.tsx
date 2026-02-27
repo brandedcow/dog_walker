@@ -25,92 +25,133 @@ const OverlayContainer = ({ title, children, onBack }: { title: string, children
 
 export const KennelOverlay = () => {
   const { dogMetadata, dogStats, setMenuState } = useGameStore();
+  const [activeApp, setActiveApp] = useState<'HOME' | 'KENNEL'>('HOME');
+
+  const renderHomeScreen = () => (
+    <div style={{ 
+      display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', 
+      padding: '40px 20px', flex: 1, alignContent: 'start' 
+    }}>
+      {[
+        { id: 'KENNEL', icon: '🐕', label: 'Kennel', color: '#44ff44' },
+        { id: 'MAPS', icon: '🗺️', label: 'Maps', color: '#4488ff', disabled: true },
+        { id: 'WALLET', icon: '💳', label: 'Wallet', color: '#ffcc00', disabled: true },
+        { id: 'MESSAGES', icon: '💬', label: 'Chat', color: '#ff44aa', disabled: true },
+        { id: 'CAMERA', icon: '📷', label: 'Camera', color: '#888', disabled: true },
+        { id: 'SETTINGS', icon: '⚙️', label: 'System', color: '#555', disabled: true },
+      ].map(app => (
+        <div 
+          key={app.id}
+          onClick={() => !app.disabled && setActiveApp('KENNEL')}
+          style={{ 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+            cursor: app.disabled ? 'default' : 'pointer', opacity: app.disabled ? 0.4 : 1
+          }}
+        >
+          <div style={{ 
+            width: '60px', height: '60px', background: app.color, borderRadius: '15px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+          }}>
+            {app.icon}
+          </div>
+          <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{app.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderKennelApp = () => (
+    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px', padding: '0 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+        <button 
+          onClick={() => setActiveApp('HOME')}
+          style={{ background: 'none', border: 'none', color: '#44ff44', fontSize: '24px', cursor: 'pointer', padding: 0 }}
+        >
+          ←
+        </button>
+        <h2 style={{ margin: 0, color: '#44ff44', fontSize: '20px', letterSpacing: '1px' }}>THE KENNEL</h2>
+      </div>
+
+      <div style={{ 
+        background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px',
+        border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '10px' }}>🐕</div>
+        <h3 style={{ margin: '0 0 5px 0', fontSize: '20px' }}>{dogMetadata.name}</h3>
+        <div style={{ fontSize: '12px', color: '#44ff44', fontWeight: 'bold', marginBottom: '15px' }}>
+          LVL {dogStats.trainingLevel} {dogMetadata.trainingLevel}
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', textAlign: 'left' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+            <div style={{ fontSize: '10px', opacity: 0.5 }}>SIZE</div>
+            <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.size}</div>
+          </div>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+            <div style={{ fontSize: '10px', opacity: 0.5 }}>MOOD</div>
+            <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.mood}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '20px' }}>
+        <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>TRAITS</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+            <span>Trust</span>
+            <span style={{ color: '#ffcc00' }}>{dogStats.trust} 🐾</span>
+          </div>
+          <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+            <div style={{ width: `${Math.min(100, (dogStats.trust / 100) * 100)}%`, height: '100%', background: '#ffcc00' }} />
+          </div>
+          
+          <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.7, fontStyle: 'italic' }}>
+            "{dogMetadata.characteristic}"
+          </p>
+        </div>
+      </div>
+
+      <button 
+        style={{ 
+          marginTop: 'auto', padding: '15px', background: '#333', color: 'white',
+          border: 'none', borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer',
+          opacity: 0.5
+        }}
+        disabled
+      >
+        CHANGE DOG (SOON)
+      </button>
+    </div>
+  );
+
   return (
     <div style={{
-      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-      width: '320px', height: '580px', background: '#111', border: '8px solid #333',
-      borderRadius: '40px', padding: '20px', pointerEvents: 'auto', color: 'white',
-      display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: '0 0 50px rgba(0,0,0,0.8)',
-      overflow: 'hidden', borderBottomWidth: '15px'
+      position: 'absolute', top: 0, left: 0, width: '100%', height: '100dvh',
+      background: activeApp === 'HOME' ? 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)' : '#111',
+      zIndex: 100, pointerEvents: 'auto', color: 'white',
+      display: 'flex', flexDirection: 'column', gap: '10px',
+      overflow: 'hidden', fontFamily: 'sans-serif'
     }}>
       {/* Smartphone Status Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', opacity: 0.6, padding: '0 10px' }}>
-        <span>9:41</span>
-        <div style={{ display: 'flex', gap: '5px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', opacity: 0.8, padding: '10px 20px' }}>
+        <span style={{ fontWeight: 'bold' }}>9:41</span>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <span>📶</span>
           <span>🔋</span>
         </div>
       </div>
 
-      <h2 style={{ margin: '10px 0 0 0', textAlign: 'center', color: '#44ff44', fontSize: '18px', letterSpacing: '1px' }}>THE KENNEL</h2>
-      
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div style={{ 
-          background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '48px', marginBottom: '10px' }}>🐕</div>
-          <h3 style={{ margin: '0 0 5px 0', fontSize: '20px' }}>{dogMetadata.name}</h3>
-          <div style={{ fontSize: '12px', color: '#44ff44', fontWeight: 'bold', marginBottom: '15px' }}>
-            LVL {dogStats.trainingLevel} {dogMetadata.trainingLevel}
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', textAlign: 'left' }}>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
-              <div style={{ fontSize: '10px', opacity: 0.5 }}>SIZE</div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.size}</div>
-            </div>
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
-              <div style={{ fontSize: '10px', opacity: 0.5 }}>MOOD</div>
-              <div style={{ fontSize: '12px', fontWeight: 'bold' }}>{dogMetadata.mood}</div>
-            </div>
-          </div>
-        </div>
+      {activeApp === 'HOME' ? renderHomeScreen() : renderKennelApp()}
 
-        <div style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '20px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>TRAITS</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span>Trust</span>
-              <span style={{ color: '#ffcc00' }}>{dogStats.trust} 🐾</span>
-            </div>
-            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-              <div style={{ width: `${Math.min(100, (dogStats.trust / 100) * 100)}%`, height: '100%', background: '#ffcc00' }} />
-            </div>
-            
-            <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.7, fontStyle: 'italic' }}>
-              "{dogMetadata.characteristic}"
-            </p>
-          </div>
-        </div>
-
-        <button 
-          style={{ 
-            marginTop: 'auto', padding: '15px', background: '#333', color: 'white',
-            border: 'none', borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer',
-            opacity: 0.5
-          }}
-          disabled
-        >
-          CHANGE DOG (SOON)
-        </button>
-      </div>
-
-      <button 
+      {/* Home Indicator / Exit Button */}
+      <div 
         onClick={() => setMenuState(MenuState.IDLE)}
         style={{ 
-          padding: '12px', background: 'white', color: 'black', border: 'none', 
-          borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px'
-        }}
-      >
-        CLOSE APP
-      </button>
-
-      {/* Home Indicator */}
-      <div style={{ 
-        width: '100px', height: '4px', background: 'rgba(255,255,255,0.2)', 
-        borderRadius: '2px', margin: '10px auto 0 auto' 
-      }} />
+          width: '120px', height: '5px', background: 'rgba(255,255,255,0.3)', 
+          borderRadius: '2.5px', margin: '15px auto', cursor: 'pointer'
+        }} 
+      />
     </div>
   );
 };
