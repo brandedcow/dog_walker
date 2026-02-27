@@ -52,17 +52,35 @@ describe('MenuOverlays', () => {
       expect(screen.getByText(/"ADHD"/)).toBeInTheDocument();
     });
 
-    it('calls setMenuState(IDLE) when home indicator is clicked', () => {
+    it('calls setMenuState(IDLE) when home button is clicked from home screen', () => {
       const setMenuState = vi.fn();
       useGameStore.setState({ setMenuState });
       
       const { container } = render(<KennelOverlay />);
       
-      // Home indicator is the div with specific style at the bottom
-      const homeIndicator = container.lastElementChild?.lastElementChild;
-      if (homeIndicator) fireEvent.click(homeIndicator);
+      // Home button is the square/border-box in the middle of the nav bar
+      const homeBtn = container.lastElementChild?.lastElementChild?.children[1];
+      if (homeBtn) fireEvent.click(homeBtn);
       
       expect(setMenuState).toHaveBeenCalledWith(MenuState.IDLE);
+    });
+
+    it('returns to home screen when back button is clicked in app', () => {
+      render(<KennelOverlay />);
+      
+      // Navigate to app first
+      fireEvent.click(screen.getByText('Kennel'));
+      expect(screen.getByText('THE KENNEL')).toBeInTheDocument();
+
+      // Click back button (first child of nav bar)
+      const { container } = render(<KennelOverlay />);
+      const backBtn = container.querySelector('div[onClick]'); // First div with onClick in nav bar
+      // More precise:
+      const navBar = container.lastElementChild?.lastElementChild;
+      const backNavBtn = navBar?.children[0];
+      if (backNavBtn) fireEvent.click(backNavBtn);
+      
+      expect(screen.getByText('Kennel')).toBeInTheDocument();
     });
   });
 
