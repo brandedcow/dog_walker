@@ -102,10 +102,10 @@ The game features a state-driven audio system powered by `THREE.Audio`.
 ### 4.2 Tabbed Progression System (Training Overlay)
 The Training Manual is implemented as a full-screen 2D React overlay (`TrainingOverlay.tsx`) for maximum legibility on mobile devices, styled with a physical notebook aesthetic (side tabs) while maintaining a mobile-first vertical layout.
 - **Coordination:** The overlay only renders after the 3D camera transition completes, signaled by the `isMenuReady` state in the `useGameStore`.
-- **PROFILE (Overview & Traits):** The primary tab tracking the player's numerical growth (Level, XP, Grit) and Resonance traits. Uses explicit readouts (e.g., Strength, Bond) instead of abstract values. The header prominently displays the Player's Name, Race, and Level, with a streamlined overview section to reduce clutter.
-- **FIELD NOTES (Skills):** A branching progression tree based on the Resonance Filter.
+- **STATS (Overview & Traits):** The primary tab tracking the player's numerical growth (Level, XP, Grit) and Resonance traits. Uses explicit readouts (e.g., Strength, Bond) instead of abstract values. The header prominently displays the Player's Name, Race, and Level, with a streamlined overview section to reduce clutter.
 - **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics.
-- **Resonance Hexagram:** An interactive SVG-based visualizer on the Stats page that illustrates the 6 resonance relationships and their current potency based on the player's primary frequency. Allows for tuning at Rank 1.
+- **RESONANCE (Visualizer):** An interactive SVG-based visualizer that illustrates the 6 resonance relationships and their current potency based on the player's primary frequency. Allows for tuning at Rank 1.
+- **FIELD NOTES (Skills):** A branching progression tree based on the Resonance Filter.
 
 ### 4.3 HUD & Metadata
 - **Architecture:** HUD is organized into a modular tree. Large overlays (e.g., Mission Success, Training) are extracted into standalone components.

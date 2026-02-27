@@ -19,19 +19,19 @@ describe('TrainingOverlay Component', () => {
     });
   });
 
-  it('renders correctly and defaults to PROFILE tab', () => {
+  it('renders correctly and defaults to STATS tab', () => {
     render(<TrainingOverlay />);
     
-    expect(screen.getAllByText('PROFILE')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
     expect(screen.getByText('TEST WALKER')).toBeInTheDocument();
     expect(screen.getByText('TRAITS')).toBeInTheDocument();
   });
 
-  it('switches to STATS tab and shows progress', () => {
+  it('switches to RESONANCE tab and shows progress', () => {
     render(<TrainingOverlay />);
     
-    const statsTab = screen.getByText('STATS');
-    fireEvent.click(statsTab);
+    const resonanceTab = screen.getByText('RESONANCE');
+    fireEvent.click(resonanceTab);
     
     expect(screen.getByText(/RANK 1 PROGRESS/i)).toBeInTheDocument();
     expect(screen.getAllByText(/4.0/i).length).toBeGreaterThan(0);

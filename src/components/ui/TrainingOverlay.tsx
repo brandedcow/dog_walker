@@ -233,7 +233,7 @@ export const TrainingOverlay = () => {
     setResonanceType
   } = useGameStore();
 
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'COMMANDS' | 'STATS' | 'SKILLS'>('PROFILE');
+  const [activeTab, setActiveTab] = useState<'STATS' | 'COMMANDS' | 'RESONANCE' | 'SKILLS'>('STATS');
   const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
 
   const resonancePaths = [
@@ -256,7 +256,7 @@ export const TrainingOverlay = () => {
     }}>
       {/* Sidebar Tabs */}
       <div style={{ position: 'absolute', right: 0, top: '100px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 10 }}>
-        {['PROFILE', 'COMMANDS', 'STATS', 'SKILLS'].map((tab) => (
+        {['STATS', 'COMMANDS', 'RESONANCE', 'SKILLS'].map((tab) => (
           <div
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -281,9 +281,9 @@ export const TrainingOverlay = () => {
       <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)', position: 'relative' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>
-            {activeTab === 'PROFILE' ? playerName : activeTab}
+            {activeTab === 'STATS' ? playerName : activeTab}
           </h1>
-          {activeTab === 'PROFILE' && (
+          {activeTab === 'STATS' && (
             <div style={{ fontSize: '12px', fontWeight: '900', color: '#6e6c56', marginTop: '2px', display: 'flex', gap: '10px' }}>
               <span>{(race || 'Human').toUpperCase()}</span>
               <span style={{ opacity: 0.3 }}>|</span>
@@ -317,7 +317,7 @@ export const TrainingOverlay = () => {
 
       {/* Content Area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 70px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
-        {activeTab === 'PROFILE' && (
+        {activeTab === 'STATS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
               <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>TRAITS</h2>
@@ -391,7 +391,7 @@ export const TrainingOverlay = () => {
           </div>
         )}
 
-        {activeTab === 'STATS' && (
+        {activeTab === 'RESONANCE' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', alignItems: 'center', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
               <HexagramVisualizer 

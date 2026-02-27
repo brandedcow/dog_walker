@@ -31,7 +31,7 @@ import { DeskLamp } from './furniture/DeskLamp';
 export const RoomScene = () => {
   const { 
     gameState, setGameState, dogState, setDogState, menuState, 
-    setMenuState, isMovingForward, unlockedSkills, traits, setTension
+    setMenuState, isMovingForward, unlockedSkills, traits, setTension, setDistance
   } = useGameStore();
   const [nightstandLampOn, setNightstandLampOn] = useState(true);
   const [standingLampOn, setStandingLampOn] = useState(true);
@@ -57,8 +57,11 @@ export const RoomScene = () => {
       playerPos.current.x = Math.max(-4.5, Math.min(4.5, playerPos.current.x));
       playerPos.current.z = Math.max(-3.5, Math.min(4.5, playerPos.current.z));
     }
-    leash.update(delta, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current, setTension, traits);
-    dogAI.update(delta, playerPos.current, dogState, setDogState, unlockedSkills, traits);
+    const { tension } = leash.update(delta, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
+    setTension(tension);
+    const { dogDistance } = dogAI.update(delta, playerPos.current, dogState, setDogState, unlockedSkills, traits);
+    setDistance(dogDistance);
+
     if (menuState === MenuState.IDLE) {
       const camDistance = 3;
       const camHeight = 1.8;

@@ -74,7 +74,6 @@ describe('MenuOverlays', () => {
 
       // Click back button (first child of nav bar)
       const { container } = render(<KennelOverlay />);
-      const backBtn = container.querySelector('div[onClick]'); // First div with onClick in nav bar
       // More precise:
       const navBar = container.lastElementChild?.lastElementChild;
       const backNavBtn = navBar?.children[0];

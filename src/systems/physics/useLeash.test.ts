@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useLeash } from './useLeash';
 import { Vector3 } from 'three';
@@ -9,7 +9,6 @@ describe('useLeash', () => {
   const dogPos = new Vector3(0, 0, 5); // 5m away
   const dogRotation = 0;
   const delta = 1/60;
-  const mockOnStrain = vi.fn();
 
   it('initializes nodes correctly', () => {
     const { result } = renderHook(() => useLeash());
@@ -21,7 +20,7 @@ describe('useLeash', () => {
     const { result } = renderHook(() => useLeash());
     
     act(() => {
-      result.current.update(delta, playerPos, dogPos, dogRotation, mockOnStrain);
+      result.current.update(delta, playerPos, dogPos, dogRotation);
     });
 
     const handPos = playerPos.clone().add(new Vector3(0.8, -1.2, -0.5));
@@ -37,20 +36,20 @@ describe('useLeash', () => {
     // Very close: tension should be 0
     let tensionData: any;
     act(() => {
-      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, 1), dogRotation, mockOnStrain);
+      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, 1), dogRotation);
     });
     expect(tensionData?.rawTension).toBe(0);
 
     // At 50% max distance
     act(() => {
-      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH / 2), dogRotation, mockOnStrain);
+      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH / 2), dogRotation);
     });
     expect(tensionData?.rawTension).toBeGreaterThan(0);
     expect(tensionData?.rawTension).toBeLessThan(1);
 
     // At max distance
     act(() => {
-      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation, mockOnStrain);
+      tensionData = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation);
     });
     expect(tensionData?.rawTension).toBe(1);
   });
@@ -60,7 +59,7 @@ describe('useLeash', () => {
     const farDogPos = new Vector3(0, 0, MAX_LEASH_LENGTH + 5); // 5m past limit
     
     act(() => {
-      result.current.update(delta, playerPos, farDogPos, dogRotation, mockOnStrain);
+      result.current.update(delta, playerPos, farDogPos, dogRotation);
     });
 
     const distance = playerPos.distanceTo(farDogPos);
@@ -73,13 +72,13 @@ describe('useLeash', () => {
     act(() => {
       result.current.applyTug();
       // First update to initialize physics state
-      result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation, mockOnStrain);
+      result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation);
     });
 
     expect(result.current.tugRecoil.current).toBeGreaterThan(0);
     
     // With recoil, tension should be reduced relative to raw tension
-    const updateResult = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation, mockOnStrain);
+    const updateResult = result.current.update(delta, playerPos, new Vector3(0, 0, MAX_LEASH_LENGTH), dogRotation);
     expect(updateResult.tension).toBeLessThan(updateResult.rawTension);
     expect(updateResult.tension).toBeGreaterThanOrEqual(0);
   });
@@ -89,32 +88,10 @@ describe('useLeash', () => {
     const nanPos = new Vector3(NaN, 0, 0);
     
     act(() => {
-      result.current.update(delta, nanPos, dogPos, dogRotation, mockOnStrain);
+      result.current.update(delta, nanPos, dogPos, dogRotation);
     });
 
     const n = result.current.nodes.current;
     expect(n[0].x).toBeDefined();
-  });
-
-  it('respects STRENGTH trait for strain threshold', () => {
-    const { result } = renderHook(() => useLeash());
-    const onStrain = vi.fn();
-    
-    // Max distance should definitely strain with low strength
-    const farDogPos = new Vector3(0, 0, MAX_LEASH_LENGTH);
-
-    act(() => {
-      // Base strength 1: threshold 0.8
-      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 1, bond: 1, awareness: 1, focus: 1, speed: 1, mastery: 1 });
-    });
-    expect(onStrain).toHaveBeenCalled();
-
-    onStrain.mockClear();
-
-    act(() => {
-      // High strength 100 (for testing): threshold very high
-      result.current.update(delta, playerPos, farDogPos, dogRotation, onStrain, { strength: 100, bond: 1, awareness: 1, focus: 1, speed: 1, mastery: 1 });
-    });
-    expect(onStrain).not.toHaveBeenCalled();
   });
 });

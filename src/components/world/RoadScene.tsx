@@ -112,7 +112,7 @@ export const RoadScene = () => {
     let lastAIState: any = null;
 
     while (accumulator.current >= FIXED_DELTA) {
-      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current, setTension, traits);
+      lastLeashState = leash.update(FIXED_DELTA, playerPos.current, dogAI.dogPos.current, dogAI.currentRotation.current);
       lastAIState = dogAI.update(FIXED_DELTA, playerPos.current, dogState, setDogState, unlockedSkills, traits);
 
       if (isMovingForward && gameState === GameState.PLAYING) {
