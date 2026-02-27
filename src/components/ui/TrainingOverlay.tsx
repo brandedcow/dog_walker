@@ -268,19 +268,34 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Header - Only houses the title */}
-      <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>
-              {activeTab === 'PROFILE' ? playerName : activeTab}
-            </h1>
-            <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '2px' }}>FIELD NOTES v2.0</div>
-          </div>
-          <button 
-            onClick={() => setMenuState(MenuState.IDLE)}
-            style={{ width: '50px', height: '50px', background: '#2c3e50', color: 'white', border: 'none', borderRadius: '50%', fontSize: '32px', fontWeight: 'bold', cursor: 'pointer' }}
-          > × </button>
+      <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)', position: 'relative' }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>
+            {activeTab === 'PROFILE' ? playerName : activeTab}
+          </h1>
+          <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '2px' }}>FIELD NOTES v2.0</div>
         </div>
+        <button 
+          onClick={() => setMenuState(MenuState.IDLE)}
+          style={{ 
+            position: 'absolute',
+            top: '15px',
+            right: '15px',
+            width: '40px', 
+            height: '40px', 
+            background: '#2c3e50', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '50%', 
+            fontSize: '24px', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: 1
+          }}
+        > × </button>
       </div>
 
       {/* Content Area */}
