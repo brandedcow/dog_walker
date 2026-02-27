@@ -72,6 +72,13 @@ export const DogSize = {
 } as const;
 export type DogSize = typeof DogSize[keyof typeof DogSize];
 
+export const Race = {
+  HUMAN: 'Human',
+  ELF: 'Elf',
+  DWARF: 'Dwarf'
+} as const;
+export type Race = typeof Race[keyof typeof Race];
+
 export const ResonanceType = {
   ANCHOR: 'Anchor',       // Strength
   WHISPERER: 'Whisperer', // Bond

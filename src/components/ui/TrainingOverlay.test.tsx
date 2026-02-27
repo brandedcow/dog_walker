@@ -10,6 +10,8 @@ describe('TrainingOverlay Component', () => {
     useGameStore.setState({
       menuState: MenuState.TRAINING,
       playerStats: { strength: 1, grit: 100 },
+      playerName: 'TEST WALKER',
+      race: 'Human' as any,
       progression: { walkerRank: 1, xp: 0, skillPoints: 5 },
       unlockedSkills: ['FOUNDATION'],
       resonanceType: ResonanceType.ANCHOR,
@@ -17,12 +19,23 @@ describe('TrainingOverlay Component', () => {
     });
   });
 
-  it('renders correctly and defaults to STATS tab', () => {
+  it('renders correctly and defaults to PROFILE tab', () => {
     render(<TrainingOverlay />);
     
-    expect(screen.getAllByText('STATS')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('PROFILE')[0]).toBeInTheDocument();
+    expect(screen.getByText('OVERVIEW')).toBeInTheDocument();
+    expect(screen.getByText('TEST WALKER')).toBeInTheDocument();
+    expect(screen.getByText('TRAITS')).toBeInTheDocument();
+  });
+
+  it('switches to STATS tab and shows progress', () => {
+    render(<TrainingOverlay />);
+    
+    const statsTab = screen.getByText('STATS');
+    fireEvent.click(statsTab);
+    
     expect(screen.getByText(/RANK 1 PROGRESS/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/4.0/i).length).toBeGreaterThan(0); // Anchor base levels
+    expect(screen.getAllByText(/4.0/i).length).toBeGreaterThan(0);
   });
 
   it('switches between tabs', () => {

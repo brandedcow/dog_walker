@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ResonanceTraits, Progression, ResonanceType as PlayerResonance } from '../types';
-import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, ResonanceType, RESONANCE_STATS } from '../types';
+import { GameState, DogState, MenuState, TrainingLevel, DogCharacteristic, DogSize, ResonanceType, RESONANCE_STATS, Race } from '../types';
 import { SKILLS } from '../config/skills';
 
 export interface DogMetadata {
@@ -62,6 +62,8 @@ interface GameStore {
   isProfileExpanded: boolean;
   dogMetadata: DogMetadata;
   playerStats: PlayerStats;
+  playerName: string;
+  race: Race;
   dogStats: DogStats;
   sessionGrit: number;
   hasStrained: boolean;
@@ -71,8 +73,8 @@ interface GameStore {
   // Refined Progression
   resonanceType: PlayerResonance;
   secondaryFocus: PlayerResonance | null;
-  traits: ResonanceTraits;
-  rawTraits: ResonanceTraits;
+  traits: ResonanceTraits; // Final Output (Raw * Filter)
+  rawTraits: ResonanceTraits; // Raw Organic Level
   progression: Progression;
   affinityXP: Record<ResonanceType, number>;
 
@@ -139,6 +141,8 @@ const calculateFinalTraits = (
 };
 
 const DEFAULT_PROG_STATE = {
+  playerName: 'WALKER',
+  race: Race.HUMAN,
   resonanceType: ResonanceType.ANCHOR,
   secondaryFocus: null,
   dogMetadata: {
@@ -342,8 +346,10 @@ export const useGameStore = create<GameStore>()(
     {
       name: 'barking-mad-save',
       storage: createJSONStorage(() => localStorage),
-      version: 3, // Increment version to trigger migration/reset if structure changes drastically
+      version: 4, // Increment version for new playerName/race properties
       partialize: (state) => ({
+        playerName: state.playerName,
+        race: state.race,
         resonanceType: state.resonanceType,
         secondaryFocus: state.secondaryFocus,
         dogMetadata: state.dogMetadata,

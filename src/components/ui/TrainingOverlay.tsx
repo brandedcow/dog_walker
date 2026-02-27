@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore, getResonanceFilter, RESONANCE_ORDER } from '../../store/useGameStore';
 import { SKILLS, type Skill } from '../../config/skills';
-import { MenuState, ResonanceType } from '../../types';
+import { MenuState, ResonanceType, RESONANCE_STATS } from '../../types';
 
 const SkillNode = ({
   skill,
@@ -116,7 +116,7 @@ const HexagramVisualizer = ({
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative', width: '100%', boxSizing: 'border-box' }}>
       <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', textAlign: 'center', color: '#2c3e50' }}>NEURAL RESONANCE READOUT</h3>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <svg width={size} height={size} style={{ overflow: 'visible' }}>
@@ -204,6 +204,8 @@ export const TrainingOverlay = () => {
   const {
     setMenuState,
     playerStats,
+    playerName = 'WALKER',
+    race = 'Human',
     unlockedSkills,
     purchaseSkill,
     respecSkills,
@@ -223,7 +225,7 @@ export const TrainingOverlay = () => {
     setResonanceType
   } = useGameStore();
 
-  const [activeTab, setActiveTab] = useState<'STATS' | 'SKILLS' | 'COMMANDS'>('STATS');
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'STATS' | 'SKILLS' | 'COMMANDS'>('PROFILE');
   const [confirmRespec, setConfirmRespec] = useState(false);
 
   const handleRespec = () => {
@@ -244,6 +246,9 @@ export const TrainingOverlay = () => {
     { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
+  // Calculate total level
+  const totalLevel = Math.floor(Object.values(rawTraits).reduce((a, b) => a + b, 0));
+
   return (
     <div style={{
       position: 'absolute', top: 0, left: 0, width: '100%', height: '100dvh',
@@ -253,17 +258,17 @@ export const TrainingOverlay = () => {
     }}>
       {/* Sidebar Tabs */}
       <div style={{ position: 'absolute', right: 0, top: '100px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 10 }}>
-        {['STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
+        {['PROFILE', 'STATS', 'SKILLS', 'COMMANDS'].map((tab) => (
           <div
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             style={{
-              width: '50px', height: '120px',
+              width: '50px', height: '100px',
               background: activeTab === tab ? '#ffffff' : '#d1cdb0',
               border: '2px solid #2c3e50', borderRight: 'none', borderRadius: '20px 0 0 20px',
               writingMode: 'vertical-rl', textOrientation: 'mixed',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '16px', fontWeight: '900', cursor: 'pointer',
+              fontSize: '14px', fontWeight: '900', cursor: 'pointer',
               color: activeTab === tab ? '#2c3e50' : '#6e6c56',
               boxShadow: activeTab === tab ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none',
               transition: 'all 0.2s'
@@ -296,27 +301,100 @@ export const TrainingOverlay = () => {
             <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
             <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
           </div>
-          <button
-            onClick={handleRespec}
-            style={{
-              background: confirmRespec ? '#d32f2f' : '#2c3e50',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              fontSize: '12px',
-              fontWeight: '900',
-              cursor: 'pointer',
-              marginTop: '5px'
-            }}
-          >
-            {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
-          </button>
+          {(activeTab === 'SKILLS' || activeTab === 'STATS') && (
+            <button
+              onClick={handleRespec}
+              style={{
+                background: confirmRespec ? '#d32f2f' : '#2c3e50',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: '900',
+                cursor: 'pointer',
+                marginTop: '5px'
+              }}
+            >
+              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Content Area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 70px 40px 20px', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+        {activeTab === 'PROFILE' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
+            {/* Overview Section */}
+            <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>OVERVIEW</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
+                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>NAME</span>
+                  <span style={{ fontWeight: '900' }}>{playerName}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
+                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>RACE</span>
+                  <span style={{ fontWeight: '900' }}>{race}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #ddd', paddingBottom: '8px' }}>
+                  <span style={{ fontWeight: '900', color: '#6e6c56' }}>TOTAL LEVEL</span>
+                  <span style={{ fontWeight: '900', color: '#1976d2' }}>{totalLevel}</span>
+                </div>
+                <div style={{ marginTop: '10px' }}>
+                  <span style={{ fontWeight: '900', color: '#6e6c56', fontSize: '12px', display: 'block', marginBottom: '8px' }}>RESONANCE AFFINITY</span>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    <div style={{ flex: 1, background: '#2c3e50', color: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '10px', opacity: 0.7 }}>MAIN</div>
+                      <div style={{ fontWeight: '900', fontSize: '14px' }}>{resonanceType.toUpperCase()}</div>
+                    </div>
+                    <div style={{ flex: 1, background: secondaryFocus ? '#1976d2' : '#d1cdb0', color: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '10px', opacity: 0.7 }}>SECONDARY</div>
+                      <div style={{ fontWeight: '900', fontSize: '14px' }}>{secondaryFocus ? secondaryFocus.toUpperCase() : 'NONE'}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Traits Section */}
+            <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>TRAITS</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {resonancePaths.map(path => {
+                  const base = (RESONANCE_STATS[resonanceType] as any)[path.traitKey];
+                  const raw = (rawTraits as any)[path.traitKey] || 0;
+                  const bonus = Math.max(0, raw - base);
+                  
+                  return (
+                    <div key={path.label} style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
+                      <div style={{ width: '100px', fontWeight: '900', fontSize: '12px' }}>{path.label}</div>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ flex: base, background: '#d1cdb0', height: '12px', borderRadius: '6px' }} />
+                        {bonus > 0 && <div style={{ flex: bonus, background: '#2e7d32', height: '12px', borderRadius: '6px' }} />}
+                        <div style={{ flex: Math.max(0, 20 - raw), height: '12px' }} />
+                      </div>
+                      <div style={{ width: '60px', textAlign: 'right', fontSize: '12px' }}>
+                        <span style={{ fontWeight: '900' }}>{base}</span>
+                        {bonus > 0 && <span style={{ color: '#2e7d32', fontWeight: '900' }}> +{bonus}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+                <div style={{ marginTop: '10px', display: 'flex', gap: '15px', justifyContent: 'center', fontSize: '10px', fontWeight: '900' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '10px', height: '10px', background: '#d1cdb0', borderRadius: '2px' }} /> BASE
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '10px', height: '10px', background: '#2e7d32', borderRadius: '2px' }} /> SKILL BONUS
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'STATS' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', alignItems: 'center', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
