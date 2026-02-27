@@ -214,11 +214,11 @@ export const TrainingOverlay = () => {
     setMenuState,
     playerName = 'WALKER',
     race = 'Human',
-    unlockedSkills,
+    unlockedSkills = ['FOUNDATION'],
     purchaseSkill,
     traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     rawTraits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
-    progression,
+    progression = { walkerRank: 1, xp: 0, skillPoints: 0 },
     resonanceType = ResonanceType.ANCHOR,
     secondaryFocus,
     affinityXP = {
@@ -244,7 +244,7 @@ export const TrainingOverlay = () => {
     { label: 'MASTERY', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
-  const totalLevel = Math.floor(Object.values(rawTraits).reduce((a, b) => a + b, 0));
+  const totalLevel = Math.floor(Object.values(rawTraits || {}).reduce((a, b) => (a || 0) + (b || 0), 0));
 
   return (
     <div style={{
@@ -284,7 +284,7 @@ export const TrainingOverlay = () => {
           </h1>
           {activeTab === 'PROFILE' && (
             <div style={{ fontSize: '12px', fontWeight: '900', color: '#6e6c56', marginTop: '2px', display: 'flex', gap: '10px' }}>
-              <span>{race.toUpperCase()}</span>
+              <span>{(race || 'Human').toUpperCase()}</span>
               <span style={{ opacity: 0.3 }}>|</span>
               <span>LEVEL {totalLevel}</span>
             </div>
@@ -404,7 +404,7 @@ export const TrainingOverlay = () => {
               
               <div style={{ background: 'white', padding: '20px', borderRadius: '15px', border: '2px solid #2c3e50', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#2c3e50' }}>RANK {progression?.walkerRank || 1} PROGRESS</span>
+                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#2c3e50' }}>RANK {(progression?.walkerRank || 1)} PROGRESS</span>
                   <span style={{ fontSize: '14px', color: '#2c3e50' }}>{(progression?.xp || 0) % 1000}/1000 XP</span>
                 </div>
                 <div style={{ width: '100%', height: '12px', background: '#d1cdb0', borderRadius: '6px', overflow: 'hidden', border: '2px solid #2c3e50' }}>
@@ -487,14 +487,14 @@ export const TrainingOverlay = () => {
                     </h3>
                   </div>
                   <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
-                    {path.skills.map((skill) => (
+                    {(path.skills || []).map((skill) => (
                       <div key={skill.id} style={{ flex: '0 0 280px' }}>
                         <SkillNode
                           skill={skill}
-                          unlocked={unlockedSkills.includes(skill.id)}
-                          available={!skill.dependsOn || unlockedSkills.includes(skill.dependsOn)}
-                          canAffordGrit={playerStats?.grit >= skill.gritCost}
-                          canAffordSP={progression?.skillPoints >= skill.spCost}
+                          unlocked={(unlockedSkills || []).includes(skill.id)}
+                          available={!skill.dependsOn || (unlockedSkills || []).includes(skill.dependsOn)}
+                          canAffordGrit={(playerStats?.grit || 0) >= skill.gritCost}
+                          canAffordSP={(progression?.skillPoints || 0) >= skill.spCost}
                           potency={potency}
                           onPurchase={() => purchaseSkill(skill.id, skill.gritCost, skill.spCost)}
                         />
@@ -512,9 +512,9 @@ export const TrainingOverlay = () => {
                 </h3>
                 <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
                   {SKILLS.filter(s => s.id.startsWith('HYB')).map(skill => {
-                    const unlocked = unlockedSkills.includes(skill.id);
-                    const canAffordGrit = playerStats?.grit >= skill.gritCost;
-                    const canAffordSP = progression?.skillPoints >= skill.spCost;
+                    const unlocked = (unlockedSkills || []).includes(skill.id);
+                    const canAffordGrit = (playerStats?.grit || 0) >= skill.gritCost;
+                    const canAffordSP = (progression?.skillPoints || 0) >= skill.spCost;
                     
                     return (
                       <div key={skill.id} style={{ flex: '0 0 280px' }}>

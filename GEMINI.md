@@ -99,9 +99,9 @@ The game features a state-driven audio system powered by `THREE.Audio`.
 - **Cinematic Transitions:** Camera smoothly lerps to a top-down perpendicular view when selecting the Training Manual. The manual cover physically opens to reveal the UI once the camera arrives.
 
 ### 4.2 Tabbed Progression System (Training Overlay)
-The Training Manual is implemented as a full-screen 2D React overlay (`TrainingOverlay.tsx`) for maximum legibility on mobile devices.
+The Training Manual is implemented as a full-screen 2D React overlay (`TrainingOverlay.tsx`) for maximum legibility on mobile devices, styled with a physical notebook aesthetic (side tabs) while maintaining a mobile-first vertical layout.
 - **Coordination:** The overlay only renders after the 3D camera transition completes, signaled by the `isMenuReady` state in the `useGameStore`.
-- **DASHBOARD (Stats):** Tracks the player's numerical growth and resonance traits.
+- **PROFILE (Overview & Traits):** The primary tab tracking the player's numerical growth (Level, XP, Grit) and Resonance traits. Uses explicit readouts (e.g., Strength, Bond) instead of abstract values. The header prominently displays the Player's Name, Race, and Level, with a streamlined overview section to reduce clutter.
 - **FIELD NOTES (Skills):** A branching progression tree based on the Resonance Filter.
 - **COMMANDS (Reference):** A diegetic guide explaining core walk mechanics.
 - **Resonance Hexagram:** An interactive SVG-based visualizer on the Stats page that illustrates the 6 resonance relationships and their current potency based on the player's primary frequency. Allows for tuning at Rank 1.
@@ -142,4 +142,5 @@ The Training Manual is implemented as a full-screen 2D React overlay (`TrainingO
 - **HUD Scalability:** Adopted a "Research -> Strategy -> Execution" approach to UI refactoring, moving logic into custom hooks and primitive components to prevent `HUD.tsx` bloat.
 - **UI Mapping:** The Field Notes UI uses a full-screen overlay for accessibility, replacing the previous 3D-mapped HTML to ensure perfect legibility across all phone display ratios.
 - **Camera Stability & Framing:** Implemented micro-offsets, locking thresholds, and aspect-ratio aware dynamic zoom in `useMenuCamera` to ensure 3D menus (like the Training Manual) remain perfectly framed on both mobile portrait and desktop landscape viewports.
-- **Global HUD Controls:** High-priority menu interactions (like the "X" Close button) are promoted from 3D space to the global React HUD to ensure accessibility and consistent positioning across all devices.
+- **Global HUD Controls:** High-priority menu interactions (like the "X" Close button) are promoted from 3D space to the global React HUD to ensure accessibility and consistent positioning across all devices. The Training Manual specifically positions its close button in the top right corner for intuitive access.
+- **UI Safety & State Fallbacks:** The progression UI incorporates robust store logic with safety fallbacks for Resonance state to prevent "blank screen" crashes when trait mapping receives unexpected or undefined state data.
