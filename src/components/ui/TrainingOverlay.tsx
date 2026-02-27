@@ -208,7 +208,6 @@ export const TrainingOverlay = () => {
     race = 'Human',
     unlockedSkills,
     purchaseSkill,
-    respecSkills,
     traits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     rawTraits = { strength: 1, bond: 1, focus: 1, speed: 1, awareness: 1, mastery: 1 },
     progression,
@@ -226,16 +225,6 @@ export const TrainingOverlay = () => {
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'STATS' | 'SKILLS' | 'COMMANDS'>('PROFILE');
-  const [confirmRespec, setConfirmRespec] = useState(false);
-
-  const handleRespec = () => {
-    if (confirmRespec) {
-      respecSkills(250);
-      setConfirmRespec(false);
-    } else {
-      setConfirmRespec(true);
-    }
-  };
 
   const resonancePaths = [
     { label: 'ANCHOR', type: ResonanceType.ANCHOR, traitKey: 'strength', skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
@@ -290,40 +279,6 @@ export const TrainingOverlay = () => {
             onClick={() => setMenuState(MenuState.IDLE)}
             style={{ width: '50px', height: '50px', background: '#2c3e50', color: 'white', border: 'none', borderRadius: '50%', fontSize: '32px', fontWeight: 'bold', cursor: 'pointer' }}
           > × </button>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '30px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap', minHeight: '65px' }}>
-          {activeTab !== 'PROFILE' && (
-            <>
-              <div style={{ flex: '1 0 auto' }}>
-                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>GRIT CACHE</div>
-                <div style={{ fontSize: '24px', fontWeight: '900', color: '#2e7d32' }}>{playerStats?.grit || 0} G</div>
-              </div>
-              <div style={{ flex: '1 0 auto' }}>
-                <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
-                <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
-              </div>
-            </>
-          )}
-          {(activeTab === 'SKILLS' || activeTab === 'STATS') && (
-            <button
-              onClick={handleRespec}
-              style={{
-                marginLeft: 'auto',
-                background: confirmRespec ? '#d32f2f' : '#2c3e50',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: '900',
-                cursor: 'pointer',
-                marginTop: '5px'
-              }}
-            >
-              {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
-            </button>
-          )}
         </div>
       </div>
 
