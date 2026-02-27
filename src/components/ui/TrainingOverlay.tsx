@@ -76,6 +76,15 @@ const TRAIT_MAP: Record<string, string> = {
   'Specialist': 'mastery'
 };
 
+const TRAIT_DESCS: Record<string, string> = {
+  'STRENGTH': 'Capacity to resist kinetic force and maintain physical control of high-weight breeds. Increases leash strain threshold.',
+  'BOND': 'Depth of the psychological connection. Dictates responsiveness to non-verbal cues and reduces dog stress levels.',
+  'FOCUS': 'Detection radius for environmental triggers (squirrels, trash, aggressive dogs). Improves corrective timing.',
+  'SPEED': 'Optimization of gait to maximize distance and efficiency of stamina-burn for the dog. Increases base movement velocity.',
+  'AWARENESS': 'Environmental mastery. Ability to find shortcuts and predicted neighborhood "flow". Multiplies Grit rewards.',
+  'MASTERY': 'Utilization of specialized heuristics to solve "unwalkable" or chaotic edge cases and reactive behaviors.'
+};
+
 const HexagramVisualizer = ({ 
   currentResonance, 
   secondaryFocus,
@@ -203,7 +212,6 @@ const HexagramVisualizer = ({
 export const TrainingOverlay = () => {
   const {
     setMenuState,
-    playerStats,
     playerName = 'WALKER',
     race = 'Human',
     unlockedSkills,
@@ -225,6 +233,7 @@ export const TrainingOverlay = () => {
   } = useGameStore();
 
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'STATS' | 'SKILLS' | 'COMMANDS'>('PROFILE');
+  const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
 
   const resonancePaths = [
     { label: 'STRENGTH', type: ResonanceType.ANCHOR, traitKey: 'strength', skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
@@ -310,35 +319,31 @@ export const TrainingOverlay = () => {
         {activeTab === 'PROFILE' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', maxWidth: '600px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: 'white', padding: '25px', borderRadius: '20px', border: '3px solid #2c3e50' }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>OVERVIEW</h2>
+              <h2 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: '900', borderBottom: '2px solid #2c3e50', paddingBottom: '10px' }}>TRAITS</h2>
               
-              {/* Metadata Sub-section */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '25px' }}>
-                <div style={{ marginTop: '5px' }}>
-                  <span style={{ fontWeight: '900', color: '#6e6c56', fontSize: '12px', display: 'block', marginBottom: '8px' }}>RESONANCE AFFINITY</span>
-                  <div style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ flex: 1, background: '#2c3e50', color: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '10px', opacity: 0.7 }}>MAIN</div>
-                      <div style={{ fontWeight: '900', fontSize: '14px' }}>{resonanceType.toUpperCase()}</div>
-                    </div>
-                    <div style={{ flex: 1, background: secondaryFocus ? '#1976d2' : '#d1cdb0', color: 'white', padding: '10px', borderRadius: '10px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '10px', opacity: 0.7 }}>SECONDARY</div>
-                      <div style={{ fontWeight: '900', fontSize: '14px' }}>{secondaryFocus ? secondaryFocus.toUpperCase() : 'NONE'}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Traits Sub-section */}
-              <h3 style={{ margin: '20px 0 15px 0', fontSize: '14px', fontWeight: '900', color: '#2c3e50', letterSpacing: '1px', borderTop: '1px solid #eee', paddingTop: '15px' }}>TRAIT BREAKDOWN</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {resonancePaths.map(path => {
                   const base = (RESONANCE_STATS[resonanceType] as any)[path.traitKey];
                   const raw = (rawTraits as any)[path.traitKey] || 0;
                   const bonus = Math.max(0, raw - base);
+                  const isSelected = selectedTrait === path.label;
                   
                   return (
-                    <div key={path.label} style={{ display: 'flex', alignItems: 'center', gap: '15px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>
+                    <div 
+                      key={path.label} 
+                      onClick={() => setSelectedTrait(isSelected ? null : path.label)}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '15px', 
+                        borderBottom: '1px solid #eee', 
+                        paddingBottom: '8px',
+                        cursor: 'pointer',
+                        background: isSelected ? 'rgba(44, 62, 80, 0.05)' : 'transparent',
+                        margin: '0 -10px',
+                        padding: '10px'
+                      }}
+                    >
                       <div style={{ width: '100px', fontWeight: '900', fontSize: '12px' }}>{path.label}</div>
                       <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ flex: base, background: '#d1cdb0', height: '12px', borderRadius: '6px' }} />
@@ -360,6 +365,26 @@ export const TrainingOverlay = () => {
                     <div style={{ width: '10px', height: '10px', background: '#2e7d32', borderRadius: '2px' }} /> SKILL BONUS
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Information Box */}
+            <div style={{ 
+              background: '#2c3e50', 
+              color: 'white', 
+              padding: '20px', 
+              borderRadius: '15px', 
+              minHeight: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '10px', fontWeight: '900', letterSpacing: '1px', opacity: 0.7 }}>
+                {selectedTrait ? `TRAIT INFO: ${selectedTrait}` : 'TRAIT ANALYZER'}
+              </div>
+              <div style={{ fontSize: '14px', lineHeight: '1.5', fontStyle: selectedTrait ? 'normal' : 'italic', opacity: selectedTrait ? 1 : 0.6 }}>
+                {selectedTrait ? TRAIT_DESCS[selectedTrait] : 'Tap a trait above to view its resonance protocol and behavioral impact.'}
               </div>
             </div>
           </div>
