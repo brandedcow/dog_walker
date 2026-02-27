@@ -184,7 +184,7 @@ const HexagramVisualizer = ({
                     textTransform: 'uppercase'
                   }}
                 >
-                  {p.type}
+                  {TRAIT_MAP[p.type]?.toUpperCase() || p.type}
                 </text>
               </g>
             );
@@ -227,12 +227,12 @@ export const TrainingOverlay = () => {
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'STATS' | 'SKILLS' | 'COMMANDS'>('PROFILE');
 
   const resonancePaths = [
-    { label: 'ANCHOR', type: ResonanceType.ANCHOR, traitKey: 'strength', skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
-    { label: 'WHISPERER', type: ResonanceType.WHISPERER, traitKey: 'bond', skills: SKILLS.filter(s => s.resonance === ResonanceType.WHISPERER) },
-    { label: 'TACTICIAN', type: ResonanceType.TACTICIAN, traitKey: 'focus', skills: SKILLS.filter(s => s.resonance === ResonanceType.TACTICIAN) },
-    { label: 'NOMAD', type: ResonanceType.NOMAD, traitKey: 'speed', skills: SKILLS.filter(s => s.resonance === ResonanceType.NOMAD) },
-    { label: 'URBANIST', type: ResonanceType.URBANIST, traitKey: 'awareness', skills: SKILLS.filter(s => s.resonance === ResonanceType.URBANIST) },
-    { label: 'SPECIALIST', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
+    { label: 'STRENGTH', type: ResonanceType.ANCHOR, traitKey: 'strength', skills: SKILLS.filter(s => s.resonance === ResonanceType.ANCHOR) },
+    { label: 'BOND', type: ResonanceType.WHISPERER, traitKey: 'bond', skills: SKILLS.filter(s => s.resonance === ResonanceType.WHISPERER) },
+    { label: 'FOCUS', type: ResonanceType.TACTICIAN, traitKey: 'focus', skills: SKILLS.filter(s => s.resonance === ResonanceType.TACTICIAN) },
+    { label: 'SPEED', type: ResonanceType.NOMAD, traitKey: 'speed', skills: SKILLS.filter(s => s.resonance === ResonanceType.NOMAD) },
+    { label: 'AWARENESS', type: ResonanceType.URBANIST, traitKey: 'awareness', skills: SKILLS.filter(s => s.resonance === ResonanceType.URBANIST) },
+    { label: 'MASTERY', type: ResonanceType.SPECIALIST, traitKey: 'mastery', skills: SKILLS.filter(s => s.resonance === ResonanceType.SPECIALIST) },
   ];
 
   const totalLevel = Math.floor(Object.values(rawTraits).reduce((a, b) => a + b, 0));
