@@ -67,7 +67,6 @@ const SkillNode = ({
   </div>
 );
 
-// Map ResonanceType to trait keys for visualizer
 const TRAIT_MAP: Record<string, string> = {
   'Anchor': 'strength',
   'Whisperer': 'bond',
@@ -92,12 +91,10 @@ const HexagramVisualizer = ({
   onResonanceSelect: (type: ResonanceType) => void,
   canSwitch: boolean
 }) => {
-  const size = 340;
+  const size = 300;
   const center = size / 2;
-  const maxRadius = 110;
-  const labelRadius = 145;
-
-  // Max value for raw traits scaling: assume 20 is "full" for visual scaling
+  const maxRadius = 85;
+  const labelRadius = 115;
   const maxTraitVal = 20;
 
   const points = RESONANCE_ORDER.map((type, i) => {
@@ -109,54 +106,43 @@ const HexagramVisualizer = ({
     return {
       type,
       angle,
-      bx: center + maxRadius * Math.cos(angle), // Blueprint Vertex
+      bx: center + maxRadius * Math.cos(angle),
       by: center + maxRadius * Math.sin(angle),
-      px: center + dynamicRadius * Math.cos(angle), // Pulse Vertex
+      px: center + dynamicRadius * Math.cos(angle),
       py: center + dynamicRadius * Math.sin(angle),
-      lx: center + labelRadius * Math.cos(angle), // Label
+      lx: center + labelRadius * Math.cos(angle),
       ly: center + labelRadius * Math.sin(angle),
     };
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: '#0a0a0a', borderRadius: '20px', border: '2px solid #333', position: 'relative', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}>
-      <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', textAlign: 'center', color: '#666', letterSpacing: '2px' }}>NEURAL RESONANCE READOUT</h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50', position: 'relative' }}>
+      <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', textAlign: 'center', color: '#2c3e50' }}>NEURAL RESONANCE READOUT</h3>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <svg width={size} height={size} style={{ overflow: 'visible' }}>
-          {/* Mastery Rings */}
           {[0.2, 0.4, 0.6, 0.8, 1.0].map((r, idx) => (
-            <circle key={idx} cx={center} cy={center} r={maxRadius * r} fill="none" stroke="#222" strokeWidth="1" strokeDasharray="5 5" />
+            <circle key={idx} cx={center} cy={center} r={maxRadius * r} fill="none" stroke="#ddd" strokeWidth="1" strokeDasharray="3 3" />
           ))}
 
-          {/* The Blueprint (Static Outline) */}
           <polygon
             points={points.map(p => `${p.bx},${p.by}`).join(' ')}
             fill="none"
-            stroke="rgba(255,255,255,0.05)"
+            stroke="rgba(44, 62, 80, 0.1)"
             strokeWidth="1"
           />
           
-          {/* Connection Lines */}
           {points.map((p, i) => (
-            <line
-              key={`line-${i}`}
-              x1={center} y1={center}
-              x2={p.bx} y2={p.by}
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth="1"
-            />
+            <line key={`line-${i}`} x1={center} y1={center} x2={p.bx} y2={p.by} stroke="rgba(44, 62, 80, 0.1)" strokeWidth="1" />
           ))}
 
-          {/* The Neural Pulse (Dynamic Fill) */}
           <polygon
             points={points.map(p => `${p.px},${p.py}`).join(' ')}
-            fill="rgba(68, 136, 255, 0.2)"
-            stroke="#4488ff"
+            fill="rgba(44, 62, 80, 0.15)"
+            stroke="#2c3e50"
             strokeWidth="2"
             style={{ transition: 'all 0.5s ease-out' }}
           />
 
-          {/* Vertices & Glows */}
           {points.map((p) => {
             const isPrimary = p.type === currentResonance;
             const isSecondary = p.type === secondaryFocus;
@@ -164,27 +150,24 @@ const HexagramVisualizer = ({
             
             return (
               <g key={p.type} onClick={() => canSwitch && onResonanceSelect(p.type)} style={{ cursor: canSwitch ? 'pointer' : 'default' }}>
-                {/* Secondary Focus Pulse */}
                 {isSecondary && (
-                  <circle cx={p.bx} cy={p.by} r="12" fill="none" stroke="#00ffff" strokeWidth="2">
-                    <animate attributeName="r" from="8" to="16" dur="1.5s" repeatCount="indefinite" />
+                  <circle cx={p.bx} cy={p.by} r="10" fill="none" stroke="#1976d2" strokeWidth="2">
+                    <animate attributeName="r" from="6" to="14" dur="1.5s" repeatCount="indefinite" />
                     <animate attributeName="opacity" from="0.8" to="0" dur="1.5s" repeatCount="indefinite" />
                   </circle>
                 )}
 
-                {/* Primary/Secondary Markers */}
                 <circle
                   cx={p.bx} cy={p.by} r={isPrimary ? 6 : 4}
-                  fill={isPrimary ? "#ffd700" : isSecondary ? "#00ffff" : "#333"}
-                  stroke={isPrimary ? "#ffd700" : "#222"}
+                  fill={isPrimary ? "#2c3e50" : isSecondary ? "#1976d2" : "#d1cdb0"}
+                  stroke="#2c3e50"
                   strokeWidth="1"
                 />
 
-                {/* Mastery Progress Arc (Mini) */}
                 <circle
                   cx={p.bx} cy={p.by} r="8"
                   fill="none"
-                  stroke="#44ff44"
+                  stroke="#2e7d32"
                   strokeWidth="2"
                   strokeDasharray={`${masteryLevel * 5} 50`}
                   transform={`rotate(-90 ${p.bx} ${p.by})`}
@@ -197,9 +180,8 @@ const HexagramVisualizer = ({
                   style={{ 
                     fontSize: '10px', 
                     fontWeight: '900', 
-                    fill: isPrimary ? '#ffd700' : isSecondary ? '#00ffff' : '#888',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
+                    fill: isPrimary ? '#2c3e50' : '#6e6c56',
+                    textTransform: 'uppercase'
                   }}
                 >
                   {p.type}
@@ -209,6 +191,11 @@ const HexagramVisualizer = ({
           })}
         </svg>
       </div>
+      {canSwitch && (
+        <div style={{ position: 'absolute', bottom: '10px', left: '0', right: '0', textAlign: 'center', fontSize: '9px', fontStyle: 'italic', opacity: 0.6, color: '#2c3e50' }}>
+          * Tap a frequency to tune (Rank 1 only)
+        </div>
+      )}
     </div>
   );
 };
@@ -260,8 +247,8 @@ export const TrainingOverlay = () => {
   return (
     <div style={{
       position: 'absolute', top: 0, left: 0, width: '100%', height: '100dvh',
-      background: '#050505', zIndex: 100, display: 'flex', flexDirection: 'column',
-      color: '#eee', fontFamily: '"Courier New", Courier, monospace',
+      background: '#f4f1ea', zIndex: 100, display: 'flex', flexDirection: 'column',
+      color: '#2c3e50', fontFamily: '"Courier New", Courier, monospace',
       pointerEvents: 'auto', overflow: 'hidden'
     }}>
       {/* Sidebar Tabs */}
@@ -272,13 +259,13 @@ export const TrainingOverlay = () => {
             onClick={() => setActiveTab(tab as any)}
             style={{
               width: '50px', height: '120px',
-              background: activeTab === tab ? '#111' : '#222',
-              border: '1px solid #444', borderRight: 'none', borderRadius: '20px 0 0 20px',
+              background: activeTab === tab ? '#ffffff' : '#d1cdb0',
+              border: '2px solid #2c3e50', borderRight: 'none', borderRadius: '20px 0 0 20px',
               writingMode: 'vertical-rl', textOrientation: 'mixed',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '900', cursor: 'pointer',
-              color: activeTab === tab ? '#4488ff' : '#666',
-              boxShadow: activeTab === tab ? '-4px 0 15px rgba(68,136,255,0.2)' : 'none',
+              fontSize: '16px', fontWeight: '900', cursor: 'pointer',
+              color: activeTab === tab ? '#2c3e50' : '#6e6c56',
+              boxShadow: activeTab === tab ? '-4px 0 15px rgba(0,0,0,0.1)' : 'none',
               transition: 'all 0.2s'
             }}
           >
@@ -288,42 +275,42 @@ export const TrainingOverlay = () => {
       </div>
 
       {/* Header */}
-      <div style={{ padding: '20px 70px 20px 20px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.8)' }}>
+      <div style={{ padding: '20px 70px 20px 20px', borderBottom: '4px solid #2c3e50', background: 'rgba(255,255,255,0.5)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px', color: '#4488ff' }}>{activeTab}</h1>
-            <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>RESONANCE PROTOCOL v2.0</div>
+            <h1 style={{ margin: 0, fontSize: '32px', fontWeight: '900', letterSpacing: '2px', color: '#2c3e50' }}>{activeTab}</h1>
+            <div style={{ fontSize: '10px', color: '#6e6c56', marginTop: '2px' }}>FIELD NOTES v2.0</div>
           </div>
           <button 
             onClick={() => setMenuState(MenuState.IDLE)}
-            style={{ width: '40px', height: '40px', background: '#222', color: '#eee', border: '1px solid #444', borderRadius: '50%', fontSize: '20px', cursor: 'pointer' }}
+            style={{ width: '50px', height: '50px', background: '#2c3e50', color: 'white', border: 'none', borderRadius: '50%', fontSize: '32px', fontWeight: 'bold', cursor: 'pointer' }}
           > × </button>
         </div>
         
-        <div style={{ display: 'flex', gap: '20px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '30px', marginTop: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 0 auto' }}>
-            <div style={{ fontSize: '9px', color: '#666', letterSpacing: '1px' }}>GRIT CACHE</div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#44ff44' }}>{playerStats?.grit || 0} G</div>
+            <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>GRIT CACHE</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#2e7d32' }}>{playerStats?.grit || 0} G</div>
           </div>
           <div style={{ flex: '1 0 auto' }}>
-            <div style={{ fontSize: '9px', color: '#666', letterSpacing: '1px' }}>SKILL POINTS</div>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#4488ff' }}>{progression?.skillPoints || 0} SP</div>
+            <div style={{ fontSize: '10px', color: '#6e6c56', letterSpacing: '1px' }}>SKILL POINTS</div>
+            <div style={{ fontSize: '24px', fontWeight: '900', color: '#1976d2' }}>{progression?.skillPoints || 0} SP</div>
           </div>
           <button
             onClick={handleRespec}
             style={{
-              background: confirmRespec ? '#d32f2f' : '#222',
-              color: '#eee',
-              border: `1px solid ${confirmRespec ? '#d32f2f' : '#444'}`,
-              padding: '8px 15px',
+              background: confirmRespec ? '#d32f2f' : '#2c3e50',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
               borderRadius: '8px',
-              fontSize: '10px',
+              fontSize: '12px',
               fontWeight: '900',
               cursor: 'pointer',
               marginTop: '5px'
             }}
           >
-            {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC FREQUENCY'}
+            {confirmRespec ? 'CONFIRM (250G)' : 'RESPEC BUILD'}
           </button>
         </div>
       </div>
@@ -342,29 +329,28 @@ export const TrainingOverlay = () => {
                 canSwitch={(progression?.walkerRank || 1) === 1} 
               />
               
-              {/* XP Progress Section */}
-              <div style={{ background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid #333', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ background: 'white', padding: '20px', borderRadius: '15px', border: '2px solid #2c3e50', width: '100%', boxSizing: 'border-box' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#4488ff' }}>RANK {progression?.walkerRank || 1} PROGRESS</span>
-                  <span style={{ fontSize: '14px', color: '#888' }}>{(progression?.xp || 0) % 1000}/1000 XP</span>
+                  <span style={{ fontWeight: '900', fontSize: '14px', color: '#2c3e50' }}>RANK {progression?.walkerRank || 1} PROGRESS</span>
+                  <span style={{ fontSize: '14px', color: '#2c3e50' }}>{(progression?.xp || 0) % 1000}/1000 XP</span>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: '#222', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${((progression?.xp || 0) % 1000) / 10}%`, height: '100%', background: '#4488ff' }} />
+                <div style={{ width: '100%', height: '12px', background: '#d1cdb0', borderRadius: '6px', overflow: 'hidden', border: '2px solid #2c3e50' }}>
+                  <div style={{ width: `${((progression?.xp || 0) % 1000) / 10}%`, height: '100%', background: '#2c3e50' }} />
                 </div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
-              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px', textAlign: 'center' }}>VECTOR & MODIFIER READOUT</h3>
-              <div style={{ overflowX: 'auto', width: '100%' }}>
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#2c3e50', letterSpacing: '2px', textAlign: 'center' }}>VECTOR & MODIFIER READOUT</h3>
+              <div style={{ overflowX: 'auto', width: '100%', background: 'white', borderRadius: '15px', border: '2px solid #2c3e50' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', minWidth: '300px' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid #333', textAlign: 'left', color: '#888' }}>
-                      <th style={{ padding: '10px 5px' }}>TRAIT</th>
-                      <th style={{ padding: '10px 5px' }}>RAW</th>
-                      <th style={{ padding: '10px 5px' }}>FILTER</th>
-                      <th style={{ padding: '10px 5px' }}>OUTPUT</th>
-                      <th style={{ padding: '10px 5px' }}>STATUS</th>
+                    <tr style={{ borderBottom: '2px solid #2c3e50', textAlign: 'left', color: '#2c3e50' }}>
+                      <th style={{ padding: '10px' }}>TRAIT</th>
+                      <th style={{ padding: '10px' }}>RAW</th>
+                      <th style={{ padding: '10px' }}>FILTER</th>
+                      <th style={{ padding: '10px' }}>OUTPUT</th>
+                      <th style={{ padding: '10px' }}>STATUS</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -374,19 +360,19 @@ export const TrainingOverlay = () => {
                       const output = (traits as any)[path.traitKey] || 0;
                       const mastery = ((affinityXP?.[path.type] || 0) % 1000) / 10;
                       
-                      const color = filter === 1 ? '#ffd700' : filter >= 0.8 ? '#c0c0c0' : filter >= 0.6 ? '#cd7f32' : '#666';
+                      const color = filter === 1 ? '#2e7d32' : filter >= 0.8 ? '#1976d2' : filter >= 0.6 ? '#fbc02d' : '#d32f2f';
                       const status = filter === 1 ? 'PURE' : filter >= 0.8 ? 'HARMONIC' : filter >= 0.6 ? 'STABLE' : 'DISSONANT';
 
                       return (
-                        <tr key={path.label} style={{ borderBottom: '1px solid #111' }}>
-                          <td style={{ padding: '12px 5px', fontWeight: '900', color: '#eee' }}>{path.label}</td>
-                          <td style={{ padding: '12px 5px', color: '#888' }}>{raw}</td>
-                          <td style={{ padding: '12px 5px', color: color }}>x{filter.toFixed(1)}</td>
-                          <td style={{ padding: '12px 5px', fontWeight: '900', color: color }}>{output.toFixed(1)}</td>
-                          <td style={{ padding: '12px 5px', fontSize: '9px', color: color }}>
+                        <tr key={path.label} style={{ borderBottom: '1px solid #ddd' }}>
+                          <td style={{ padding: '12px 10px', fontWeight: '900', color: '#2c3e50' }}>{path.label}</td>
+                          <td style={{ padding: '12px 10px', color: '#6e6c56' }}>{raw}</td>
+                          <td style={{ padding: '12px 10px', color: color }}>x{filter.toFixed(1)}</td>
+                          <td style={{ padding: '12px 10px', fontWeight: '900', color: color }}>{output.toFixed(1)}</td>
+                          <td style={{ padding: '12px 10px', fontSize: '9px', color: color }}>
                             <div style={{ marginBottom: '4px' }}>{status}</div>
-                            <div style={{ width: '100%', height: '3px', background: '#222', borderRadius: '2px' }}>
-                              <div style={{ width: `${mastery}%`, height: '100%', background: '#44ff44' }} />
+                            <div style={{ width: '40px', height: '4px', background: '#d1cdb0', borderRadius: '2px' }}>
+                              <div style={{ width: `${mastery}%`, height: '100%', background: '#2e7d32' }} />
                             </div>
                           </td>
                         </tr>
@@ -396,18 +382,17 @@ export const TrainingOverlay = () => {
                 </table>
               </div>
 
-              {/* Hatsu & Hybrid Section */}
               <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#666', letterSpacing: '2px', textAlign: 'center' }}>APEX & HYBRID SLOTTING</h3>
+                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900', color: '#2c3e50', letterSpacing: '2px', textAlign: 'center' }}>APEX & HYBRID SLOTTING</h3>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '70px', height: '70px', border: '2px solid #ffd700', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,215,0,0.05)', position: 'relative' }}>
-                    <div style={{ fontSize: '9px', position: 'absolute', top: '-8px', background: '#ffd700', color: '#000', padding: '2px 6px', fontWeight: '900' }}>APEX</div>
-                    <div style={{ fontSize: '28px' }}>⚡</div>
+                  <div style={{ width: '70px', height: '70px', border: '2px solid #2c3e50', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', position: 'relative' }}>
+                    <div style={{ fontSize: '9px', position: 'absolute', top: '-8px', background: '#2c3e50', color: 'white', padding: '2px 6px', fontWeight: '900' }}>APEX</div>
+                    <div style={{ fontSize: '28px' }}>📜</div>
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     {[1, 2].map(i => (
-                      <div key={i} style={{ width: '55px', height: '55px', border: '1px dashed #444', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111' }}>
-                        <div style={{ fontSize: '18px', opacity: 0.2 }}>🔒</div>
+                      <div key={i} style={{ width: '55px', height: '55px', border: '2px dashed #d1cdb0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.05)' }}>
+                        <div style={{ fontSize: '18px', opacity: 0.3 }}>🔒</div>
                       </div>
                     ))}
                   </div>
@@ -423,9 +408,9 @@ export const TrainingOverlay = () => {
               const potency = getResonanceFilter(resonanceType, path.type);
               return (
                 <div key={path.label} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid #333', paddingBottom: '5px' }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#eee' }}>
-                      {path.label} <span style={{ fontSize: '12px', color: '#666' }}>({Math.round(potency * 100)}% Potency)</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #2c3e50', paddingBottom: '5px' }}>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900', color: '#2c3e50' }}>
+                      {path.label} <span style={{ fontSize: '12px', color: '#6e6c56' }}>({Math.round(potency * 100)}% Potency)</span>
                     </h3>
                   </div>
                   <div style={{ display: 'flex', gap: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
@@ -447,9 +432,8 @@ export const TrainingOverlay = () => {
               );
             })}
 
-            {/* Hybrid Techniques Section */}
             {secondaryFocus && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', padding: '20px', background: 'rgba(25, 118, 210, 0.05)', borderRadius: '15px', border: '2px solid #1976d2' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', padding: '20px', background: 'white', borderRadius: '15px', border: '2px solid #1976d2' }}>
                 <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '900', color: '#1976d2' }}>
                   Resonant Hybridization: {resonanceType} × {secondaryFocus}
                 </h3>
@@ -487,9 +471,9 @@ export const TrainingOverlay = () => {
               { cmd: "🐕 COME", desc: "High-frequency recall. Efficiency based on BOND resonance." },
               { cmd: "🛑 SIT", desc: "Stabilize state. Zeros out kinetic momentum for safety." },
             ].map((item) => (
-              <div key={item.cmd} style={{ borderBottom: '1px solid #222', paddingBottom: '20px' }}>
-                <div style={{ fontWeight: '900', fontSize: '24px', color: '#4488ff', marginBottom: '10px' }}>{item.cmd}</div>
-                <div style={{ fontSize: '16px', color: '#888', lineHeight: '1.5' }}>{item.desc}</div>
+              <div key={item.cmd} style={{ borderBottom: '2px solid rgba(0,0,0,0.1)', paddingBottom: '20px' }}>
+                <div style={{ fontWeight: '900', fontSize: '24px', color: '#2c3e50', marginBottom: '10px' }}>{item.cmd}</div>
+                <div style={{ fontSize: '16px', color: '#6e6c56', lineHeight: '1.5' }}>{item.desc}</div>
               </div>
             ))}
           </div>
