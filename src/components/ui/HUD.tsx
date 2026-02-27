@@ -94,12 +94,12 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
 
   const renderPersistentUI = () => {
     if (!([GameState.HOME, GameState.PLAYING, GameState.FINISHED] as any[]).includes(gameState)) return null;
-    const isTraining = menuState === MenuState.TRAINING;
+    const isMenuOpen = menuState !== MenuState.IDLE;
 
     return (
       <>
         {/* Minimap & Status (Top-Left) */}
-        {!isTraining && (
+        {!isMenuOpen && (
           <div style={{ 
             position: 'absolute', 
             top: `calc(${topSafe} + ${baseOffset}px)`, 
@@ -180,7 +180,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         )}
 
         {/* Profile Card (Bottom-Left) */}
-        {!isTraining && (
+        {!isMenuOpen && (
           <div style={{ 
             position: 'absolute', 
             bottom: `calc(${bottomSafe} + ${baseOffset}px)`, 
@@ -194,7 +194,7 @@ export const HUD = ({ handleGo }: { handleGo: () => void }) => {
         )}
 
         {/* Paw Controls (Bottom-Right) */}
-        {((gameState === GameState.PLAYING || gameState === GameState.FINISHED) || (gameState === GameState.HOME && menuState === MenuState.IDLE)) && (
+        {((gameState === GameState.PLAYING || gameState === GameState.FINISHED) || (gameState === GameState.HOME && !isMenuOpen)) && (
           <div style={{ 
             position: 'absolute', 
             bottom: `calc(${bottomSafe} + ${baseOffset}px)`, 

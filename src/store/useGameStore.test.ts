@@ -5,21 +5,8 @@ import { GameState, DogState, MenuState, ResonanceType, RESONANCE_STATS } from '
 describe('useGameStore', () => {
   beforeEach(() => {
     // Reset store before each test
-    const initialState = useGameStore.getState();
-    useGameStore.setState({
-      ...initialState,
-      gameState: GameState.HOME,
-      dogState: DogState.STANDING,
-      menuState: MenuState.IDLE,
-      resonanceType: ResonanceType.ANCHOR,
-      tension: 0,
-      distance: 0,
-      playerStats: { strength: 1, grit: 0 },
-      traits: RESONANCE_STATS[ResonanceType.ANCHOR],
-      progression: { walkerRank: 1, xp: 0, skillPoints: 0 },
-      unlockedSkills: ['FOUNDATION'],
-      hasStrained: false,
-    });
+    useGameStore.getState().resetProgress();
+    localStorage.clear();
   });
 
   it('correctly calculates Grit and XP upon walk finalization', () => {
@@ -140,5 +127,58 @@ describe('useGameStore', () => {
     expect(finalState.unlockedSkills).toEqual(['FOUNDATION']);
     // Anchor Base Strength is 4
     expect(finalState.traits.strength).toBe(4);
+  });
+
+  describe('addXP', () => {
+    it('increases total XP, rank, and grants skill points upon rank-up', () => {
+      const store = useGameStore.getState();
+      
+      // Starting from 0 XP (Rank 1)
+      store.addXP(1000);
+      
+      let updatedState = useGameStore.getState();
+      expect(updatedState.progression.xp).toBe(1000);
+      expect(updatedState.progression.walkerRank).toBe(2);
+      expect(updatedState.progression.skillPoints).toBe(2);
+      
+      // Add another 1000 XP (Rank 3)
+      store.addXP(1000);
+      updatedState = useGameStore.getState();
+      expect(updatedState.progression.xp).toBe(2000);
+      expect(updatedState.progression.walkerRank).toBe(3);
+      expect(updatedState.progression.skillPoints).toBe(4);
+    });
+
+    it('correctly sets secondaryFocus based on the highest non-primary affinity XP', () => {
+      const store = useGameStore.getState();
+      
+      // Primary is Anchor. Add XP to various categories.
+      store.addXP(100, ResonanceType.WHISPERER);
+      expect(useGameStore.getState().secondaryFocus).toBe(ResonanceType.WHISPERER);
+      
+      store.addXP(200, ResonanceType.NOMAD);
+      expect(useGameStore.getState().secondaryFocus).toBe(ResonanceType.NOMAD);
+      
+      store.addXP(300, ResonanceType.TACTICIAN);
+      expect(useGameStore.getState().secondaryFocus).toBe(ResonanceType.TACTICIAN);
+      
+      // Adding XP to primary (Anchor) should NOT change secondaryFocus
+      store.addXP(500, ResonanceType.ANCHOR);
+      expect(useGameStore.getState().secondaryFocus).toBe(ResonanceType.TACTICIAN);
+    });
+
+    it('organically grows rawTraits based on affinity XP', () => {
+      const store = useGameStore.getState();
+      
+      // Initial Strength (Anchor) is 4
+      expect(useGameStore.getState().rawTraits.strength).toBe(4);
+      
+      // 100 XP = +1 Raw Level for that category
+      store.addXP(200, ResonanceType.ANCHOR);
+      
+      const finalState = useGameStore.getState();
+      expect(finalState.rawTraits.strength).toBe(6);
+      expect(finalState.traits.strength).toBe(6); // Final = Raw * 1.0 (Primary)
+    });
   });
 });
